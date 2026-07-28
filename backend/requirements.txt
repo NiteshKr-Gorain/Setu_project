@@ -16,3 +16,4 @@ pypdf
 python-docx
 anthropic
 numpy
+requests>=2.31.0

@@ -23,7 +23,7 @@ export async function getMentor(userId) {
 }
 
 export async function requestMentor(mentorUserId, message) {
-  return api.post(`/mentors/${mentorUserId}/request`, { mentor_id: mentorUserId, message });
+  return api.post(`/mentors/${mentorUserId}/request`, { message });
 }
 
 export async function getIncomingRequests() {

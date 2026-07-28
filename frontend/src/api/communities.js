@@ -1,18 +1,18 @@
 import { api } from './client';
 
-export async function createCommunity({ name, description, communityType, location }) {
+export async function createCommunity({ name, description, category, visibility = 'public' }) {
   return api.post('/communities', {
     name,
     description,
-    community_type: communityType,
-    location,
+    category,
+    visibility,
   });
 }
 
-export async function listCommunities({ communityType, location } = {}) {
+export async function listCommunities({ category, visibility } = {}) {
   const params = new URLSearchParams();
-  if (communityType) params.set('community_type', communityType);
-  if (location) params.set('location', location);
+  if (category && category !== 'All') params.set('category', category);
+  if (visibility) params.set('visibility', visibility);
   const res = await api.get(`/communities?${params.toString()}`);
   return res?.communities || [];
 }
@@ -26,7 +26,7 @@ export async function joinCommunity(id) {
 }
 
 export async function leaveCommunity(id) {
-  return api.delete(`/communities/${id}/leave`);
+  return api.post(`/communities/${id}/leave`, {});
 }
 
 export async function updateCommunity(id, updates) {

@@ -101,6 +101,14 @@ class TestBackendComprehensive(unittest.TestCase):
                 self.assertEqual(res.status_code, 200, f"Endpoint {ep} failed with status {res.status_code}")
         print(" [PASS] All public query endpoints returned HTTP 200 OK.")
 
+    def test_08_text_search_query(self):
+        """Test text search endpoint GET /search?q=... for 200 OK response."""
+        with TestClient(app) as client:
+            res = client.get("/search?q=farming")
+            self.assertEqual(res.status_code, 200)
+            self.assertIsInstance(res.json(), list)
+        print(" [PASS] Text search query endpoint test passed.")
+
     @classmethod
     def tearDownClass(cls):
         database_module.close_mongo_connection()

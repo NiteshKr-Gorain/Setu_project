@@ -30,12 +30,9 @@ async def search_entries(
         if content_type:
             query["content_type"] = content_type
 
-        # Project textScore so pydantic can validate and deserialize it
-        projection = {"score": {"$meta": "textScore"}}
-
         cursor = (
             db["knowledge_entries"]
-            .find(query, projection)
+            .find(query)
             .sort([("score", {"$meta": "textScore"})])
             .skip(skip)
             .limit(limit)

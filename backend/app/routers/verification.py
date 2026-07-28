@@ -41,7 +41,7 @@ async def verify_knowledge_entry(
         )
         
     # Self-verification check
-    if entry.get("contributor_id") == current_user["_id"]:
+    if str(entry.get("contributor_id")) == str(current_user["_id"]):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You cannot verify your own knowledge entry."

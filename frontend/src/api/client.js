@@ -1,7 +1,7 @@
 // Core API client for the Setu backend (FastAPI + MongoDB).
 // Handles: base URL config, JWT attachment, automatic access-token refresh
 // on 401, and consistent error shapes for the rest of the app to consume.
-const rawBaseUrl = import.meta.env.VITE_API_URL || 'https://setu-project-tpb5.onrender.com';
+const rawBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 const BASE_URL = rawBaseUrl.replace(/\/+$/, '');
 
 const TOKEN_KEY = 'setu_access_token';

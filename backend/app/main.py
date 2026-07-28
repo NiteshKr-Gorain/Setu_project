@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import connect_to_mongo, close_mongo_connection, get_database
-from app.routers import auth, users, knowledge, search, mentors, verification, learning_paths, communities
+from app.routers import auth, users, knowledge, search, mentors, verification, learning_paths, communities, ai
 
 # Configure basic logging
 logging.basicConfig(
@@ -156,6 +156,7 @@ app.include_router(mentors.router)
 app.include_router(verification.router)
 app.include_router(learning_paths.router)
 app.include_router(communities.router)
+app.include_router(ai.router)
 
 
 
@@ -166,4 +167,10 @@ async def health_check():
     Perform a health check on the application.
     """
     return {"status": "ok"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+
 

@@ -208,11 +208,11 @@ export default function AboutUs({ onSignUpClick }) {
             <div className="bg-white border border-slate-100 p-6 rounded-3xl flex items-center space-x-4 shadow-3xs text-left">
               <img
                 src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80"
-                alt="Dr. Ramesh Prasad"
+                alt="Mr. Gurmeet Singh"
                 className="w-16 h-16 rounded-full object-cover border border-slate-100"
               />
               <div>
-                <h4 className="text-sm font-bold text-slate-900">Dr. Ramesh Prasad</h4>
+                <h4 className="text-sm font-bold text-slate-900">Mr.Gurmeet Singh</h4>
                 <p className="text-[10px] text-brand-primary font-semibold uppercase tracking-wider">Elder Advisor & Historian</p>
                 <p className="text-[11px] text-slate-400 leading-relaxed font-normal pt-1">
                   Guiding historical authenticity, community relations, and standardizing dialect recordings.

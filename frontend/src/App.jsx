@@ -125,7 +125,7 @@ export default function App() {
       </main>
 
       {/* Footer Section */}
-      {currentView === 'home' && <Footer />}
+      <Footer currentView={currentView} onViewChange={handleViewChange} />
 
       {/* Floating AI Assistant Button */}
       <AiButton onViewChange={handleViewChange} currentView={currentView} />

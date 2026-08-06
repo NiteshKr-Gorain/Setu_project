@@ -1,6 +1,7 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
-export default function FeatureCard({ title, description, icon, badge }) {
+export default function FeatureCard({ title, description, icon, badge, link }) {
   return (
     <div className="glass-card glass-card-hover rounded-2xl p-8 flex flex-col items-start text-left relative overflow-hidden group">
       {/* Dynamic glow effect inside the card */}
@@ -27,12 +28,15 @@ export default function FeatureCard({ title, description, icon, badge }) {
       </p>
 
       {/* Learn more interactive link */}
-      <div className="mt-6 flex items-center text-xs font-semibold text-brand-primary group-hover:text-brand-hover transition-colors cursor-pointer">
+      <Link 
+        to={link || '/'} 
+        className="mt-6 flex items-center text-xs font-semibold text-brand-primary group-hover:text-brand-hover transition-colors cursor-pointer"
+      >
         <span>Learn More</span>
         <svg className="w-3 h-3 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
-      </div>
+      </Link>
     </div>
   );
 }

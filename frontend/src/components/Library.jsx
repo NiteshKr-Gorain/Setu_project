@@ -6,7 +6,7 @@ import { CATEGORIES as BACKEND_CATEGORIES, listKnowledge, normalizeEntry } from 
 const categories = BACKEND_CATEGORIES;
 const contentTypes = ['All', 'Article', 'Video', 'Audio', 'PDF'];
 
-export default function Library({ onContribute }) {
+export default function Library() {
   const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
@@ -511,26 +511,7 @@ export default function Library({ onContribute }) {
         )}
       </div>
 
-      {/* 7. Simple Footer */}
-      <footer className="mt-20 border-t border-slate-150 py-10 bg-slate-50/50">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center space-x-2 text-slate-800">
-            <svg className="w-6 h-6 text-blue-500" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M4 22C4 17.5817 11.1634 14 20 14C24.4183 14 28 15.7909 28 18" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-              <path d="M4 22H28" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-            </svg>
-            <span className="font-bold text-md text-slate-950">Setu</span>
-            <span className="text-slate-400 text-xs">| Preservation & Sharing of Traditional Knowledge</span>
-          </div>
-          
-          <div className="flex flex-wrap justify-center gap-6 text-xs text-slate-500 font-bold">
-            <a href="#about" className="hover:text-blue-600 transition-colors">About Setu</a>
-            <a href="#contact" className="hover:text-blue-600 transition-colors">Contact</a>
-            <a href="#privacy" className="hover:text-blue-600 transition-colors">Privacy Policy</a>
-            <a href="#help" className="hover:text-blue-600 transition-colors">Help</a>
-          </div>
-        </div>
-      </footer>
+      <div className="h-16"></div>
 
     </div>
   );

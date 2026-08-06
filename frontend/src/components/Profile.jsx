@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import EditProfileModal from './EditProfileModal';
 import { useAuth } from '../context/AuthContext';
 import * as mentorsApi from '../api/mentors';
 import { CATEGORIES } from '../api/knowledge';
 
-export default function Profile({ userProfile, onLogout }) {
-  const { patchLocalProfile } = useAuth();
+export default function Profile() {
+  const { currentUser: userProfile, patchLocalProfile, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
   const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'settings', 'security', 'notifications'
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
@@ -227,7 +234,7 @@ export default function Profile({ userProfile, onLogout }) {
                 Edit Profile
               </button>
               <button
-                onClick={onLogout}
+                onClick={handleLogout}
                 className="w-full py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer"
               >
                 Log Out

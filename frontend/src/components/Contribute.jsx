@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   CATEGORIES,
   CONTENT_TYPES,
@@ -24,7 +25,8 @@ const STAGE = {
   ERROR: 'error',
 };
 
-export default function Contribute({ onViewChange }) {
+export default function Contribute() {
+  const navigate = useNavigate();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState(CATEGORIES[0]);
@@ -119,7 +121,7 @@ export default function Contribute({ onViewChange }) {
               </p>
               <div className="flex items-center justify-center gap-3 pt-2">
                 <button
-                  onClick={() => onViewChange('library')}
+                  onClick={() => navigate('/library')}
                   className="px-6 py-2.5 bg-brand-primary hover:bg-brand-hover text-white text-xs font-bold rounded-full transition-all cursor-pointer"
                 >
                   View in Library

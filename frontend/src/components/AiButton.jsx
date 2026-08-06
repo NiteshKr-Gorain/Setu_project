@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import AiModalContainer from './ai/AiModalContainer';
 
-export default function AiButton({ onViewChange }) {
+export default function AiButton() {
   const { currentUser } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleButtonClick = () => {
-    if (!currentUser && onViewChange) {
+    if (!currentUser) {
       // If user is not signed in, redirect to Sign In page
-      onViewChange('signin');
+      navigate('/signin');
     } else {
       // Toggle full AI Assistant Modal interface
       setIsOpen(true);

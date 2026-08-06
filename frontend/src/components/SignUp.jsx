@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-export default function SignUp({ onViewChange }) {
+export default function SignUp() {
   const { register } = useAuth();
+  const navigate = useNavigate();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -43,7 +45,7 @@ export default function SignUp({ onViewChange }) {
     try {
       await register({ name: fullName.trim(), email: email.toLowerCase(), password, role });
       setSuccessMsg('Account created successfully! Logging in...');
-      setTimeout(() => onViewChange('profile'), 600);
+      setTimeout(() => navigate('/profile'), 600);
     } catch (err) {
       setErrorMsg(err.message || 'Could not create your account. Please try again.');
     } finally {
@@ -62,9 +64,8 @@ export default function SignUp({ onViewChange }) {
           
           {/* Left Column: Brand Identity & Graphic */}
           <div className="lg:col-span-6 flex flex-col items-start text-left space-y-8 max-w-xl">
-            <a 
-              href="#home" 
-              onClick={(e) => { e.preventDefault(); onViewChange('home'); }}
+            <Link 
+              to="/" 
               className="flex items-center space-x-3 text-brand-primary"
             >
               <svg className="w-8 h-8" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -76,7 +77,7 @@ export default function SignUp({ onViewChange }) {
                 <path d="M16 14V22" stroke="currentColor" strokeWidth="1.5" strokeDasharray="2 2" />
               </svg>
               <span className="text-2xl font-bold tracking-tight text-slate-800">Setu</span>
-            </a>
+            </Link>
 
             <div className="space-y-4">
               <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 leading-[1.1]">
@@ -274,12 +275,12 @@ export default function SignUp({ onViewChange }) {
               <div className="pt-1 text-center">
                 <p className="text-xs text-slate-500 font-semibold leading-relaxed">
                   Already have an account?{' '}
-                  <button
-                    onClick={() => onViewChange('signin')}
+                  <Link
+                    to="/signin"
                     className="text-brand-primary font-bold hover:underline cursor-pointer"
                   >
                     Sign In
-                  </button>
+                  </Link>
                 </p>
               </div>
             </div>

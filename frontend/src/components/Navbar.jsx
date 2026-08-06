@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
-export default function Navbar({ currentView = 'home', onViewChange, currentUser, onLogout }) {
+export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { currentUser, logout } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -16,24 +20,28 @@ export default function Navbar({ currentView = 'home', onViewChange, currentUser
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleNavClick = (e, item) => {
-    e.preventDefault();
-    const view = item.toLowerCase();
-    if (onViewChange) {
-      onViewChange(view);
-    }
+  const handleLogout = () => {
+    logout();
+    navigate('/');
   };
 
-  const navItems = ['Home', 'Library', 'Community', 'Legacy', 'Govt Schemes', 'About Us'];
+  const navItems = [
+    { name: 'Home', path: '/' },
+    { name: 'Library', path: '/library' },
+    { name: 'Community', path: '/community' },
+    { name: 'Legacy', path: '/legacy' },
+    { name: 'Govt Schemes', path: '/schemes' },
+    { name: 'About Us', path: '/about' },
+    { name: 'Contact', path: '/contact' }
+  ];
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'glass py-3 shadow-md' : 'bg-transparent py-5'}`}>
       <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between">
         
         {/* Logo brand */}
-        <a
-          href="#home"
-          onClick={(e) => handleNavClick(e, 'Home')}
+        <Link
+          to="/"
           className="flex items-center space-x-3 text-brand-primary hover:scale-[1.01] transition-transform duration-200"
         >
           <svg className="w-8 h-8" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -47,48 +55,51 @@ export default function Navbar({ currentView = 'home', onViewChange, currentUser
           <span className="text-2xl font-bold tracking-tight text-slate-800">
             Setu
           </span>
-        </a>
+        </Link>
 
         {/* Center Links (Desktop) */}
         <div className="hidden md:flex items-center space-x-8">
-          {navItems.map((item) => {
-            const isActive = currentView === item.toLowerCase();
-            return (
-              <a
-                key={item}
-                href={`#${item.toLowerCase().replace(' ', '')}`}
-                onClick={(e) => handleNavClick(e, item)}
-                className={`text-sm font-semibold transition-all duration-200 relative py-1 ${isActive
-                    ? 'text-brand-primary'
-                    : 'text-slate-655 hover:text-brand-primary'
-                  }`}
-              >
-                {item}
-                {isActive && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-primary rounded-full animate-fade-in" />
-                )}
-              </a>
-            );
-          })}
+          {navItems.map((item) => (
+            <NavLink
+              key={item.name}
+              to={item.path}
+              className={({ isActive }) =>
+                `text-sm font-semibold transition-all duration-200 relative py-1 ${
+                  isActive ? 'text-brand-primary' : 'text-slate-655 hover:text-brand-primary'
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  {item.name}
+                  {isActive && (
+                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-primary rounded-full animate-fade-in" />
+                  )}
+                </>
+              )}
+            </NavLink>
+          ))}
         </div>
 
         {/* Right side buttons / Profile (Desktop) */}
         <div className="hidden md:flex items-center space-x-4">
           {currentUser ? (
             <div className="flex items-center space-x-4">
-              <button
-                onClick={() => onViewChange('contribute')}
+              <Link
+                to="/contribute"
                 className="px-4 py-2 bg-brand-primary hover:bg-brand-hover text-white font-bold text-xs rounded-full shadow-md shadow-brand-primary/10 transition-all duration-200 cursor-pointer"
               >
                 + Share Knowledge
-              </button>
-              <button
-                onClick={() => onViewChange('profile')}
-                className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-full border transition-all duration-300 cursor-pointer ${
-                  currentView === 'profile'
-                    ? 'border-brand-primary bg-brand-light text-brand-hover'
-                    : 'border-slate-200 hover:border-brand-primary bg-white text-slate-700'
-                }`}
+              </Link>
+              <NavLink
+                to="/profile"
+                className={({ isActive }) =>
+                  `flex items-center space-x-2 px-3.5 py-1.5 rounded-full border transition-all duration-300 cursor-pointer ${
+                    isActive
+                      ? 'border-brand-primary bg-brand-light text-brand-hover'
+                      : 'border-slate-200 hover:border-brand-primary bg-white text-slate-700'
+                  }`
+                }
               >
                 <img
                   src={currentUser.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100"}
@@ -96,9 +107,9 @@ export default function Navbar({ currentView = 'home', onViewChange, currentUser
                   className="w-6 h-6 rounded-full object-cover border border-slate-100"
                 />
                 <span className="text-xs font-bold">{currentUser.name}</span>
-              </button>
+              </NavLink>
               <button
-                onClick={onLogout}
+                onClick={handleLogout}
                 className="text-xs font-bold text-slate-500 hover:text-brand-primary transition-colors cursor-pointer"
               >
                 Log Out
@@ -106,18 +117,18 @@ export default function Navbar({ currentView = 'home', onViewChange, currentUser
             </div>
           ) : (
             <div className="flex items-center space-x-3">
-              <button
-                onClick={() => onViewChange('signin')}
+              <Link
+                to="/signin"
                 className="px-5 py-2 border border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white font-bold text-xs rounded-full transition-all duration-200 cursor-pointer"
               >
                 Sign In
-              </button>
-              <button
-                onClick={() => onViewChange('signup')}
+              </Link>
+              <Link
+                to="/signup"
                 className="px-5 py-2 bg-brand-primary hover:bg-brand-hover text-white font-bold text-xs rounded-full shadow-md shadow-brand-primary/10 hover:shadow-brand-hover/20 hover:scale-[1.02] transition-all duration-200 cursor-pointer"
               >
                 Sign Up
-              </button>
+              </Link>
             </div>
           )}
         </div>
@@ -146,43 +157,34 @@ export default function Navbar({ currentView = 'home', onViewChange, currentUser
           }`}
       >
         <div className="glass px-6 py-6 flex flex-col space-y-4">
-          {navItems.map((item) => {
-            const isActive = currentView === item.toLowerCase();
-            return (
-              <a
-                key={item}
-                href={`#${item.toLowerCase().replace(' ', '')}`}
-                onClick={(e) => {
-                  setIsOpen(false);
-                  handleNavClick(e, item);
-                }}
-                className={`text-base font-semibold py-1 transition-colors ${isActive
-                    ? 'text-brand-primary'
-                    : 'text-slate-700 hover:text-brand-primary'
-                  }`}
-              >
-                {item}
-              </a>
-            );
-          })}
+          {navItems.map((item) => (
+            <NavLink
+              key={item.name}
+              to={item.path}
+              onClick={() => setIsOpen(false)}
+              className={({ isActive }) =>
+                `text-base font-semibold py-1 transition-colors ${
+                  isActive ? 'text-brand-primary' : 'text-slate-700 hover:text-brand-primary'
+                }`
+              }
+            >
+              {item.name}
+            </NavLink>
+          ))}
 
           {/* Authentication inside Mobile Menu */}
           {currentUser ? (
             <div className="flex flex-col space-y-3 pt-4 border-t border-slate-100">
-              <button
-                onClick={() => {
-                  setIsOpen(false);
-                  onViewChange('contribute');
-                }}
+              <Link
+                to="/contribute"
+                onClick={() => setIsOpen(false)}
                 className="w-full text-center py-2.5 bg-brand-primary hover:bg-brand-hover text-white font-semibold text-base rounded-full shadow-md transition-all cursor-pointer"
               >
                 + Share Knowledge
-              </button>
-              <button
-                onClick={() => {
-                  setIsOpen(false);
-                  onViewChange('profile');
-                }}
+              </Link>
+              <Link
+                to="/profile"
+                onClick={() => setIsOpen(false)}
                 className="flex items-center space-x-3 text-slate-700 hover:text-brand-primary font-semibold text-base py-1.5 cursor-pointer text-left"
               >
                 <img
@@ -191,11 +193,11 @@ export default function Navbar({ currentView = 'home', onViewChange, currentUser
                   className="w-8 h-8 rounded-full object-cover border border-slate-200"
                 />
                 <span>Profile ({currentUser.name})</span>
-              </button>
+              </Link>
               <button
                 onClick={() => {
                   setIsOpen(false);
-                  onLogout();
+                  handleLogout();
                 }}
                 className="text-left text-slate-500 hover:text-brand-primary font-semibold text-base py-1.5 cursor-pointer"
               >
@@ -204,24 +206,20 @@ export default function Navbar({ currentView = 'home', onViewChange, currentUser
             </div>
           ) : (
             <div className="flex flex-col space-y-3 pt-4 border-t border-slate-100">
-              <button
-                onClick={() => {
-                  setIsOpen(false);
-                  onViewChange('signin');
-                }}
+              <Link
+                to="/signin"
+                onClick={() => setIsOpen(false)}
                 className="w-full text-center py-2.5 border border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white font-semibold text-base rounded-full transition-all cursor-pointer"
               >
                 Sign In
-              </button>
-              <button
-                onClick={() => {
-                  setIsOpen(false);
-                  onViewChange('signup');
-                }}
+              </Link>
+              <Link
+                to="/signup"
+                onClick={() => setIsOpen(false)}
                 className="w-full text-center py-2.5 bg-brand-primary hover:bg-brand-hover text-white font-semibold text-base rounded-full shadow-md transition-all cursor-pointer"
               >
                 Sign Up
-              </button>
+              </Link>
             </div>
           )}
         </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import organicFarmingImg from '../assets/organic_farming.png';
 import potteryImg from '../assets/pottery.png';
 import ayurvedicRemediesImg from '../assets/ayurvedic_remedies.png';
@@ -135,7 +136,8 @@ const categories = [
   'Recipes'
 ];
 
-export default function Community({ userProfile }) {
+export default function Community() {
+  const { currentUser: userProfile } = useAuth();
   // Stories Feed & Actions
   const [stories, setStories] = useState(initialStories);
   const [searchQuery, setSearchQuery] = useState('');

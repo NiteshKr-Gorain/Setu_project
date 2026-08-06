@@ -51,7 +51,6 @@ const fallbackMockEntries = [
 export default function LibraryPage({ onContribute }) {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState('');
 
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedContentType, setSelectedContentType] = useState('All');
@@ -62,13 +61,11 @@ export default function LibraryPage({ onContribute }) {
   const [bookmarkedIds, setBookmarkedIds] = useState([]);
 
   const [learningPaths, setLearningPaths] = useState([]);
-  const [pathsLoading, setPathsLoading] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
     async function loadData() {
       setLoading(true);
-      setErrorMsg('');
       try {
         const apiData = await fetchKnowledgeEntries({
           category: selectedCategory,
@@ -101,16 +98,12 @@ export default function LibraryPage({ onContribute }) {
 
   useEffect(() => {
     let isMounted = true;
-    setPathsLoading(true);
     listLearningPaths()
       .then((data) => {
         if (isMounted) setLearningPaths(Array.isArray(data) ? data : data?.items || []);
       })
       .catch(() => {
         // Learning paths optional fallback
-      })
-      .finally(() => {
-        if (isMounted) setPathsLoading(false);
       });
     return () => { isMounted = false; };
   }, []);

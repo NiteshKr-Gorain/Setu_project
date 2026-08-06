@@ -2,80 +2,79 @@ import React, { useState, useRef } from 'react';
 
 const mockVideos = [
   {
-    id: 1,
-    title: '🌾 The Harvests of 1947: Crossing the Punjab',
+    id: 'v1',
+    title: '🌾 Preserving Ancestral Seed Varieties in Drylands',
     storytellerName: 'Harbhajan Singh',
-    category: 'Partition-era stories',
-    duration: '12:40',
-    thumbnail: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80',
+    category: 'Agriculture',
+    duration: '4:12',
+    thumbnail: 'https://images.unsplash.com/photo-1593113598332-cd59c5bc3f90?auto=format&fit=crop&w=800&q=80',
     videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-    description: 'Harbhajan Singh shares an emotional, first-hand account of crossing the border in 1947 as a young boy. He recalls the kindness of stranger communities, the dry bread shared in cargo wagons, and the resilient spirit of rebuilding his family farm in East Punjab.'
+    description: 'Elder farmer Harbhajan Singh explains how his family has preserved non-hybrid, drought-resistant heirloom seeds across 4 generations in arid soil.'
   },
   {
-    id: 2,
-    title: '🏺 Centering Clay: A Lifetime on the Stone Wheel',
+    id: 'v2',
+    title: '🏺 Micro-porous Terracotta Firing Techniques',
     storytellerName: 'Sita Devi',
-    category: 'Craftsmanship',
-    duration: '08:15',
+    category: 'Traditional Skills',
+    duration: '3:45',
     thumbnail: 'https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&w=800&q=80',
     videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-    description: 'Master artisan Sita Devi details the tactile philosophy of centered river clay. She explains how the speed of a stone potter wheel mirrors the cycles of nature, and how clay pots keep summer drinking water naturally cold through micro-porous evaporation.'
+    description: 'Master artisan Sita Devi demonstrates river clay wedging and wood pit kiln baking secrets passed down through centuries.'
   },
   {
-    id: 3,
-    title: '🚂 Early Steam Locomotives and Indian Railways',
-    storytellerName: 'K. R. Subramanian',
-    category: 'Career journeys',
-    duration: '10:32',
-    thumbnail: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80',
+    id: 'v3',
+    title: '🌿 Wild Herbal Kashayam for Respiratory Defense',
+    storytellerName: 'Dr. V. Sharma',
+    category: 'Ayurveda & Health',
+    duration: '5:20',
+    thumbnail: 'https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?auto=format&fit=crop&w=800&q=80',
     videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-    description: 'Retired railway engineer Subramanian recounts the challenging days of steam boilers and coal tracks. He explains the rigorous mechanics of early locomotive models and the dedication required to maintain safe cross-country transportation in the mid-20th century.'
+    description: 'Ayurvedic expert Dr. Sharma shares the exact brewing ratios for Tulsi, ginger, and licorice decoction for immunity.'
   },
   {
-    id: 4,
-    title: '🥣 Ragi Porridge and Traditional Summer Diets',
+    id: 'v4',
+    title: '🥣 Germinated Finger Millet (Ragi) Breakfast Brew',
     storytellerName: 'Savitri Devi',
-    category: 'Family traditions',
-    duration: '07:50',
-    thumbnail: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=80',
+    category: 'Heritage Recipes',
+    duration: '2:50',
+    thumbnail: 'https://images.unsplash.com/photo-1586444248902-2f64eddc13df?auto=format&fit=crop&w=800&q=80',
     videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
-    description: 'Grandmother Savitri Devi demonstrates the traditional methods of soaking, sprouting, and slow-cooking finger millets (ragi). She highlights how fermented porridge served as a natural probiotic breakfast that kept farmworkers energized through intense summers.'
+    description: 'Grandmother Savitri Devi details the 36-hour germination process that multiplies calcium bioavailability in millet.'
   },
   {
-    id: 5,
-    title: '🌿 The Legend of Sanjeevani: Himalayan Folklore',
-    storytellerName: 'Pandit Ram Prasad',
-    category: 'Folklore',
-    duration: '15:20',
+    id: 'v5',
+    title: '💧 Community Check-Dam Rainwater Harvesting',
+    storytellerName: 'Village Elders Collective',
+    category: 'Ecological Wisdom',
+    duration: '6:15',
     thumbnail: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80',
     videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
-    description: 'Pandit Ram Prasad narrates the mythical origins of medicinal herbs in the high valleys of Uttarakhand. He explains the oral traditions passed down through local shepherds and how traditional folklore acts as a catalog of native ecological wisdom.'
+    description: 'A case study of how dry-stone check dams restored groundwater well levels by 4 meters across 3 droughts.'
   },
   {
-    id: 6,
-    title: '🧵 Weaving the Warp: Khadi Handloom Physics',
-    storytellerName: 'Vikas Devakar',
-    category: 'Craftsmanship',
-    duration: '09:45',
-    thumbnail: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80',
+    id: 'v6',
+    title: '🧵 Organic Cotton Handloom Weaving Traditions',
+    storytellerName: 'Kamla Devi',
+    category: 'Traditional Skills',
+    duration: '4:30',
+    thumbnail: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80',
     videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
-    description: 'Vikas details the mathematical calculations involved in setting up the warp yarns on a traditional wooden handloom. He explains the rhythmic coordinate patterns of foot treadles and shuttle throws that turn single raw threads into durable, breathable Khadi cloth.'
+    description: 'Master weaver Kamla Devi demonstrates handloom shuttle techniques and natural indigo dye extraction.'
   }
 ];
 
 const categories = [
-  'Partition-era stories',
-  'Career journeys',
-  'Family traditions',
-  'Folklore',
-  'Craftsmanship'
+  'Agriculture',
+  'Traditional Skills',
+  'Ayurveda & Health',
+  'Heritage Recipes',
+  'Ecological Wisdom'
 ];
 
 export default function LegacyPage() {
   const [activeVideo, setActiveVideo] = useState(mockVideos[0]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  
   const playerRef = useRef(null);
 
   const filteredVideos = mockVideos.filter(video => {
@@ -87,10 +86,9 @@ export default function LegacyPage() {
 
   const handleSelectVideo = (video) => {
     setActiveVideo(video);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
     if (playerRef.current) {
-      playerRef.current.load();
-      playerRef.current.play().catch(err => console.log('Autoplay prevented', err));
+      playerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      playerRef.current.play().catch(() => {});
     }
   };
 
@@ -98,20 +96,20 @@ export default function LegacyPage() {
     <div className="pt-24 pb-16 min-h-screen bg-slate-50 text-slate-800 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-8">
         
-        {/* Intro header */}
+        {/* Page Intro Header */}
         <div className="text-left space-y-2 max-w-2xl">
           <span className="text-[10px] bg-amber-50 text-amber-700 border border-amber-200/50 px-3.5 py-1.5 rounded-full font-bold uppercase tracking-wide">
-            Legacy Audio &amp; Video Archives
+            Oral Heritage Vault
           </span>
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 leading-tight pt-1">
-            Storyteller Wisdom Archive
+            Legacy Video &amp; Voice Archives
           </h1>
-          <p className="text-xs text-slate-400 leading-relaxed font-normal">
+          <p className="text-xs text-slate-500 leading-relaxed font-normal">
             Listen to the direct voices of elder generations sharing life journeys, local traditions, historical events, and craft secrets.
           </p>
         </div>
 
-        {/* 1. Featured Video Player Section */}
+        {/* 1. Featured Video Player Section with Lazy Loading & Preload */}
         <div className="bg-white border border-slate-100 rounded-3xl overflow-hidden shadow-xs grid grid-cols-1 lg:grid-cols-12 gap-0 text-left">
           <div className="lg:col-span-7 bg-black aspect-video flex items-center justify-center relative">
             <video
@@ -119,6 +117,9 @@ export default function LegacyPage() {
               src={activeVideo.videoUrl}
               poster={activeVideo.thumbnail}
               controls
+              preload="metadata"
+              loading="lazy"
+              playsInline
               className="w-full h-full object-contain"
             />
           </div>
@@ -190,7 +191,7 @@ export default function LegacyPage() {
           </div>
         </div>
 
-        {/* 3. Grid of Video Cards */}
+        {/* 3. Grid of Video Cards with Lazy Thumbnail Loading */}
         <div className="space-y-6 text-left">
           <h3 className="font-bold text-sm text-slate-800 pl-1">Wisdom Archives Playlist</h3>
           
@@ -210,6 +211,7 @@ export default function LegacyPage() {
                       <img
                         src={video.thumbnail}
                         alt={video.title}
+                        loading="lazy"
                         className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
                       />
                       <div className="absolute inset-0 bg-black/30 opacity-60 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -223,23 +225,16 @@ export default function LegacyPage() {
                     </div>
 
                     <div className="p-5 flex-grow flex flex-col justify-between space-y-3">
-                      <div className="space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[8px] font-bold text-amber-700 bg-amber-50 border border-amber-200/40 px-2 py-0.5 rounded-md uppercase tracking-wider">
-                            {video.category}
-                          </span>
-                          {isPlaying && (
-                            <span className="text-[8px] font-bold text-amber-600 uppercase tracking-widest animate-pulse">
-                              ● Playing
-                            </span>
-                          )}
-                        </div>
-                        <h4 className="text-xs font-bold text-slate-900 group-hover:text-amber-700 transition-colors leading-snug line-clamp-2 pt-0.5">
+                      <div className="space-y-1">
+                        <span className="text-[9px] font-bold text-amber-700 uppercase tracking-wider">
+                          {video.category}
+                        </span>
+                        <h4 className="text-xs md:text-sm font-bold text-slate-900 line-clamp-2 group-hover:text-amber-700 transition-colors">
                           {video.title}
                         </h4>
-                        <p className="text-[10px] font-semibold text-slate-400">
-                          Storyteller: {video.storytellerName}
-                        </p>
+                      </div>
+                      <div className="text-[10px] text-slate-400 font-medium">
+                        Storyteller: {video.storytellerName}
                       </div>
                     </div>
                   </div>
@@ -247,8 +242,8 @@ export default function LegacyPage() {
               })}
             </div>
           ) : (
-            <div className="bg-white border border-slate-100 rounded-3xl p-12 text-center text-slate-400 text-xs italic shadow-3xs">
-              No storytelling archives match your criteria.
+            <div className="bg-white rounded-3xl p-12 text-center text-slate-400 border border-slate-100 text-xs">
+              No oral story videos found matching "{searchQuery}".
             </div>
           )}
         </div>

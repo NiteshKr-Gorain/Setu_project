@@ -2,239 +2,277 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import HomeView from './HomeView';
+import ChatInput from './ChatInput';
 import ChatMessagesView from './ChatMessagesView';
+import VoiceAvatarModal from './VoiceAvatarModal';
 import ChatsView from './ChatsView';
 import SettingsView from './SettingsView';
-import ChatInput from './ChatInput';
-import { sendChatMessageStream } from '../../../shared/services/apiService';
-import { loadSavedChats, saveChatsToStorage } from '../../../shared/services/localStorageService';
+import { 
+  checkBackendHealth, 
+  sendChatMessage 
+} from '../../../shared/services/apiService';
+import { 
+  searchLocalStorage, 
+  saveToLocalStorageCache, 
+  getRecentChats, 
+  addRecentChat,
+  deleteHistoryAndChat
+} from '../../../shared/services/localStorageService';
 
 export default function AiModalContainer({ userProfile, onClose }) {
-  const [activeView, setActiveView] = useState('home'); // 'home', 'chat', 'chats', 'settings'
-  const [savedChats, setSavedChats] = useState([]);
-  const [currentChatId, setCurrentChatId] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [inputQuery, setInputQuery] = useState('');
-  
-  const [selectedLanguage, setSelectedLanguage] = useState('en');
-  const [verifiedFilter, setVerifiedFilter] = useState(false);
-  const [isStreaming, setIsStreaming] = useState(false);
-  const [abortController, setAbortController] = useState(null);
-  const [errorBanner, setErrorBanner] = useState('');
+  const [activeTab, setActiveTab] = useState('home');
+  const [darkMode, setDarkMode] = useState(false);
+  const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [chatsList, setChatsList] = useState([]);
+  const [activeChatMessages, setActiveChatMessages] = useState(null);
+  const [activeChatTitle, setActiveChatTitle] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedModel, setSelectedModel] = useState('Instant');
+  const [isBackendConnected, setIsBackendConnected] = useState(false);
 
-  // Load saved chat history on mount
+  // Poll backend health status
+  const checkHealth = async () => {
+    const health = await checkBackendHealth();
+    setIsBackendConnected(health.connected);
+    return health;
+  };
+
   useEffect(() => {
-    const local = loadSavedChats();
-    setSavedChats(local);
+    setChatsList(getRecentChats());
+    checkHealth();
+
+    const timer = setInterval(() => {
+      checkHealth();
+    }, 10000);
+
+    return () => clearInterval(timer);
   }, []);
 
-  const startNewChat = () => {
-    setCurrentChatId(null);
-    setMessages([]);
-    setActiveView('chat');
-    setErrorBanner('');
+  const handleStartNewChat = () => {
+    setActiveChatMessages(null);
+    setActiveChatTitle('');
+    setActiveTab('home');
   };
 
-  const handlePromptSelect = (promptText) => {
-    startNewChat();
-    handleSendQuery(promptText);
-  };
+  // Main Handle Send Message Pipeline
+  const handleSendMessage = async (promptText, category = 'General') => {
+    if (!promptText.trim()) return;
 
-  const handleSendQuery = async (queryText) => {
-    const textToSend = queryText || inputQuery;
-    if (!textToSend.trim() || isStreaming) return;
-
-    setErrorBanner('');
-    let chatId = currentChatId;
-    let updatedChats = [...savedChats];
-
-    if (!chatId) {
-      chatId = `chat-${Date.now()}`;
-      setCurrentChatId(chatId);
-      const newChatObj = {
-        id: chatId,
-        title: textToSend.length > 35 ? `${textToSend.substring(0, 35)}...` : textToSend,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        messages: []
-      };
-      updatedChats = [newChatObj, ...savedChats];
-      setSavedChats(updatedChats);
-    }
-
-    const userMessage = {
-      id: `msg-${Date.now()}`,
+    const userMsg = {
       sender: 'user',
-      text: textToSend,
+      text: promptText,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
-    const aiMessageId = `msg-ai-${Date.now()}`;
-    const initialAiMessage = {
-      id: aiMessageId,
-      sender: 'ai',
-      text: '',
-      isStreaming: true,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
+    const currentMessages = activeChatMessages ? [...activeChatMessages, userMsg] : [userMsg];
+    setActiveChatMessages(currentMessages);
+    if (!activeChatTitle) setActiveChatTitle(promptText);
+    setIsLoading(true);
 
-    const newMessagesState = [...messages, userMessage, initialAiMessage];
-    setMessages(newMessagesState);
-    setInputQuery('');
-    setActiveView('chat');
-    setIsStreaming(true);
+    // STEP 1: Search Local Storage Cache first for local context match
+    const localCheck = searchLocalStorage(promptText);
 
-    const controller = new AbortController();
-    setAbortController(controller);
+    // STEP 2: Execute Dual Check Backend API (Local Storage + Google Web Search)
+    const apiResult = await sendChatMessage(promptText, category, localCheck);
 
-    try {
-      let accumulatedText = '';
-      await sendChatMessageStream(
-        textToSend,
-        {
-          language: selectedLanguage,
-          verifiedOnly: verifiedFilter,
-          chatId
-        },
-        (chunkText) => {
-          accumulatedText += chunkText;
-          setMessages(prev => prev.map(msg => {
-            if (msg.id === aiMessageId) {
-              return { ...msg, text: accumulatedText };
-            }
-            return msg;
-          }));
-        },
-        controller.signal
-      );
+    if (apiResult.success && apiResult.data) {
+      const data = apiResult.data;
+      const aiMsg = {
+        sender: 'ai',
+        text: data.response || 'No response content returned.',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        category: data.category || category,
+        source: data.source || 'Dual Search (Local + Google)',
+        localMatch: data.local_match || (localCheck.found ? localCheck : null),
+        googleMatch: data.google_match || null,
+        sources: data.sources || ['Local Storage', 'Google Search'],
+        points: data.points || null,
+        kerasMetadata: data.keras_metadata || null,
+        persona: data.persona || 'Wise Master'
+      };
 
-      // Finalize streaming
-      const finalizedMessages = newMessagesState.map(msg => {
-        if (msg.id === aiMessageId) {
-          return { ...msg, text: accumulatedText, isStreaming: false };
-        }
-        return msg;
-      });
+      setActiveChatMessages(prev => [...prev, aiMsg]);
+      saveToLocalStorageCache(promptText, aiMsg.text, aiMsg.category, data);
+      setChatsList(addRecentChat(promptText, aiMsg.category));
+      setIsBackendConnected(true);
+      setIsLoading(false);
+      return;
+    }
 
-      setMessages(finalizedMessages);
-      
-      // Save to local storage
-      const finalChats = updatedChats.map(c => {
-        if (c.id === chatId) {
-          return { ...c, messages: finalizedMessages };
-        }
-        return c;
-      });
-      setSavedChats(finalChats);
-      saveChatsToStorage(finalChats);
+    // STEP 3: Fallback to Local Storage Cache if Backend is Offline or Failed
+    setIsBackendConnected(false);
+    const localResult = searchLocalStorage(promptText);
 
-    } catch (err) {
-      if (err.name === 'AbortError') {
-        console.log('Stream request canceled by user.');
-      } else {
-        console.error('Chat AI stream error:', err);
-        setErrorBanner('Connecting to live Setu AI stream. Displaying benchmarked response.');
+    if (localResult.found) {
+      const cached = localResult.data;
+      const aiMsg = {
+        sender: 'ai',
+        text: cached.response,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        category: cached.category || category,
+        source: cached.source || 'Local Storage Cache (Offline)',
+        points: cached.points || null,
+        kerasMetadata: cached.kerasMetadata || null,
+        persona: cached.persona || 'Cached Knowledge'
+      };
+
+      setActiveChatMessages(prev => [...prev, aiMsg]);
+      setChatsList(addRecentChat(promptText, category));
+    } else {
+      const fallbackText = `Here is the response for "${promptText}".`;
+      const fallbackAiMsg = {
+        sender: 'ai',
+        text: fallbackText,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        category,
+        source: 'Browser Local Synthesizer (Offline)'
+      };
+
+      setActiveChatMessages(prev => [...prev, fallbackAiMsg]);
+      saveToLocalStorageCache(promptText, fallbackText, category);
+      setChatsList(addRecentChat(promptText, category));
+    }
+
+    setIsLoading(false);
+  };
+
+  const handleSelectRecentChat = (chat) => {
+    setActiveChatTitle(chat.title);
+    setActiveChatMessages([
+      {
+        sender: 'user',
+        text: `Open chat thread for "${chat.title}"`,
+        timestamp: chat.timestamp
+      },
+      {
+        sender: 'ai',
+        text: `Stored thread loaded for "${chat.title}".`,
+        source: 'Local Storage Cache',
+        timestamp: chat.timestamp,
+        points: [
+          { num: 1, text: `Topic: ${chat.title}` },
+          { num: 2, text: `Category: ${chat.category || 'General'}` }
+        ]
       }
-    } finally {
-      setIsStreaming(false);
-      setAbortController(null);
+    ]);
+  };
+
+  const handleResetChatView = () => {
+    setActiveChatMessages(null);
+    setActiveChatTitle('');
+  };
+
+  const handleDeleteRecentChat = (chatToDelete) => {
+    const result = deleteHistoryAndChat(chatToDelete.id, chatToDelete.title);
+    setChatsList(result.recentChats);
+    if (activeChatTitle === chatToDelete.title) {
+      handleResetChatView();
     }
   };
 
-  const handleStopStream = () => {
-    if (abortController) {
-      abortController.abort();
+  const renderMainContent = () => {
+    if (activeChatMessages) {
+      return (
+        <div className="flex-1 flex flex-col min-h-0 bg-[#f5f5f7]">
+          <ChatMessagesView
+            messages={activeChatMessages}
+            title={activeChatTitle}
+            onBack={handleResetChatView}
+            isLoading={isLoading}
+            userProfile={userProfile}
+          />
+          <div className="pb-6 pt-2 bg-[#f5f5f7]">
+            <ChatInput
+              onSendMessage={(txt) => handleSendMessage(txt)}
+              onOpenVoiceMode={() => setIsVoiceModalOpen(true)}
+              isLoading={isLoading}
+              selectedModel={selectedModel}
+              setSelectedModel={setSelectedModel}
+            />
+          </div>
+        </div>
+      );
     }
-    setIsStreaming(false);
-  };
 
-  const loadSavedChatSession = (chatObj) => {
-    setCurrentChatId(chatObj.id);
-    setMessages(chatObj.messages || []);
-    setActiveView('chat');
-  };
-
-  const deleteSavedChatSession = (chatId) => {
-    const filtered = savedChats.filter(c => c.id !== chatId);
-    setSavedChats(filtered);
-    saveChatsToStorage(filtered);
-    if (currentChatId === chatId) {
-      startNewChat();
-      setActiveView('home');
+    switch (activeTab) {
+      case 'chats':
+        return (
+          <ChatsView
+            chats={chatsList}
+            setChatsList={setChatsList}
+            onSelectChat={handleSelectRecentChat}
+            onNewChat={handleStartNewChat}
+          />
+        );
+      case 'settings':
+        return (
+          <SettingsView
+            darkMode={darkMode}
+            setDarkMode={setDarkMode}
+            isBackendConnected={isBackendConnected}
+            onRefreshBackendStatus={checkHealth}
+          />
+        );
+      case 'home':
+      default:
+        return (
+          <HomeView
+            onSendMessage={(prompt, cat) => handleSendMessage(prompt, cat)}
+            onOpenVoiceMode={() => setIsVoiceModalOpen(true)}
+            isLoading={isLoading}
+            selectedModel={selectedModel}
+            setSelectedModel={setSelectedModel}
+          />
+        );
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 text-sans">
-      {/* Modal Surface Box */}
-      <div className="bg-white w-full max-w-5xl h-[88vh] rounded-[32px] shadow-2xl border border-slate-100 flex overflow-hidden text-left relative animate-in fade-in zoom-in-95 duration-200">
-        
-        {/* Sidebar Left Controls */}
-        <Sidebar
-          activeView={activeView}
-          onViewChange={setActiveView}
-          onNewChat={startNewChat}
-          savedChatsCount={savedChats.length}
+    <div className="w-full max-w-6xl h-[90vh] bg-[#f5f5f7] rounded-[32px] shadow-2xl border border-slate-200/80 flex overflow-hidden font-sans relative text-slate-800 selection:bg-orange-500 selection:text-white">
+      {/* Side Bar */}
+      <Sidebar
+        activeTab={activeTab}
+        setActiveTab={(tab) => {
+          setActiveTab(tab);
+          setActiveChatMessages(null);
+        }}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        onNewChat={handleStartNewChat}
+        chats={chatsList}
+        onSelectChat={handleSelectRecentChat}
+        activeChatTitle={activeChatTitle}
+        onDeleteChat={handleDeleteRecentChat}
+        userProfile={userProfile}
+      />
+
+      {/* Main Container */}
+      <main className="flex-1 flex flex-col h-full overflow-hidden relative bg-[#f5f5f7]">
+        {/* Top Header */}
+        <Header
+          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+          activeChatTitle={activeChatTitle}
+          isBackendConnected={isBackendConnected}
+          onClose={onClose}
         />
 
-        {/* Main Interface Content Area */}
-        <div className="flex-1 flex flex-col h-full bg-slate-50/40 min-w-0 relative">
-          
-          {/* Header Controller */}
-          <Header
-            userProfile={userProfile}
-            selectedLanguage={selectedLanguage}
-            onLanguageChange={setSelectedLanguage}
-            verifiedFilter={verifiedFilter}
-            onVerifiedFilterToggle={() => setVerifiedFilter(!verifiedFilter)}
-            onClose={onClose}
-          />
+        {/* Dynamic Views */}
+        {renderMainContent()}
+      </main>
 
-          {/* View Switcher */}
-          <div className="flex-1 overflow-hidden relative flex flex-col">
-            {activeView === 'home' && (
-              <HomeView onPromptSelect={handlePromptSelect} />
-            )}
-
-            {activeView === 'chat' && (
-              <ChatMessagesView
-                messages={messages}
-                isStreaming={isStreaming}
-                errorBanner={errorBanner}
-              />
-            )}
-
-            {activeView === 'chats' && (
-              <ChatsView
-                chats={savedChats}
-                onSelectChat={loadSavedChatSession}
-                onDeleteChat={deleteSavedChatSession}
-              />
-            )}
-
-            {activeView === 'settings' && (
-              <SettingsView
-                selectedLanguage={selectedLanguage}
-                onLanguageChange={setSelectedLanguage}
-                verifiedFilter={verifiedFilter}
-                onVerifiedFilterToggle={() => setVerifiedFilter(!verifiedFilter)}
-              />
-            )}
-          </div>
-
-          {/* Bottom Chat Input Form (Shown when in Home or Chat views) */}
-          {(activeView === 'home' || activeView === 'chat') && (
-            <ChatInput
-              inputQuery={inputQuery}
-              onInputChange={setInputQuery}
-              onSend={handleSendQuery}
-              isStreaming={isStreaming}
-              onStop={handleStopStream}
-            />
-          )}
-
-        </div>
-
-      </div>
+      {/* Voice Avatar Modal */}
+      <VoiceAvatarModal
+        isOpen={isVoiceModalOpen}
+        onClose={() => setIsVoiceModalOpen(false)}
+        onAskBackend={async (queryText) => {
+          const res = await sendChatMessage(queryText, 'Voice');
+          if (res.success) {
+            return res.data;
+          }
+          return { response: `Processed query: "${queryText}". Backend server is currently offline.` };
+        }}
+      />
     </div>
   );
 }

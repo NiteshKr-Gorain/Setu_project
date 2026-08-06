@@ -1,61 +1,76 @@
 import React from 'react';
+import { Maximize2, Server, X, PanelLeft } from 'lucide-react';
 
-export default function Header({
-  userProfile,
-  selectedLanguage,
-  onLanguageChange,
-  verifiedFilter,
-  onVerifiedFilterToggle,
-  onClose,
-}) {
+export default function Header({ activeChatTitle, isBackendConnected, onToggleSidebar, onClose }) {
   return (
-    <div className="bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between shadow-3xs">
-      <div className="flex items-center space-x-3 text-left">
-        <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-brand-primary via-orange-500 to-amber-500 flex items-center justify-center text-white font-bold text-sm shadow-xs">
-          🤖
-        </div>
-        <div>
-          <h3 className="text-sm font-extrabold text-slate-900 leading-none">Setu AI Assistant</h3>
-          <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-wider">
-            Verified Traditional Wisdom Engine
-          </p>
-        </div>
+    <header className="flex items-center justify-between h-14 px-4 bg-[#f5f5f7]/90 backdrop-blur-md text-slate-800 border-b border-[#e2e8f0] sticky top-0 z-10">
+      <div className="flex items-center gap-3">
+        {onToggleSidebar && (
+          <button
+            onClick={onToggleSidebar}
+            className="md:hidden p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-200/60 rounded-lg transition-colors"
+            title="Toggle Sidebar"
+          >
+            <PanelLeft className="w-5 h-5" />
+          </button>
+        )}
+        {activeChatTitle && (
+          <h2 className="text-sm font-medium text-slate-700 truncate max-w-xs md:max-w-md">
+            {activeChatTitle}
+          </h2>
+        )}
       </div>
 
-      <div className="flex items-center space-x-3">
-        {/* Verified Knowledge Filter Toggle */}
-        <button
-          onClick={onVerifiedFilterToggle}
-          className={`px-3 py-1.5 rounded-full text-[10px] font-bold border transition-all cursor-pointer ${
-            verifiedFilter
-              ? 'bg-emerald-50 text-emerald-700 border-emerald-200 shadow-3xs'
-              : 'bg-slate-50 text-slate-500 border-slate-200/60 hover:bg-slate-100'
+      <div className="flex items-center gap-2">
+        {/* Connection Status Badge */}
+        <div
+          title={isBackendConnected ? "Connected" : "Offline"}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+            isBackendConnected
+              ? 'bg-orange-50 text-orange-700 border-orange-200'
+              : 'bg-amber-50 text-amber-700 border-amber-200'
           }`}
         >
-          {verifiedFilter ? '✓ Verified Only' : 'All Knowledge'}
+          <span className="relative flex h-2 w-2">
+            <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+              isBackendConnected ? 'bg-orange-500' : 'bg-amber-400'
+            }`} />
+            <span className={`relative inline-flex rounded-full h-2 w-2 ${
+              isBackendConnected ? 'bg-orange-500' : 'bg-amber-500'
+            }`} />
+          </span>
+          <Server className="w-3.5 h-3.5 text-orange-600" />
+          <span className="hidden sm:inline font-semibold">
+            {isBackendConnected ? 'Connected' : 'Offline'}
+          </span>
+        </div>
+
+        {/* Fullscreen / Expand button */}
+        <button 
+          onClick={() => {
+            if (!document.fullscreenElement) {
+              document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+              document.exitFullscreen().catch(() => {});
+            }
+          }}
+          className="p-2 text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+          title="Toggle Fullscreen"
+        >
+          <Maximize2 className="w-4 h-4" />
         </button>
 
-        {/* Language Selector */}
-        <select
-          value={selectedLanguage}
-          onChange={(e) => onLanguageChange(e.target.value)}
-          className="bg-slate-50 border border-slate-200/60 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-700 focus:outline-none focus:border-brand-primary"
-        >
-          <option value="en">English (EN)</option>
-          <option value="hi">हिंदी (Hindi)</option>
-          <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
-          <option value="gu">ગુજરાતી (Gujarati)</option>
-          <option value="ta">தமிழ் (Tamil)</option>
-        </select>
-
-        {/* Close Modal Button */}
-        <button
-          onClick={onClose}
-          className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
-        >
-          ✕
-        </button>
+        {/* Modal Close Button */}
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="p-2 text-slate-400 hover:text-slate-800 hover:bg-slate-200/60 rounded-full transition-colors ml-1"
+            title="Close Assistant"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
       </div>
-    </div>
+    </header>
   );
 }

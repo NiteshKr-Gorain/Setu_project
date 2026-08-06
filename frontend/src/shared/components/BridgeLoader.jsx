@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 
 export default function BridgeLoader({ onFinish }) {
   const [progress, setProgress] = useState(0);
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
 
   useEffect(() => {
     let current = 0;
     let isCancelled = false;
     const startTime = Date.now();
-    const TARGET_DURATION_MS = 5000; // Exactly 5 seconds
+    const TARGET_DURATION_MS = 4000; // Exactly 4 seconds (reduced by 1 second)
 
     const interval = setInterval(() => {
       if (isCancelled) return;
@@ -40,15 +41,22 @@ export default function BridgeLoader({ onFinish }) {
   }, [onFinish]);
 
   return (
-    <div className="fixed inset-0 z-50 w-screen h-screen bg-transparent backdrop-blur-md overflow-hidden select-none">
-      {/* Edge-to-Edge Full Screen Setu Video */}
+    <div className="fixed inset-0 z-50 w-screen h-screen bg-slate-950 backdrop-blur-md overflow-hidden select-none">
+      {/* Edge-to-Edge Full Screen Setu Video with Optimized Preloading */}
       <video
         src="/Setu_Video.mp4"
         autoPlay
         muted
         loop
         playsInline
-        className="w-full h-full object-cover bg-transparent"
+        preload="auto"
+        fetchpriority="high"
+        disablePictureInPicture
+        disableRemotePlayback
+        onLoadedData={() => setIsVideoLoaded(true)}
+        className={`w-full h-full object-cover bg-transparent transition-opacity duration-700 ${
+          isVideoLoaded ? 'opacity-100' : 'opacity-0'
+        }`}
       />
 
       {/* Transparent Ambient Gradient Overlays */}

@@ -98,7 +98,7 @@ export async function classifyPrompt(prompt) {
     });
     if (!response.ok) throw new Error('Classification failed');
     return await response.json();
-  } catch (error) {
+  } catch (_error) {
     return { category: 'General', confidence: 0.5, vector_norm: 0.0 };
   }
 }

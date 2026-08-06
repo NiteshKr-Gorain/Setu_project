@@ -5,7 +5,8 @@ import * as mentorsApi from '../../shared/api/mentorsApi';
 import { fetchKnowledgeEntries } from '../library/api/knowledgeApi';
 
 export default function ProfilePage({ userProfile, onLogout }) {
-  const { patchLocalProfile } = useAuth();
+  const { currentUser, patchLocalProfile } = useAuth();
+  const user = userProfile || currentUser;
 
   const [activeTab, setActiveTab] = useState('contributions'); // 'contributions', 'mentorship', 'verification'
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -13,8 +14,8 @@ export default function ProfilePage({ userProfile, onLogout }) {
   const [myContributions, setMyContributions] = useState([]);
   const [contribsLoading, setContribsLoading] = useState(true);
 
-  const [mentorProfile, setMentorProfile] = useState(null);
-  const [mentorLoading, setMentorLoading] = useState(true);
+  const [_mentorProfile, setMentorProfile] = useState(null);
+  const [_mentorLoading, setMentorLoading] = useState(true);
   const [mentorSaving, setMentorSaving] = useState(false);
   const [mentorMsg, setMentorMsg] = useState('');
 
@@ -24,14 +25,14 @@ export default function ProfilePage({ userProfile, onLogout }) {
   const [categoriesInput, setCategoriesInput] = useState('Agriculture, Traditional Skills');
 
   const profileData = {
-    name: userProfile?.name || 'Community Member',
-    title: userProfile?.role === 'contributor' ? 'Senior Heritage Contributor' : 'Youth Learner & Explorer',
-    location: userProfile?.location || 'India',
-    bio: userProfile?.bio || 'Passionate about connecting with elders, learning traditional techniques, and building intergenerational bridges.',
-    avatar: userProfile?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&h=300&q=80',
+    name: user?.name || 'Community Member',
+    title: user?.role === 'contributor' ? 'Senior Heritage Contributor' : 'Youth Learner & Explorer',
+    location: user?.location || 'India',
+    bio: user?.bio || 'Passionate about connecting with elders, learning traditional techniques, and building intergenerational bridges.',
+    avatar: user?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&h=300&q=80',
     joinedDate: 'Joined July 2026',
-    email: userProfile?.email || 'user@example.com',
-    role: userProfile?.role || 'user',
+    email: user?.email || 'user@example.com',
+    role: user?.role || 'user',
   };
 
   useEffect(() => {

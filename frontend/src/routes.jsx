@@ -11,7 +11,7 @@ import SignUpPage from './features/auth/SignUpPage';
 import ProfilePage from './features/profile/ProfilePage';
 import AiAssistantPage from './features/ai/AiAssistantPage';
 
-export default function AppRoutes({ currentView, setCurrentView, requireAuthView, currentUser, handleLogout }) {
+export default function AppRoutes({ currentView, setCurrentView, _requireAuthView, currentUser, handleLogout }) {
   // Normalize string for robust route matching
   const normalizedView = (currentView || 'home').toString().toLowerCase().trim();
 

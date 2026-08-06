@@ -1,4 +1,6 @@
+import asyncio
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
 
@@ -12,6 +14,10 @@ class ChatRequest(BaseModel):
     prompt: str
     category: Optional[str] = "General"
     local_context: Optional[Dict[str, Any]] = None
+
+class StreamChatRequest(BaseModel):
+    prompt: str
+    options: Optional[Dict[str, Any]] = None
 
 class ClassifyRequest(BaseModel):
     prompt: str
@@ -75,3 +81,24 @@ def process_chat(req: ChatRequest):
     }
 
     return persona_output
+
+@router.post("/api/chat/stream")
+async def process_chat_stream(req: StreamChatRequest):
+    """
+    Streaming AI Pipeline Endpoint.
+    """
+    prompt = req.prompt.strip()
+    if not prompt:
+        raise HTTPException(status_code=400, detail="Prompt cannot be empty")
+
+    dual_res = dual_check_search(prompt)
+    response_text = dual_res.get("response", f"Verified knowledge response for '{prompt}'.")
+
+    async def stream_generator():
+        words = response_text.split(" ")
+        for i, word in enumerate(words):
+            suffix = " " if i < len(words) - 1 else ""
+            yield f"{word}{suffix}"
+            await asyncio.sleep(0.03)
+
+    return StreamingResponse(stream_generator(), media_type="text/plain")

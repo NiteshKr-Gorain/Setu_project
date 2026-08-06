@@ -86,7 +86,9 @@ export default function App() {
   // Navigation handler for full-page route views
   const handleViewChange = (targetView) => {
     const clean = targetView.toString().toLowerCase().trim();
-    if (!currentUser && protectedViews.includes(clean)) {
+    const token = localStorage.getItem('setu_access_token');
+    const isAuthed = !!currentUser || !!token;
+    if (!isAuthed && protectedViews.includes(clean)) {
       setCurrentView('signin');
     } else {
       setCurrentView(clean);

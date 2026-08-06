@@ -2,33 +2,29 @@ import React, { useState } from 'react';
 import { useAuth } from '../../features/auth/AuthContext';
 import AiModalContainer from '../../features/ai/components/AiModalContainer';
 
-export default function AiButton({ onViewChange }) {
+export default function AiButton() {
   const { currentUser } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleButtonClick = () => {
-    if (!currentUser && onViewChange) {
-      // If user is not signed in, redirect to Sign In page
-      onViewChange('signin');
-    } else {
-      // Toggle full AI Assistant Modal interface
-      setIsOpen(true);
-    }
+    setIsOpen(true);
   };
 
   return (
     <>
-      {/* Full AI Assistant Interface Modal */}
+      {/* Full Setu AI Assistant Interface Modal */}
       {isOpen && (
-        <AiModalContainer
-          userProfile={currentUser}
-          onClose={() => setIsOpen(false)}
-        />
+        <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-3 sm:p-6">
+          <AiModalContainer
+            userProfile={currentUser}
+            onClose={() => setIsOpen(false)}
+          />
+        </div>
       )}
 
-      {/* Floating Round AI Button Fixed at Right Bottom Side Corner */}
+      {/* Floating Round AI Button Fixed at Right Bottom Corner */}
       <div className="fixed bottom-6 right-6 z-40 flex items-center group">
-        {/* Tooltip on hover */}
+        {/* Tooltip on hover (positioned to the left of the button) */}
         <div className="absolute right-16 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-300 transform translate-x-2 group-hover:translate-x-0 whitespace-nowrap bg-slate-900/90 backdrop-blur-md text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow-xl border border-slate-700/50 flex items-center space-x-2">
           <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
           <span>Setu AI Assistant</span>

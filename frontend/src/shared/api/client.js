@@ -1,37 +1,41 @@
-// Core API client for the Setu backend (FastAPI + MongoDB).
-// Handles: base URL config, JWT attachment, automatic access-token refresh
-// on 401, and consistent error shapes for the rest of the app to consume.
-const rawBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-const BASE_URL = rawBaseUrl.replace(/\/+$/, '');
+// Client imports
+import { ENV } from '../config/env';
 
+// Base URL
+const BASE_URL = ENV.API_URL;
+
+// Storage keys
 const TOKEN_KEY = 'setu_access_token';
 const REFRESH_KEY = 'setu_refresh_token';
 
+// Read access
 export function getAccessToken() {
   return localStorage.getItem(TOKEN_KEY);
 }
 
+// Read refresh
 export function getRefreshToken() {
   return localStorage.getItem(REFRESH_KEY);
 }
 
+// Save tokens
 export function setTokens({ access_token, refresh_token }) {
   if (access_token) localStorage.setItem(TOKEN_KEY, access_token);
   if (refresh_token) localStorage.setItem(REFRESH_KEY, refresh_token);
 }
 
+// Clear tokens
 export function clearTokens() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(REFRESH_KEY);
 }
 
-// Aliases for compatibility
+// Auth aliases
 export const setAuthToken = (token) => setTokens({ access_token: token });
 export const clearAuthToken = clearTokens;
 export const getAuthToken = getAccessToken;
 
-// Custom error class so UI code can distinguish network failures from
-// API-reported errors (which carry a real HTTP status + backend message).
+// Custom error
 export class ApiError extends Error {
   constructor(message, status, data) {
     super(message);
@@ -41,8 +45,10 @@ export class ApiError extends Error {
   }
 }
 
+// Refresh state
 let refreshInFlight = null;
 
+// Refresh token
 async function refreshAccessToken() {
   const refreshToken = getRefreshToken();
   if (!refreshToken) throw new ApiError('No refresh token available', 401);
@@ -66,9 +72,11 @@ async function refreshAccessToken() {
   return refreshInFlight;
 }
 
+// API request
 export async function apiRequest(path, options = {}) {
   const { json, auth = true, isFormData = false, headers = {}, ...rest } = options;
 
+  // Execute fetch
   const doFetch = async () => {
     const finalHeaders = { ...headers };
     if (json !== undefined) finalHeaders['Content-Type'] = 'application/json';
@@ -86,7 +94,8 @@ export async function apiRequest(path, options = {}) {
 
   let response = await doFetch();
 
-  if (response.status === 401 && auth && getRefreshToken()) {
+  // Retry auth
+  if (response.status === 401 && auth && getRefreshToken() && !getRefreshToken().startsWith('demo-')) {
     try {
       await refreshAccessToken();
       response = await doFetch();
@@ -97,12 +106,14 @@ export async function apiRequest(path, options = {}) {
     }
   }
 
+  // Parse JSON
   let data = null;
   const contentType = response.headers.get('content-type') || '';
   if (contentType.includes('application/json')) {
     data = await response.json().catch(() => null);
   }
 
+  // Handle failure
   if (!response.ok) {
     let message = data?.detail || data?.message || `Request failed (${response.status})`;
     if (typeof message !== 'string') {
@@ -125,8 +136,10 @@ export async function apiRequest(path, options = {}) {
   return data;
 }
 
+// Client alias
 export const apiClient = apiRequest;
 
+// Helper methods
 export const api = {
   get: (path, options) => apiRequest(path, { ...options, method: 'GET' }),
   post: (path, json, options) => apiRequest(path, { ...options, method: 'POST', json }),
@@ -136,4 +149,5 @@ export const api = {
     apiRequest(path, { ...options, method: 'POST', isFormData: true, body: formData }),
 };
 
+// URL export
 export { BASE_URL };

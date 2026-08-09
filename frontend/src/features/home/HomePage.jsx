@@ -1,3 +1,4 @@
+// Home page imports
 import React from 'react';
 import Hero from './components/Hero';
 import Features from './components/Features';
@@ -5,23 +6,29 @@ import HowItWorks from './components/HowItWorks';
 import Stats from './components/Stats';
 import Testimonials from './components/Testimonials';
 
+// Home page component
 export default function HomePage({ onViewChange, currentUser }) {
   return (
-    <>
-      {/* Hero Section */}
-      <Hero onGetStarted={() => onViewChange(currentUser ? 'contribute' : 'signup')} />
+    <div className="w-full flex flex-col items-center overflow-hidden">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        {/* Hero section */}
+        <Hero
+          onGetStarted={() => onViewChange(currentUser ? 'contribute' : 'signup')}
+          onLearnMore={() => onViewChange('library')}
+        />
 
-      {/* Features Grid Section */}
-      <Features onViewChange={onViewChange} />
+        {/* Features grid */}
+        <Features onViewChange={onViewChange} />
 
-      {/* How It Works Section */}
-      <HowItWorks onViewChange={onViewChange} />
+        {/* How it works */}
+        <HowItWorks onViewChange={onViewChange} />
 
-      {/* Statistics Banner */}
-      <Stats />
+        {/* Statistics banner */}
+        <Stats />
 
-      {/* Testimonials Section */}
-      <Testimonials />
-    </>
+        {/* Testimonials section */}
+        <Testimonials />
+      </div>
+    </div>
   );
 }

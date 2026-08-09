@@ -6,7 +6,6 @@ import ChatInput from './ChatInput';
 import ChatMessagesView from './ChatMessagesView';
 import VoiceAvatarModal from './VoiceAvatarModal';
 import ChatsView from './ChatsView';
-import SettingsView from './SettingsView';
 import { 
   checkBackendHealth, 
   sendChatMessage 
@@ -15,7 +14,9 @@ import {
   searchLocalStorage, 
   saveToLocalStorageCache, 
   getRecentChats, 
-  addRecentChat,
+  getSavedChatSessions,
+  getChatSessionById,
+  saveChatSession,
   deleteHistoryAndChat
 } from '../../../shared/services/localStorageService';
 
@@ -25,11 +26,24 @@ export default function AiModalContainer({ userProfile, onClose }) {
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [chatsList, setChatsList] = useState([]);
+  const [activeChatId, setActiveChatId] = useState(null);
   const [activeChatMessages, setActiveChatMessages] = useState(null);
   const [activeChatTitle, setActiveChatTitle] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [selectedModel, setSelectedModel] = useState('Instant');
   const [isBackendConnected, setIsBackendConnected] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Handle ESC key to exit fullscreen
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isFullscreen) {
+        setIsFullscreen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isFullscreen]);
 
   // Poll backend health status
   const checkHealth = async () => {
@@ -39,7 +53,7 @@ export default function AiModalContainer({ userProfile, onClose }) {
   };
 
   useEffect(() => {
-    setChatsList(getRecentChats());
+    setChatsList(getSavedChatSessions());
     checkHealth();
 
     const timer = setInterval(() => {
@@ -50,14 +64,30 @@ export default function AiModalContainer({ userProfile, onClose }) {
   }, []);
 
   const handleStartNewChat = () => {
+    setActiveChatId(null);
     setActiveChatMessages(null);
     setActiveChatTitle('');
     setActiveTab('home');
   };
 
+  const handleCloseModal = () => {
+    handleStartNewChat();
+    if (onClose) onClose();
+  };
+
   // Main Handle Send Message Pipeline
   const handleSendMessage = async (promptText, category = 'General') => {
     if (!promptText.trim()) return;
+
+    const currentSessionId = activeChatId || `chat_${Date.now()}`;
+    const currentTitle = activeChatTitle || (promptText.length > 32 ? promptText.substring(0, 32) + '...' : promptText);
+
+    if (!activeChatId) {
+      setActiveChatId(currentSessionId);
+    }
+    if (!activeChatTitle) {
+      setActiveChatTitle(currentTitle);
+    }
 
     const userMsg = {
       sender: 'user',
@@ -67,98 +97,109 @@ export default function AiModalContainer({ userProfile, onClose }) {
 
     const currentMessages = activeChatMessages ? [...activeChatMessages, userMsg] : [userMsg];
     setActiveChatMessages(currentMessages);
-    if (!activeChatTitle) setActiveChatTitle(promptText);
     setIsLoading(true);
 
-    // STEP 1: Search Local Storage Cache first for local context match
+    let aiMsg;
     const localCheck = searchLocalStorage(promptText);
-
-    // STEP 2: Execute Dual Check Backend API (Local Storage + Google Web Search)
     const apiResult = await sendChatMessage(promptText, category, localCheck);
 
     if (apiResult.success && apiResult.data) {
       const data = apiResult.data;
-      const aiMsg = {
+      aiMsg = {
         sender: 'ai',
         text: data.response || 'No response content returned.',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         category: data.category || category,
-        source: data.source || 'Dual Search (Local + Google)',
-        localMatch: data.local_match || (localCheck.found ? localCheck : null),
+        source: data.source || 'Dual Search (Setu Database + Google Web)',
+        sources: data.sources || ['Setu Knowledge Database', 'Google Search'],
+        databaseMatches: data.database_matches || [],
+        googleMatches: data.google_matches || [],
+        databaseMatch: data.database_match || null,
         googleMatch: data.google_match || null,
-        sources: data.sources || ['Local Storage', 'Google Search'],
+        localMatch: data.local_match || (localCheck.found ? localCheck : null),
         points: data.points || null,
         kerasMetadata: data.keras_metadata || null,
-        persona: data.persona || 'Wise Master'
+        persona: data.persona || 'Setu Knowledge Assistant'
       };
-
-      setActiveChatMessages(prev => [...prev, aiMsg]);
       saveToLocalStorageCache(promptText, aiMsg.text, aiMsg.category, data);
-      setChatsList(addRecentChat(promptText, aiMsg.category));
       setIsBackendConnected(true);
-      setIsLoading(false);
-      return;
-    }
-
-    // STEP 3: Fallback to Local Storage Cache if Backend is Offline or Failed
-    setIsBackendConnected(false);
-    const localResult = searchLocalStorage(promptText);
-
-    if (localResult.found) {
-      const cached = localResult.data;
-      const aiMsg = {
-        sender: 'ai',
-        text: cached.response,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        category: cached.category || category,
-        source: cached.source || 'Local Storage Cache (Offline)',
-        points: cached.points || null,
-        kerasMetadata: cached.kerasMetadata || null,
-        persona: cached.persona || 'Cached Knowledge'
-      };
-
-      setActiveChatMessages(prev => [...prev, aiMsg]);
-      setChatsList(addRecentChat(promptText, category));
     } else {
-      const fallbackText = `Here is the response for "${promptText}".`;
-      const fallbackAiMsg = {
-        sender: 'ai',
-        text: fallbackText,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        category,
-        source: 'Browser Local Synthesizer (Offline)'
-      };
+      setIsBackendConnected(false);
+      const localResult = searchLocalStorage(promptText);
 
-      setActiveChatMessages(prev => [...prev, fallbackAiMsg]);
-      saveToLocalStorageCache(promptText, fallbackText, category);
-      setChatsList(addRecentChat(promptText, category));
+      if (localResult.found) {
+        const cached = localResult.data;
+        aiMsg = {
+          sender: 'ai',
+          text: cached.response,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          category: cached.category || category,
+          source: cached.source || 'Local Storage Cache (Offline)',
+          points: cached.points || null,
+          kerasMetadata: cached.kerasMetadata || null,
+          persona: cached.persona || 'Cached Knowledge'
+        };
+      } else {
+        const fallbackText = `Here is the response for "${promptText}".`;
+        aiMsg = {
+          sender: 'ai',
+          text: fallbackText,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          category,
+          source: 'Browser Local Synthesizer (Offline)'
+        };
+        saveToLocalStorageCache(promptText, fallbackText, category);
+      }
     }
+
+    const finalMessages = [...currentMessages, aiMsg];
+    setActiveChatMessages(finalMessages);
+
+    const updatedChats = saveChatSession({
+      id: currentSessionId,
+      title: currentTitle,
+      category,
+      messages: finalMessages
+    });
+    setChatsList(updatedChats);
 
     setIsLoading(false);
   };
 
   const handleSelectRecentChat = (chat) => {
-    setActiveChatTitle(chat.title);
-    setActiveChatMessages([
-      {
-        sender: 'user',
-        text: `Open chat thread for "${chat.title}"`,
-        timestamp: chat.timestamp
-      },
-      {
-        sender: 'ai',
-        text: `Stored thread loaded for "${chat.title}".`,
-        source: 'Local Storage Cache',
-        timestamp: chat.timestamp,
-        points: [
-          { num: 1, text: `Topic: ${chat.title}` },
-          { num: 2, text: `Category: ${chat.category || 'General'}` }
-        ]
-      }
-    ]);
+    const fullSession = getChatSessionById(chat.id) || chat;
+    setActiveChatId(fullSession.id || chat.id);
+    setActiveChatTitle(fullSession.title || chat.title);
+
+    if (fullSession.messages && Array.isArray(fullSession.messages) && fullSession.messages.length > 0) {
+      setActiveChatMessages(fullSession.messages);
+    } else {
+      const initialMsgs = [
+        {
+          sender: 'user',
+          text: chat.title,
+          timestamp: chat.timestamp || 'Previous'
+        },
+        {
+          sender: 'ai',
+          text: `Loaded stored conversation thread for "${chat.title}".`,
+          source: 'Local Storage Cache',
+          timestamp: chat.timestamp || 'Previous'
+        }
+      ];
+      setActiveChatMessages(initialMsgs);
+      saveChatSession({
+        id: chat.id,
+        title: chat.title,
+        category: chat.category || 'General',
+        messages: initialMsgs
+      });
+      setChatsList(getSavedChatSessions());
+    }
   };
 
   const handleResetChatView = () => {
+    setActiveChatId(null);
     setActiveChatMessages(null);
     setActiveChatTitle('');
   };
@@ -166,7 +207,7 @@ export default function AiModalContainer({ userProfile, onClose }) {
   const handleDeleteRecentChat = (chatToDelete) => {
     const result = deleteHistoryAndChat(chatToDelete.id, chatToDelete.title);
     setChatsList(result.recentChats);
-    if (activeChatTitle === chatToDelete.title) {
+    if (activeChatId === chatToDelete.id || activeChatTitle === chatToDelete.title) {
       handleResetChatView();
     }
   };
@@ -205,15 +246,6 @@ export default function AiModalContainer({ userProfile, onClose }) {
             onNewChat={handleStartNewChat}
           />
         );
-      case 'settings':
-        return (
-          <SettingsView
-            darkMode={darkMode}
-            setDarkMode={setDarkMode}
-            isBackendConnected={isBackendConnected}
-            onRefreshBackendStatus={checkHealth}
-          />
-        );
       case 'home':
       default:
         return (
@@ -229,12 +261,17 @@ export default function AiModalContainer({ userProfile, onClose }) {
   };
 
   return (
-    <div className="w-full max-w-6xl h-[90vh] bg-[#f5f5f7] rounded-[32px] shadow-2xl border border-slate-200/80 flex overflow-hidden font-sans relative text-slate-800 selection:bg-orange-500 selection:text-white">
+    <div className={`flex overflow-hidden font-sans text-slate-800 selection:bg-orange-500 selection:text-white transition-all duration-300 ${
+      isFullscreen
+        ? 'fixed inset-0 z-50 w-screen h-screen max-w-none rounded-none shadow-none border-none'
+        : 'w-full max-w-6xl h-[90vh] bg-[#f5f5f7] rounded-[32px] shadow-2xl border border-slate-200/80 relative'
+    }`}>
       {/* Side Bar */}
       <Sidebar
         activeTab={activeTab}
         setActiveTab={(tab) => {
           setActiveTab(tab);
+          setActiveChatId(null);
           setActiveChatMessages(null);
         }}
         isOpen={isSidebarOpen}
@@ -254,7 +291,9 @@ export default function AiModalContainer({ userProfile, onClose }) {
           onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           activeChatTitle={activeChatTitle}
           isBackendConnected={isBackendConnected}
-          onClose={onClose}
+          onClose={handleCloseModal}
+          isFullscreen={isFullscreen}
+          onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
         />
 
         {/* Dynamic Views */}

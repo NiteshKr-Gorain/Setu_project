@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Mic, MicOff, Sparkles, Send, VolumeX, Video, Settings2, Globe } from 'lucide-react';
+import { X, Mic, MicOff, Sparkles, Send, VolumeX, Video, Globe } from 'lucide-react';
 
 const LOCAL_LANGUAGES = [
   { code: 'hi-IN', name: 'Hindi (हिंदी)', flag: '🇮🇳' },
@@ -386,13 +386,6 @@ export default function VoiceAvatarModal({ isOpen, onClose, onAskBackend }) {
 
           <div className="flex items-center gap-1 shrink-0">
             <button
-              onClick={() => setShowVoiceSettings(!showVoiceSettings)}
-              className="p-2 text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded-full transition-colors"
-              title="Voice Settings"
-            >
-              <Settings2 className="w-4 h-4" />
-            </button>
-            <button
               onClick={onClose}
               className="p-2 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-full transition-colors"
             >
@@ -400,62 +393,6 @@ export default function VoiceAvatarModal({ isOpen, onClose, onAskBackend }) {
             </button>
           </div>
         </div>
-
-        {/* Voice Customization Settings Drawer */}
-        {showVoiceSettings && (
-          <div className="w-full bg-orange-50/70 border border-orange-200 rounded-2xl p-3.5 mb-3 text-xs space-y-2.5">
-            <div className="flex items-center justify-between font-semibold text-orange-800">
-              <span>Voice Synthesis Settings</span>
-              <span className="text-[10px] text-orange-600 font-normal">{availableVoices.length} Voices Found</span>
-            </div>
-
-            {/* Voice Dropdown */}
-            {availableVoices.length > 0 && (
-              <div>
-                <label className="block text-[11px] font-medium text-slate-600 mb-1">Select System Voice:</label>
-                <select
-                  value={selectedVoiceIndex}
-                  onChange={(e) => setSelectedVoiceIndex(Number(e.target.value))}
-                  className="w-full bg-white border border-orange-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-orange-500"
-                >
-                  {availableVoices.map((v, i) => (
-                    <option key={i} value={i}>
-                      {v.name} ({v.lang})
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {/* Pitch & Rate Controls */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[11px] font-medium text-slate-600 mb-1">Speed: {speechRate.toFixed(1)}x</label>
-                <input
-                  type="range"
-                  min="0.5"
-                  max="1.5"
-                  step="0.1"
-                  value={speechRate}
-                  onChange={(e) => setSpeechRate(Number(e.target.value))}
-                  className="w-full accent-orange-500 cursor-pointer"
-                />
-              </div>
-              <div>
-                <label className="block text-[11px] font-medium text-slate-600 mb-1">Pitch: {speechPitch.toFixed(1)}</label>
-                <input
-                  type="range"
-                  min="0.5"
-                  max="1.5"
-                  step="0.1"
-                  value={speechPitch}
-                  onChange={(e) => setSpeechPitch(Number(e.target.value))}
-                  className="w-full accent-orange-500 cursor-pointer"
-                />
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* 60FPS Video Canvas Avatar Player */}
         <div className="relative flex flex-col items-center justify-center my-2 group">

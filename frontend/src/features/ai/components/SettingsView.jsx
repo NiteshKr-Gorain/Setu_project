@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Sun, Moon, Volume2, Database, Trash2, CheckCircle2, ShieldCheck, Cpu, Server, RefreshCw } from 'lucide-react';
 import { clearLocalStorageCache, clearRecentChats } from '../../../shared/services/localStorageService';
+import { ENV } from '../../../shared/config/env';
 
 export default function SettingsView({ darkMode, setDarkMode, isBackendConnected, onRefreshBackendStatus }) {
   const [clearedMsg, setClearedMsg] = useState('');
@@ -61,7 +62,7 @@ export default function SettingsView({ darkMode, setDarkMode, isBackendConnected
             <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 flex items-center justify-between">
               <div>
                 <p className="text-[11px] text-slate-400 font-medium">Server Endpoint</p>
-                <p className="text-xs font-mono text-slate-800 font-semibold">http://127.0.0.1:8000</p>
+                <p className="text-xs font-mono text-slate-800 font-semibold">{ENV.API_URL}</p>
               </div>
               <span className={`w-2.5 h-2.5 rounded-full ${isBackendConnected ? 'bg-orange-500 animate-pulse' : 'bg-amber-500'}`} />
             </div>

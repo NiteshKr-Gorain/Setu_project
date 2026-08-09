@@ -4,25 +4,38 @@ import potteryImg from '../../assets/pottery.png';
 import ayurvedicRemediesImg from '../../assets/ayurvedic_remedies.png';
 import milletRecipesImg from '../../assets/millet_recipes.jpg';
 import rainwaterHarvestingImg from '../../assets/rainwater_harvesting.jpg';
+import bambooCraftImg from '../../assets/bamboo_craft.png';
+import woodCarvingImg from '../../assets/wood_carving.png';
+import handloomWeavingImg from '../../assets/handloom_weaving.png';
+import neemPesticideImg from '../../assets/neem_pesticide.png';
+import compostMakingImg from '../../assets/compost_making.png';
+import dripIrrigationImg from '../../assets/drip_irrigation.png';
+import cropRotationImg from '../../assets/crop_rotation.png';
+import herbalPlantsImg from '../../assets/herbal_plants.png';
+import pickleMakingImg from '../../assets/pickle_making.jpg';
+import healthyDietImg from '../../assets/healthy_diet.png';
+import traditionalSkillsImg from '../../assets/traditional_skills.png';
+import solarIrrigationImg from '../../assets/solar_irrigation.jpg';
 import { CATEGORIES as BACKEND_CATEGORIES } from '../library/api/knowledgeApi';
 import * as mentorsApi from '../../shared/api/mentorsApi';
 
-// Initial verified stories
+// Initial verified community skill stories & traditional knowledge posts
 const initialStories = [
   {
     id: 1,
     userName: "Ramesh Kumar",
     role: "Elder",
-    contributorTitle: "Farmer",
+    contributorTitle: "Master Farmer",
     location: "Bihar",
     category: "Agriculture",
-    title: "🌱 Organic Farming Techniques",
+    title: "🌱 Organic Farming Techniques & Soil Biology",
     description: "Transitioning to organic farming methods using intercropping and natural bio-inputs has restored our soil biology. By planting legume crops alongside wheat, we naturally fix nitrogen. We completely avoid chemical urea. The soil texture is now dark, rich, and spongy, returning to its natural fertile state.",
     coverImage: organicFarmingImg,
     postedDate: "July 12, 2026",
-    likes: 38,
+    likes: 58,
     comments: [
-      { id: 1, author: "Amit Singh", text: "Truly inspiring Ramesh ji. We are trying to implement this in our village in UP too." }
+      { id: 1, author: "Amit Singh", text: "Truly inspiring Ramesh ji. We are trying to implement this in our village in UP too." },
+      { id: 2, author: "Gurpreet Kaur", text: "Our earthworm count doubled within 6 months using this legume rotation!" }
     ],
     traditionalMethod: "Intercropping beans and maize in a 1:2 row ratio, applying composted organic manure twice per cycle.",
     scientificExplanation: "Legume root nodules house Rhizobium bacteria which convert atmospheric nitrogen into bioavailable ammonium, enhancing crop nutrient absorption naturally.",
@@ -36,16 +49,17 @@ const initialStories = [
     id: 2,
     userName: "Sita Devi",
     role: "Expert",
-    contributorTitle: "Artisan",
+    contributorTitle: "Master Potter",
     location: "Rajasthan",
     category: "Traditional Skills",
-    title: "🏺 Traditional Pottery Making",
+    title: "🏺 Traditional Wheel Pottery & Evaporative Water Cooling",
     description: "Shaping river clay on a hand-spun stone potter's wheel is a meditation passed down through generations. Once centered, the hands pull and hollow the clay to shape porous water pots (matkas). These are then fired in straw-insulated kilns using dry leaves and wood. This traditional firing technique is vital for natural water cooling.",
     coverImage: potteryImg,
     postedDate: "July 14, 2026",
-    likes: 47,
+    likes: 67,
     comments: [
-      { id: 1, author: "Neha Patel", text: "The water stored in these clay pots tastes sweet and is incredibly cooling!" }
+      { id: 1, author: "Neha Patel", text: "The water stored in these clay pots tastes sweet and is incredibly cooling!" },
+      { id: 2, author: "Ananya Roy", text: "How many hours do you bake in the wood pit?" }
     ],
     traditionalMethod: "Wedging alluvial silt clay to remove air bubbles, centering on a heavy wheel, and wood pit kiln baking at 800°C.",
     scientificExplanation: "Wood firing creates micro-porosity in the clay walls, which facilitates slow evaporative cooling of stored drinking water.",
@@ -57,17 +71,19 @@ const initialStories = [
   },
   {
     id: 3,
-    userName: "Dr. Sharma",
+    userName: "Dr. Madhavan",
     role: "Expert",
-    contributorTitle: "Ayurvedic Expert",
+    contributorTitle: "Ayurvedic Physician",
     location: "Kerala",
     category: "Health",
-    title: "🌿 Ayurvedic Home Remedy for Cold",
+    title: "🌿 Ayurvedic Home Remedy for Cold & Respiratory Relief (Kashayam)",
     description: "An age-old herbal tea (Kashayam) recipe to relieve cold, dry cough, and seasonal congestion. By boiling fresh ginger root, holy basil (Tulsi) leaves, black pepper, and licorice bark, we create a soothing brew that clears blockages and boosts respiratory health naturally.",
     coverImage: ayurvedicRemediesImg,
     postedDate: "July 15, 2026",
-    likes: 54,
-    comments: [],
+    likes: 74,
+    comments: [
+      { id: 1, author: "Dr. Ankit", text: "The proportion of black pepper and ginger is critical for bioavailability." }
+    ],
     traditionalMethod: "Boiling 5-6 crushed Tulsi leaves, a slice of ginger, and 3 black peppercorns in 1 cup water until halved, sweetening with raw honey when warm.",
     scientificExplanation: "Ginger contains active gingerols with anti-inflammatory properties, Tulsi has immunomodulatory terpenes, and licorice acts as a demulcent to soothe throat irritation.",
     benefits: "Clears respiratory phlegm, reduces throat soreness, and strengthens immunity without synthetic pills.",
@@ -80,14 +96,14 @@ const initialStories = [
     id: 4,
     userName: "Savitri Devi",
     role: "Elder",
-    contributorTitle: "Homemaker",
+    contributorTitle: "Nutritional Elder",
     location: "Tamil Nadu",
     category: "Recipes",
-    title: "🍲 Traditional Millet Recipe",
+    title: "🍲 Sprouted Finger Millet Porridge (Ragi Ambali Superfood)",
     description: "Sharing our family recipe for Sprouted Finger Millet (Ragi) porridge. Sprouting the Ragi seeds overnight increases their nutritional content. We then sun-dry, roast, and grind them into flour. Boiled with water and diluted with buttermilk and green chilies, it makes a nutrient-rich breakfast.",
     coverImage: milletRecipesImg,
     postedDate: "July 16, 2026",
-    likes: 29,
+    likes: 49,
     comments: [
       { id: 1, author: "Rahul Dev", text: "Perfect breakfast drink for hot summers! Easy to digest too." }
     ],
@@ -101,16 +117,16 @@ const initialStories = [
   },
   {
     id: 5,
-    userName: "Village Community",
-    role: "Student",
-    contributorTitle: "Community",
+    userName: "Village Watershed Collective",
+    role: "Expert",
+    contributorTitle: "Hydrology Keepers",
     location: "Gujarat",
     category: "Technology",
-    title: "💧 Rainwater Harvesting in Villages",
+    title: "💧 Dry-Stone Check Dams (Bori Bandh) & Aquifer Recharge",
     description: "Our village restored two ancient rainwater check dams (boris) to capture monsoon runoff. This gravity-fed design redirects surface water into dry brick-lined wells, replenishing our shallow water table. We have managed to raise the groundwater level by 4 meters, securing our village well water for the dry seasons.",
     coverImage: rainwaterHarvestingImg,
     postedDate: "July 10, 2026",
-    likes: 62,
+    likes: 82,
     comments: [
       { id: 1, author: "Siddharth Rajan", text: "This is a great example of combining community effort with ecological engineering." }
     ],
@@ -121,18 +137,271 @@ const initialStories = [
     isLiked: false,
     isBookmarked: false,
     connectionStatus: "none"
+  },
+  {
+    id: 6,
+    userName: "Tenzing Norbu",
+    role: "Expert",
+    contributorTitle: "Bamboo Architect",
+    location: "Assam",
+    category: "Traditional Skills",
+    title: "🎋 Earthquake-Resilient Bamboo Joinery & Living Bridges",
+    description: "In our northeastern hills, bamboo construction has withstood major seismic tremors for centuries. We cure culms of mature Bambusa balcooa in running river water to leach out fermentable sugars, preventing borer beetles. Using mortise-and-tenon rattan lashings without iron nails allows the structures to flex harmoniously with earth vibrations.",
+    coverImage: bambooCraftImg,
+    postedDate: "July 18, 2026",
+    likes: 53,
+    comments: [
+      { id: 1, author: "Arjun Barua", text: "The flexibility of river-cured bamboo is unbelievable during high winds!" }
+    ],
+    traditionalMethod: "Harvesting mature 3-year bamboo during waning moon, water soaking for 21 days, and flame-straightening with herbal smoke.",
+    scientificExplanation: "Removing free starch starves beetle larvae, while high natural tensile strength (comparable to structural steel) absorbs dynamic seismic shear forces.",
+    benefits: "Carbon-negative housing, zero cement dependence, 30+ year lifespan, and 100% natural thermal insulation.",
+    precautions: "Keep bamboo footing 18 inches elevated on river stone pillars to avoid capillary soil dampness.",
+    isLiked: false,
+    isBookmarked: false,
+    connectionStatus: "none"
+  },
+  {
+    id: 7,
+    userName: "Master S. Muthukumar",
+    role: "Elder",
+    contributorTitle: "Heritage Wood Sculptor",
+    location: "Tamil Nadu",
+    category: "Traditional Skills",
+    title: "🪵 Ancient Teak Wood Carving & Temple Relief Restoration",
+    description: "Carving intricate architectural temple panels from seasoned country teak (Tectona grandis). By following the traditional Shilpa Shastra geometry, we shape relief figures using 32 specialized hand chisels. The finished carvings are protected with cold-pressed linseed oil and pure beeswax, creating a protective patina that lasts for centuries.",
+    coverImage: woodCarvingImg,
+    postedDate: "July 20, 2026",
+    likes: 61,
+    comments: [
+      { id: 1, author: "K. Natarajan", text: "The depth and expression on the temple door panels are pure mastery." }
+    ],
+    traditionalMethod: "Using naturally air-seasoned country teak, tracing with charcoal on tracing cloth, and hand-carving along grain orientation.",
+    scientificExplanation: "High natural tectoquinone content in heartwood resists white ants and fungal rot without any toxic synthetic chemical lacquers.",
+    benefits: "Preserves ancient architectural heritage, creates lifelong heirlooms, and uses zero toxic fumes.",
+    precautions: "Always carve with the wood grain, never across the grain, to prevent fiber tear-out.",
+    isLiked: false,
+    isBookmarked: false,
+    connectionStatus: "none"
+  },
+  {
+    id: 8,
+    userName: "Radha Bai",
+    role: "Expert",
+    contributorTitle: "Master Weaver",
+    location: "Madhya Pradesh",
+    category: "Traditional Skills",
+    title: "🧵 Natural Indigo Dyeing & Handloom Cotton Weaving",
+    description: "Weaving breathable gossamer Chanderi cotton using authentic fermented indigo vats. The raw cotton yarn is hand-spun on charkhas and sized with fermented rice starch (Maandi). We submerge the yarn in ancestral vats fed with wood ash lye and jaggery. The green fabric turns into rich royal indigo only when exposed to atmospheric oxygen.",
+    coverImage: handloomWeavingImg,
+    postedDate: "July 22, 2026",
+    likes: 72,
+    comments: [
+      { id: 1, author: "Meera Sen", text: "The fabric feels like a cool second skin in 45°C summer heat!" }
+    ],
+    traditionalMethod: "Fermenting Indigofera tinctoria leaves with lime and jaggery in terracotta cisterns, hand-dipping yarn 8 times.",
+    scientificExplanation: "Leuco-indigo in the reduced alkaline vat oxidizes upon contact with ambient O₂ into insoluble indigotin pigment locked deep in cellulose fibers.",
+    benefits: "Zero chemical wastewater, protects artisan skin health, and creates thermally adaptive breathable fabric.",
+    precautions: "Keep the indigo vat strictly anaerobic during resting hours to prevent premature surface scum oxidation.",
+    isLiked: false,
+    isBookmarked: false,
+    connectionStatus: "none"
+  },
+  {
+    id: 9,
+    userName: "Kavita Deshmukh",
+    role: "Expert",
+    contributorTitle: "Natural Farming Pioneer",
+    location: "Maharashtra",
+    category: "Agriculture",
+    title: "🍃 Neem-Karanj Natural Bio-Pesticide (Neemastra Formulation)",
+    description: "Protecting our pomegranate and cotton crops from sucking pests and caterpillars using 100% farm-sourced Neemastra. We crush fresh neem leaves, karanj seeds, and green chilies in aged cow urine. After 48 hours of shade fermentation, this extract repels bollworms, aphids, and whiteflies without killing honeybees or beneficial ladybird beetles.",
+    coverImage: neemPesticideImg,
+    postedDate: "July 24, 2026",
+    likes: 89,
+    comments: [
+      { id: 1, author: "Subhash Patel", text: "Saved me Rs 18,000 in synthetic sprays on my 4-acre cotton plot!" }
+    ],
+    traditionalMethod: "Crushing 5kg neem leaves + 2kg karanj leaves in 10 liters desi cow urine; stirring clockwise twice daily for 2 days.",
+    scientificExplanation: "Azadirachtin acts as an anti-feedant and disrupts insect ecdysis (molting), while capsaicin in chili repels larval borers naturally.",
+    benefits: "Zero chemical pesticide residue in food, saves thousands in farm input costs, and protects beneficial pollinator insects.",
+    precautions: "Always filter thoroughly with double muslin cloth to prevent nozzle clogging in sprayers; apply in late evening.",
+    isLiked: false,
+    isBookmarked: false,
+    connectionStatus: "none"
+  },
+  {
+    id: 10,
+    userName: "Balwinder Singh",
+    role: "Elder",
+    contributorTitle: "Organic Soil Scientist",
+    location: "Punjab",
+    category: "Agriculture",
+    title: "🪱 Aerobic Jeevamrutha Microbial Soil Catalyst (Bio-Fermentation)",
+    description: "Rebuilding dead alkaline farm soil into a living ecosystem using Jeevamrutha. A single gram of fresh desi cow dung contains hundreds of millions of beneficial microbes. Fermenting it for 48 hours with black jaggery, chickpea flour, and virgin forest soil multiplies these colonies exponentially. When applied, earthworms return within 3 weeks.",
+    coverImage: compostMakingImg,
+    postedDate: "July 26, 2026",
+    likes: 95,
+    comments: [
+      { id: 1, author: "Harpreet Singh", text: "Our soil pH dropped from 8.6 to 7.2 over 2 seasons using Jeevamrutha!" }
+    ],
+    traditionalMethod: "200L water + 10kg fresh cow dung + 10L cow urine + 2kg jaggery + 2kg besan + handful virgin soil; ferment in shade for 72h.",
+    scientificExplanation: "Exponential logarithmic microbial bloom produces plant-available humic acids and solubilizes locked insoluble soil phosphorus.",
+    benefits: "Eliminates synthetic NPK fertilizers, increases soil water-holding capacity by 40%, and revives native earthworm populations.",
+    precautions: "Must be used within 7 to 10 days of preparation while microbial colonies are actively vigorous.",
+    isLiked: false,
+    isBookmarked: false,
+    connectionStatus: "none"
+  },
+  {
+    id: 11,
+    userName: "Parvati Bai",
+    role: "Elder",
+    contributorTitle: "Culinary Heritage Keeper",
+    location: "Uttar Pradesh",
+    category: "Recipes",
+    title: "🥒 Ancestral Sun-Cured Raw Mango Pickle with Cold-Pressed Mustard Oil",
+    description: "Preserving raw country mangoes (Desi Kairi) using solar heat, Himalayan rock salt, and cold-pressed mustard oil. Our grandmothers taught us to toss the mango chunks in rock salt for 48 hours to draw out moisture, followed by 8 hours of sun drying on clean cotton cloth. Stored in ceramic Martaban jars, it stays fresh for 4+ years without preservatives.",
+    coverImage: pickleMakingImg,
+    postedDate: "July 27, 2026",
+    likes: 64,
+    comments: [
+      { id: 1, author: "Sunita Verma", text: "The ceramic Martaban jar is the real secret to preventing oil rancidity!" }
+    ],
+    traditionalMethod: "Salting mango cubes in clay urn, sun-drying for 8 hours, roasting fenugreek and fennel, packing tightly in oil-sealed Martaban jars.",
+    scientificExplanation: "High osmotic pressure from rock salt and antimicrobial allyl isothiocyanates in cold-pressed mustard oil prevent fungal and bacterial spore germination.",
+    benefits: "Provides live natural probiotics for gut flora, zero chemical preservatives or synthetic vinegar, and zero post-harvest fruit waste.",
+    precautions: "Never allow moisture or wet spoons into the jar; moisture breaks the sterile lipid seal and causes surface white mold.",
+    isLiked: false,
+    isBookmarked: false,
+    connectionStatus: "none"
+  },
+  {
+    id: 12,
+    userName: "Madan Lal",
+    role: "Expert",
+    contributorTitle: "Desert Hydrologist",
+    location: "Rajasthan",
+    category: "Technology",
+    title: "☀️ Clay Pitcher Sub-Surface Drip Irrigation (Ghara Sinchai)",
+    description: "Farming vegetables in the arid Thar Desert with 80% less water using unglazed earthen pitchers buried up to their necks between crop rows. As the surrounding soil dries, clay micro-pores slowly release moisture directly to plant roots through natural soil matric suction. Zero evaporative water loss under midday desert sun.",
+    coverImage: dripIrrigationImg,
+    postedDate: "July 28, 2026",
+    likes: 78,
+    comments: [
+      { id: 1, author: "Ghanshyam Gurjar", text: "We grew lush gourds and tomatoes in the middle of 48°C summer with just 1 pitcher per 4 plants." }
+    ],
+    traditionalMethod: "Burying unglazed 15-liter terracotta pots in soil beds, filling with water, and covering with inverted clay lids.",
+    scientificExplanation: "Soil moisture tension gradient pulls water through porous clay walls automatically when soil is dry and halts when soil is saturated.",
+    benefits: "Saves 80% water compared to surface flooding, prevents weed growth between rows, and requires zero electricity or plastic drip pipes.",
+    precautions: "Cover pitcher openings tightly with clay lids to prevent mosquito breeding and dust contamination.",
+    isLiked: false,
+    isBookmarked: false,
+    connectionStatus: "none"
+  },
+  {
+    id: 13,
+    userName: "Govindappa",
+    role: "Elder",
+    contributorTitle: "Native Seed Conservationist",
+    location: "Karnataka",
+    category: "Agriculture",
+    title: "🌾 Navadanya 9-Crop Intercropping & Soil Moisture Conservation",
+    description: "Practicing the ancient Navadanya (Nine Seeds) agro-ecological system on our rainfed farm. By sowing a harmonious blend of cereals (millets), pulses (pigeon pea, cowpea), oilseeds (sesame), and fiber crops simultaneously, the field acts as a self-balancing ecosystem. If monsoon rains are delayed, drought-hardy millets still thrive.",
+    coverImage: cropRotationImg,
+    postedDate: "July 29, 2026",
+    likes: 85,
+    comments: [
+      { id: 1, author: "Dr. K. Swaminathan", text: "This multi-canopy system provides complete insurance against erratic monsoon climate changes." }
+    ],
+    traditionalMethod: "Mixing 9 traditional desi seeds in balanced ratios, sowing with indigenous wooden bullock ploughs in concentric rows.",
+    scientificExplanation: "Multi-layered root depths (shallow millet roots + deep taproot pulses) access different soil moisture strata without nutrient competition.",
+    benefits: "Guarantees crop yield even during severe drought, prevents total farm failure, and continuously enriches soil nitrogen.",
+    precautions: "Ensure seed germination rates are tested before mixing to maintain optimal crop density.",
+    isLiked: false,
+    isBookmarked: false,
+    connectionStatus: "none"
+  },
+  {
+    id: 14,
+    userName: "Vaidya Laxmi",
+    role: "Expert",
+    contributorTitle: "Himalayan Herbalist",
+    location: "Uttarakhand",
+    category: "Health",
+    title: "🪴 Cultivating Sacred Himalayan Herbs (Ashwagandha & Brahmi Garden)",
+    description: "Growing high-potency medicinal botanicals in high-altitude organic terraced beds. We cultivate Ashwagandha (Withania somnifera) in well-drained sandy loam soil fertilized with decomposed pine needle mulch and wood ash. Harvesting roots during the post-monsoon dormant phase maximizes active withanolide alkaloid concentrations.",
+    coverImage: herbalPlantsImg,
+    postedDate: "July 30, 2026",
+    likes: 71,
+    comments: [
+      { id: 1, author: "Alok Joshi", text: "The root aroma from mountain-grown Ashwagandha is far stronger than commercial greenhouse varieties." }
+    ],
+    traditionalMethod: "Sowing seeds during late monsoon on raised terrace beds, weeding manually, and harvesting 150-day roots in dry winter.",
+    scientificExplanation: "Moderate moisture stress in well-drained soils triggers secondary metabolite synthesis, increasing withanolide A & B adaptogens.",
+    benefits: "Produces certified therapeutic-grade Ayurvedic herbs, supports mountain women collectives, and preserves endangered native flora.",
+    precautions: "Avoid waterlogged clay soils which cause root rot within 48 hours; dry harvested roots in shade.",
+    isLiked: false,
+    isBookmarked: false,
+    connectionStatus: "none"
+  },
+  {
+    id: 15,
+    userName: "Birsa Munda Tribal Collective",
+    role: "Expert",
+    contributorTitle: "Forest Wisdom Keepers",
+    location: "Jharkhand",
+    category: "Traditional Skills",
+    title: "🍯 Non-Destructive Wild Forest Honey Harvesting (Apis dorsata)",
+    description: "Harvesting pure wild forest honey from giant rock bees (Apis dorsata) without burning nests or killing bees. Using sacred herbal smoke made from dried Shorea robusta (Sal) leaves and lemongrass, bees are gently calmed and moved aside. We cut only the outer honeycomb surplus, leaving the brood comb completely intact for colony survival.",
+    coverImage: traditionalSkillsImg,
+    postedDate: "July 31, 2026",
+    likes: 93,
+    comments: [
+      { id: 1, author: "Hemant Soren", text: "This sustainable method ensures bee colonies return to the same cliff year after year!" }
+    ],
+    traditionalMethod: "Harvesting at twilight using cool herbal smoke, climbing with wild vine ropes, and cutting only honey reserve combs.",
+    scientificExplanation: "Sal resin smoke contains natural terpenes that tranquilize guard bees without triggering alarm pheromone (isopentyl acetate) defense attacks.",
+    benefits: "Safeguards forest wild bee colonies, produces raw medicinal enzyme-rich forest honey, and provides ethical tribal livelihoods.",
+    precautions: "Never harvest during rainy periods; always leave minimum 40% of honey reserves for the bee brood.",
+    isLiked: false,
+    isBookmarked: false,
+    connectionStatus: "none"
+  },
+  {
+    id: 16,
+    userName: "Anand Varma",
+    role: "Expert",
+    contributorTitle: "Eco-Architect",
+    location: "Himachal Pradesh",
+    category: "Technology",
+    title: "🧱 Rammed Earth & Cob Sustainable Eco-Housing Architecture",
+    description: "Constructing thermally comfortable mountain homes using local subsoil, river sand, straw, and natural lime. By ramming earth in wooden formwork, we create 18-inch thick high-mass walls that absorb solar warmth during sunny mountain days and radiate it back inside during freezing winter nights. Zero cement, zero steel.",
+    coverImage: solarIrrigationImg,
+    postedDate: "August 2, 2026",
+    likes: 88,
+    comments: [
+      { id: 1, author: "Kunal Pathak", text: "The indoor temperature stays an incredible 21°C even when it is -2°C outside in winter!" }
+    ],
+    traditionalMethod: "Mixing 70% subsoil + 15% sand + 15% clay with wheat straw and cow dung; pneumatic or wooden pestle ramming into wooden shutters.",
+    scientificExplanation: "High thermal inertia creates a 10-to-12 hour thermal lag, balancing extreme diurnal temperature swings naturally.",
+    benefits: "90% reduction in building embodied energy, zero air conditioning needed, 100% recyclable, and naturally breathable indoor air.",
+    precautions: "Provide deep roof eaves (chhajjas) to protect exterior raw earth walls from direct monsoon rain splashes.",
+    isLiked: false,
+    isBookmarked: false,
+    connectionStatus: "none"
   }
 ];
 
 const categories = [
+  'All',
   'Agriculture',
   'Health',
   'Traditional Skills',
-  'Education',
+  'Recipes',
   'Technology',
-  'Culture',
-  'Finance',
-  'Recipes'
+  'Education',
+  'Culture'
 ];
 
 export default function CommunityPage({ userProfile }) {
@@ -431,6 +700,30 @@ export default function CommunityPage({ userProfile }) {
         </div>
       )}
 
+      {/* Floating Right-Side Icon Button for Share Heritage Knowledge */}
+      <div className="fixed bottom-24 right-6 z-40 flex items-center group">
+        {/* Tooltip on hover */}
+        <div className="absolute right-16 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-300 transform translate-x-2 group-hover:translate-x-0 whitespace-nowrap bg-slate-900/90 backdrop-blur-md text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow-xl border border-slate-700/50 flex items-center space-x-2">
+          <span className="w-2 h-2 rounded-full bg-blue-400 animate-ping"></span>
+          <span>Share Heritage Knowledge</span>
+        </div>
+
+        {/* Ambient Ring Glow */}
+        <div className="absolute -inset-1.5 bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-500 rounded-full blur-md opacity-60 group-hover:opacity-100 group-hover:blur-lg transition-all duration-300 animate-pulse pointer-events-none"></div>
+
+        {/* Main Floating Round Icon Button */}
+        <button
+          id="floating-share-heritage-button"
+          onClick={() => setShowShareModal(true)}
+          aria-label="Share Heritage Knowledge"
+          title="Share Heritage Knowledge"
+          className="relative w-14 h-14 rounded-full bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700 text-white shadow-xl shadow-blue-500/30 hover:shadow-2xl hover:shadow-blue-500/50 flex items-center justify-center border-2 border-white/40 transform hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer overflow-hidden text-2xl"
+        >
+          <div className="absolute inset-0 bg-white/20 rounded-full opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+          <span className="drop-shadow-md transition-transform duration-300 group-hover:rotate-12">✍️</span>
+        </button>
+      </div>
+
       {/* AI Summary Modal Overlay */}
       {summaryPost && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
@@ -512,6 +805,7 @@ export default function CommunityPage({ userProfile }) {
                 <img
                   src={readMorePost.coverImage}
                   alt={readMorePost.title}
+                  loading="lazy"
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -522,6 +816,7 @@ export default function CommunityPage({ userProfile }) {
                     <img
                       src={readMorePost.profilePic}
                       alt={readMorePost.userName}
+                      loading="lazy"
                       className="w-8 h-8 rounded-full object-cover"
                     />
                   )}
@@ -690,6 +985,7 @@ export default function CommunityPage({ userProfile }) {
                   <img
                     src={postImageUrl}
                     alt="Preview"
+                    loading="lazy"
                     className="w-full h-32 object-cover rounded-xl mt-2 border border-slate-100"
                   />
                 )}
@@ -723,6 +1019,7 @@ export default function CommunityPage({ userProfile }) {
               <img
                 src={activeChatUser.avatar}
                 alt={activeChatUser.name}
+                loading="lazy"
                 className="w-8 h-8 rounded-full object-cover border border-white/20"
               />
               <div className="text-left">
@@ -850,38 +1147,12 @@ export default function CommunityPage({ userProfile }) {
         </div>
       </div>
 
-      {/* Main Grid: Feed and Sidebar */}
+      {/* Main Feed */}
       <div className="max-w-7xl mx-auto px-6 md:px-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="space-y-6">
 
-          {/* Main Feed Column (8 grid width) */}
-          <div className="lg:col-span-8 space-y-6">
-
-            {/* Share Knowledge Trigger Card */}
-            <div className="bg-white rounded-3xl border border-slate-100 p-6 text-left shadow-xs flex items-center justify-between gap-4">
-              <div className="flex items-center space-x-3 flex-grow">
-                <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm border border-blue-100">
-                  ✍️
-                </div>
-                <div className="flex-grow">
-                  <button
-                    onClick={() => setShowShareModal(true)}
-                    className="w-full text-left bg-slate-50 hover:bg-slate-100 border border-slate-200/60 text-slate-400 hover:text-slate-500 text-xs px-4 py-3 rounded-2xl focus:outline-none transition-all cursor-pointer font-medium"
-                  >
-                    Share knowledge, recipes, or traditional crafts...
-                  </button>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowShareModal(true)}
-                className="px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-2xl transition-all flex items-center space-x-1.5 cursor-pointer shadow-sm shadow-blue-500/10"
-              >
-                <span>Post</span>
-              </button>
-            </div>
-
-            {/* Category Filter and Search widgets */}
-            <div className="bg-white rounded-3xl border border-slate-100 p-6 text-left shadow-xs space-y-5">
+          {/* Category Filter and Search widgets */}
+          <div className="bg-white rounded-3xl border border-slate-100 p-6 text-left shadow-xs space-y-5">
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-grow flex items-center bg-slate-50 border border-slate-200/50 rounded-2xl p-1.5 focus-within:bg-white focus-within:border-blue-300 focus-within:ring-2 focus-within:ring-blue-100/50 transition-all duration-300">
                   <span className="pl-3 text-slate-400">🔍</span>
@@ -925,218 +1196,212 @@ export default function CommunityPage({ userProfile }) {
               </div>
             </div>
 
-            {/* Stories List */}
-            <div className="space-y-8">
+            {/* Stories List - Responsive Grid & Compact Post Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredStories.map((story) => (
                 <div
                   key={story.id}
-                  className="bg-white rounded-3xl border border-slate-100 shadow-xs overflow-hidden flex flex-col text-left transition-all duration-300 hover:shadow-sm"
+                  className="bg-white rounded-2xl border border-slate-100 shadow-xs overflow-hidden flex flex-col justify-between text-left transition-all duration-300 hover:shadow-md hover:border-slate-200"
                 >
-                  {/* Header: User, Location, Connections Button */}
-                  <div className="p-5 flex items-center justify-between border-b border-slate-50">
-                    <div className="flex items-center space-x-3">
-                      {story.profilePic ? (
-                        <img
-                          src={story.profilePic}
-                          alt={story.userName}
-                          className="w-10 h-10 rounded-full object-cover border border-slate-100"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-400 text-sm">
-                          {story.userName.charAt(0)}
+                  <div>
+                    {/* Header: User, Location, Connections Button */}
+                    <div className="p-3.5 sm:p-4 flex items-center justify-between border-b border-slate-50 gap-2">
+                      <div className="flex items-center space-x-2.5 min-w-0">
+                        {story.profilePic ? (
+                          <img
+                            src={story.profilePic}
+                            alt={story.userName}
+                            loading="lazy"
+                            className="w-8 h-8 rounded-full object-cover border border-slate-100 shrink-0"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-400 text-xs shrink-0">
+                            {story.userName.charAt(0)}
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <div className="flex items-center space-x-1.5">
+                            <span className="text-xs font-bold text-slate-900 truncate">{story.userName}</span>
+                            <span className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-md font-semibold shrink-0">{story.role}</span>
+                          </div>
+                          <p className="text-[10px] font-semibold text-slate-400 truncate">
+                            {story.contributorTitle} • {story.location}
+                          </p>
                         </div>
-                      )}
-                      <div>
-                        <div className="flex items-center space-x-1.5">
-                          <span className="text-sm font-bold text-slate-900">{story.userName}</span>
-                          <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-md font-semibold">{story.role}</span>
-                        </div>
-                        <p className="text-[10px] font-semibold text-slate-400">
-                          {story.contributorTitle} • {story.location}
-                        </p>
                       </div>
-                    </div>
 
-                    <div className="flex items-center space-x-2">
-                      {userProfile && userProfile.name !== story.userName && (
-                        <>
-                          {story.connectionStatus === 'none' && (
-                            <button
-                              onClick={() => handleConnectRequest(story.userName)}
-                              className="px-3.5 py-1.5 border border-blue-200 text-blue-600 hover:bg-blue-50 text-[10px] font-bold rounded-xl transition-all cursor-pointer"
-                            >
-                              Connect
-                            </button>
-                          )}
-                          {story.connectionStatus === 'pending' && (
-                            <span className="px-3.5 py-1.5 border border-slate-200 text-slate-400 text-[10px] font-bold rounded-xl bg-slate-50 select-none">
-                              Requested
-                            </span>
-                          )}
-                          {story.connectionStatus === 'incoming' && (
-                            <button
-                              onClick={() => handleAcceptRequest(story.userName)}
-                              className="px-3.5 py-1.5 bg-orange-500 hover:bg-orange-650 text-white text-[10px] font-bold rounded-xl transition-all cursor-pointer shadow-3xs"
-                            >
-                              Accept Request
-                            </button>
-                          )}
-                          {story.connectionStatus === 'connected' && (
-                            <button
-                              onClick={() => setActiveChatUser({
-                                name: story.userName,
-                                avatar: story.profilePic || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&h=150&q=80",
-                                role: story.role,
-                                location: story.location
-                              })}
-                              className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold rounded-xl transition-all cursor-pointer shadow-3xs flex items-center space-x-1"
-                            >
-                              <span>💬</span>
-                              <span>Message</span>
-                            </button>
-                          )}
-                        </>
-                      )}
+                      <div className="flex items-center space-x-1.5 shrink-0">
+                        {userProfile && userProfile.name !== story.userName && (
+                          <>
+                            {story.connectionStatus === 'none' && (
+                              <button
+                                onClick={() => handleConnectRequest(story.userName)}
+                                className="px-2.5 py-1 border border-blue-200 text-blue-600 hover:bg-blue-50 text-[10px] font-bold rounded-lg transition-all cursor-pointer"
+                              >
+                                Connect
+                              </button>
+                            )}
+                            {story.connectionStatus === 'pending' && (
+                              <span className="px-2.5 py-1 border border-slate-200 text-slate-400 text-[10px] font-bold rounded-lg bg-slate-50 select-none">
+                                Requested
+                              </span>
+                            )}
+                            {story.connectionStatus === 'incoming' && (
+                              <button
+                                onClick={() => handleAcceptRequest(story.userName)}
+                                className="px-2.5 py-1 bg-orange-500 hover:bg-orange-650 text-white text-[10px] font-bold rounded-lg transition-all cursor-pointer shadow-3xs"
+                              >
+                                Accept
+                              </button>
+                            )}
+                            {story.connectionStatus === 'connected' && (
+                              <button
+                                onClick={() => setActiveChatUser({
+                                  name: story.userName,
+                                  avatar: story.profilePic || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&h=150&q=80",
+                                  role: story.role,
+                                  location: story.location
+                                })}
+                                className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold rounded-lg transition-all cursor-pointer shadow-3xs flex items-center space-x-1"
+                              >
+                                <span>💬</span>
+                                <span className="hidden sm:inline">Message</span>
+                              </button>
+                            )}
+                          </>
+                        )}
 
-                      <div className="text-right">
                         <span className="px-2 py-0.5 bg-slate-50 border border-slate-200/50 rounded-md text-[8px] font-bold text-slate-400 uppercase tracking-wide">
                           {story.category}
                         </span>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Cover photo */}
-                  <div className="relative aspect-video w-full overflow-hidden bg-slate-50 border-b border-slate-50">
-                    <img
-                      src={story.coverImage}
-                      alt={story.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-
-                  {/* Text contents */}
-                  <div className="p-6 space-y-2">
-                    <span className="text-[10px] text-slate-400 font-semibold">{story.postedDate}</span>
-                    <h3 className="text-md font-bold text-slate-900 leading-snug">{story.title}</h3>
-                    <p className="text-slate-600 text-xs leading-relaxed font-normal">{story.description}</p>
-                  </div>
-
-                  {/* Action controls row */}
-                  <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
-                    <div className="flex items-center space-x-1 sm:space-x-2">
-                      <button
-                        onClick={() => handleLike(story.id)}
-                        className={`flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${story.isLiked ? 'bg-red-50 text-red-650' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-600'
-                          }`}
-                      >
-                        <span>❤️</span>
-                        <span>{story.likes}</span>
-                      </button>
-                      <button
-                        onClick={() => handleCommentToggle(story.id)}
-                        className={`flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${visibleComments[story.id] ? 'bg-blue-50 text-blue-600' : 'text-slate-400 hover:bg-slate-100'
-                          }`}
-                      >
-                        <span>💬</span>
-                        <span>{story.comments.length}</span>
-                      </button>
-                      <button
-                        onClick={() => handleBookmark(story.id)}
-                        className={`p-1.5 rounded-lg transition-all cursor-pointer ${story.isBookmarked ? 'bg-amber-50 text-amber-600' : 'text-slate-400 hover:bg-slate-100'
-                          }`}
-                        title="Bookmark"
-                      >
-                        <span>🔖</span>
-                      </button>
-                      <button
-                        onClick={() => handleShare(story.id)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 transition-all cursor-pointer"
-                        title="Share"
-                      >
-                        <span>📤</span>
-                      </button>
+                    {/* Cover photo - Compact aspect ratio */}
+                    <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-50 border-b border-slate-50">
+                      <img
+                        src={story.coverImage}
+                        alt={story.title}
+                        loading="lazy"
+                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                      />
                     </div>
 
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => setSummaryPost(story)}
-                        className="px-3 py-1.5 bg-orange-50 hover:bg-orange-100 text-orange-650 text-[10px] font-bold rounded-lg transition-all cursor-pointer flex items-center space-x-1"
-                      >
-                        <span>🤖</span>
-                        <span>AI Summary</span>
-                      </button>
-                      <button
+                    {/* Text contents */}
+                    <div className="p-4 space-y-2">
+                      <span className="text-[10px] text-slate-400 font-semibold">{story.postedDate}</span>
+                      <h3
                         onClick={() => setReadMorePost(story)}
-                        className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-650 text-[10px] font-bold rounded-lg transition-all cursor-pointer"
+                        className="text-sm font-bold text-slate-900 leading-snug line-clamp-2 hover:text-blue-600 cursor-pointer transition-colors"
                       >
-                        Read More
-                      </button>
+                        {story.title}
+                      </h3>
+                      <p className="text-slate-600 text-xs leading-relaxed font-normal line-clamp-2">
+                        {story.description}
+                      </p>
                     </div>
                   </div>
 
-                  {/* Comment box */}
-                  {visibleComments[story.id] && (
-                    <div className="p-6 bg-slate-50 border-t border-slate-100 space-y-4">
-                      <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Comments ({story.comments.length})</h4>
-
-                      {story.comments.length > 0 ? (
-                        <div className="space-y-2.5 max-h-40 overflow-y-auto">
-                          {story.comments.map((c) => (
-                            <div key={c.id} className="bg-white p-3 rounded-xl border border-slate-200/50 text-[11px]">
-                              <p className="font-bold text-slate-800 mb-0.5">{c.author}</p>
-                              <p className="text-slate-650 leading-relaxed font-normal">{c.text}</p>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-[11px] text-slate-400 italic">No comments yet. Join the discussion!</p>
-                      )}
-
-                      <form onSubmit={(e) => handleAddComment(e, story.id)} className="flex space-x-2">
-                        <input
-                          type="text"
-                          placeholder="Type your comment..."
-                          value={commentInputs[story.id] || ''}
-                          onChange={(e) => setCommentInputs({ ...commentInputs, [story.id]: e.target.value })}
-                          className="flex-grow bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none font-medium"
-                        />
+                  <div>
+                    {/* Action controls row */}
+                    <div className="px-4 py-3 bg-slate-50/60 border-t border-slate-100 flex items-center justify-between gap-1 flex-wrap">
+                      <div className="flex items-center space-x-1">
                         <button
-                          type="submit"
-                          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
+                          onClick={() => handleLike(story.id)}
+                          className={`flex items-center space-x-1 px-2 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                            story.isLiked ? 'bg-red-50 text-red-650' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-600'
+                          }`}
+                          title="Like"
                         >
-                          Send
+                          <span>❤️</span>
+                          <span className="text-[11px]">{story.likes}</span>
                         </button>
-                      </form>
+                        <button
+                          onClick={() => handleCommentToggle(story.id)}
+                          className={`flex items-center space-x-1 px-2 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                            visibleComments[story.id] ? 'bg-blue-50 text-blue-600' : 'text-slate-400 hover:bg-slate-100'
+                          }`}
+                          title="Comments"
+                        >
+                          <span>💬</span>
+                          <span className="text-[11px]">{story.comments.length}</span>
+                        </button>
+                        <button
+                          onClick={() => handleBookmark(story.id)}
+                          className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                            story.isBookmarked ? 'bg-amber-50 text-amber-600' : 'text-slate-400 hover:bg-slate-100'
+                          }`}
+                          title="Bookmark"
+                        >
+                          <span>🔖</span>
+                        </button>
+                        <button
+                          onClick={() => handleShare(story.id)}
+                          className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 transition-all cursor-pointer"
+                          title="Share"
+                        >
+                          <span>📤</span>
+                        </button>
+                      </div>
+
+                      <div className="flex items-center space-x-1.5">
+                        <button
+                          onClick={() => setSummaryPost(story)}
+                          className="px-2.5 py-1 bg-orange-50 hover:bg-orange-100 text-orange-650 text-[10px] font-bold rounded-lg transition-all cursor-pointer flex items-center space-x-1"
+                          title="AI Summary"
+                        >
+                          <span>🤖</span>
+                          <span className="hidden sm:inline">AI Summary</span>
+                        </button>
+                        <button
+                          onClick={() => setReadMorePost(story)}
+                          className="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-650 text-[10px] font-bold rounded-lg transition-all cursor-pointer whitespace-nowrap"
+                        >
+                          Read More
+                        </button>
+                      </div>
                     </div>
-                  )}
+
+                    {/* Comment box */}
+                    {visibleComments[story.id] && (
+                      <div className="p-4 bg-slate-50 border-t border-slate-100 space-y-3">
+                        <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Comments ({story.comments.length})</h4>
+
+                        {story.comments.length > 0 ? (
+                          <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
+                            {story.comments.map((c) => (
+                              <div key={c.id} className="bg-white p-2.5 rounded-xl border border-slate-200/50 text-[11px]">
+                                <p className="font-bold text-slate-800 mb-0.5">{c.author}</p>
+                                <p className="text-slate-650 leading-relaxed font-normal">{c.text}</p>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-[11px] text-slate-400 italic">No comments yet. Join the discussion!</p>
+                        )}
+
+                        <form onSubmit={(e) => handleAddComment(e, story.id)} className="flex space-x-1.5">
+                          <input
+                            type="text"
+                            placeholder="Type comment..."
+                            value={commentInputs[story.id] || ''}
+                            onChange={(e) => setCommentInputs({ ...commentInputs, [story.id]: e.target.value })}
+                            className="flex-grow bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none font-medium"
+                          />
+                          <button
+                            type="submit"
+                            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
+                          >
+                            Send
+                          </button>
+                        </form>
+                      </div>
+                    )}
+                  </div>
 
                 </div>
               ))}
             </div>
-
-          </div>
-
-          {/* Sidebar Column (4 grid width) */}
-          <div className="lg:col-span-4 space-y-6 text-left">
-
-            {/* Community Guidelines card */}
-            <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-xs space-y-4">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Community Space</h3>
-              <p className="text-xs text-slate-500 leading-relaxed font-medium">
-                Welcome to Setu's open community feed! Here, you can explore, read, and share recipes, agricultural tips, traditional crafts, and life stories directly.
-              </p>
-              <div className="h-px bg-slate-100 my-2"></div>
-              <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Guidelines:</h4>
-              <ul className="space-y-2.5 text-xs text-slate-600 font-semibold list-disc list-inside">
-                <li>Respect ancestral traditions and stories.</li>
-                <li>Share recipes, crafts, and farming tips.</li>
-                <li>No registration or login needed.</li>
-                <li>Posts are published instantly to the community.</li>
-              </ul>
-            </div>
-
-          </div>
 
         </div>
       </div>

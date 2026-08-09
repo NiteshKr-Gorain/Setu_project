@@ -1,6 +1,9 @@
+// Stats imports
 import React from 'react';
 
+// Stats component
 export default function Stats() {
+  // Stats data
   const statsList = [
     { value: '1,200+', label: 'Stories Preserved', icon: '📚' },
     { value: '850+', label: 'Active Mentors', icon: '👴' },
@@ -9,7 +12,7 @@ export default function Stats() {
   ];
 
   return (
-    <section className="py-16 bg-gradient-to-r from-blue-600 to-indigo-700 text-white transition-all duration-300 shadow-md">
+    <section className="py-16 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-3xl transition-all duration-300 shadow-md">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {statsList.map((stat, idx) => (

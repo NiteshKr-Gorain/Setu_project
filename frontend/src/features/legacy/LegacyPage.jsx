@@ -111,16 +111,20 @@ export default function LegacyPage() {
 
         {/* 1. Featured Video Player Section with Lazy Loading & Preload */}
         <div className="bg-white border border-slate-100 rounded-3xl overflow-hidden shadow-xs grid grid-cols-1 lg:grid-cols-12 gap-0 text-left">
-          <div className="lg:col-span-7 bg-black aspect-video flex items-center justify-center relative">
+          <div className="lg:col-span-7 bg-black aspect-video flex items-center justify-center relative cursor-pointer">
             <video
               ref={playerRef}
               src={activeVideo.videoUrl}
               poster={activeVideo.thumbnail}
               controls
-              preload="metadata"
-              loading="lazy"
+              preload="none"
               playsInline
-              className="w-full h-full object-contain"
+              onClick={(e) => {
+                if (e.currentTarget.paused) {
+                  e.currentTarget.play().catch(() => {});
+                }
+              }}
+              className="w-full h-full object-contain cursor-pointer"
             />
           </div>
           

@@ -83,7 +83,7 @@ export default function SignUpPage({ onViewChange }) {
               className="flex items-center space-x-3 text-brand-primary cursor-pointer"
             >
               <div className="w-10 h-10 rounded-2xl overflow-hidden bg-transparent border-0 p-0 flex items-center justify-center">
-                <img src="/Setu_logo.png" alt="Setu Logo" className="w-full h-full object-contain" />
+                <img src="/Setu_logo.png" alt="Setu Logo" loading="lazy" className="w-full h-full object-contain" />
               </div>
               <span className="text-2xl font-bold tracking-tight text-slate-800">Setu</span>
             </a>

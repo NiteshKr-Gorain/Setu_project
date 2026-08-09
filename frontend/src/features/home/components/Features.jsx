@@ -1,7 +1,10 @@
+// Features imports
 import React from 'react';
 import FeatureCard from './FeatureCard';
 
+// Features component
 export default function Features({ onViewChange }) {
+  // Features data
   const featuresList = [
     {
       icon: '🧠',
@@ -30,10 +33,10 @@ export default function Features({ onViewChange }) {
   ];
 
   return (
-    <section className="py-24 bg-slate-50/50 border-y border-slate-100/60 transition-colors duration-300">
+    <section className="py-20 md:py-24 bg-slate-50/60 rounded-3xl border border-slate-100/80 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16">
         
-        {/* Section Header */}
+        {/* Section header */}
         <div className="flex flex-col items-center text-center space-y-4 max-w-2xl mx-auto">
           <span className="text-xs font-extrabold uppercase tracking-wider text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
             Core Values
@@ -46,7 +49,7 @@ export default function Features({ onViewChange }) {
           </p>
         </div>
 
-        {/* Features 4-Column Grid */}
+        {/* Feature cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {featuresList.map((feat, index) => (
             <FeatureCard

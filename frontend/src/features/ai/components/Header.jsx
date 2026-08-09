@@ -1,7 +1,14 @@
 import React from 'react';
-import { Maximize2, Server, X, PanelLeft } from 'lucide-react';
+import { Maximize2, Minimize2, Server, X, PanelLeft } from 'lucide-react';
 
-export default function Header({ activeChatTitle, isBackendConnected, onToggleSidebar, onClose }) {
+export default function Header({ 
+  activeChatTitle, 
+  isBackendConnected, 
+  onToggleSidebar, 
+  onClose,
+  isFullscreen,
+  onToggleFullscreen
+}) {
   return (
     <header className="flex items-center justify-between h-14 px-4 bg-[#f5f5f7]/90 backdrop-blur-md text-slate-800 border-b border-[#e2e8f0] sticky top-0 z-10">
       <div className="flex items-center gap-3">
@@ -45,20 +52,24 @@ export default function Header({ activeChatTitle, isBackendConnected, onToggleSi
           </span>
         </div>
 
-        {/* Fullscreen / Expand button */}
-        <button 
-          onClick={() => {
-            if (!document.fullscreenElement) {
-              document.documentElement.requestFullscreen().catch(() => {});
-            } else {
-              document.exitFullscreen().catch(() => {});
-            }
-          }}
-          className="p-2 text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
-          title="Toggle Fullscreen"
-        >
-          <Maximize2 className="w-4 h-4" />
-        </button>
+        {/* Fullscreen / Minimize Toggle button */}
+        {onToggleFullscreen && (
+          <button 
+            onClick={onToggleFullscreen}
+            className={`p-2 rounded-lg transition-colors ${
+              isFullscreen 
+                ? 'text-orange-600 bg-orange-50 hover:bg-orange-100' 
+                : 'text-slate-500 hover:text-orange-600 hover:bg-orange-50'
+            }`}
+            title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+          >
+            {isFullscreen ? (
+              <Minimize2 className="w-4 h-4" />
+            ) : (
+              <Maximize2 className="w-4 h-4" />
+            )}
+          </button>
+        )}
 
         {/* Modal Close Button */}
         {onClose && (

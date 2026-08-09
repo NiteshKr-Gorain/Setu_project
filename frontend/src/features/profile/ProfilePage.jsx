@@ -1,29 +1,40 @@
+// Component imports
 import React, { useState, useEffect } from 'react';
-import EditProfileModal from './components/EditProfileModal';
+import ProfileSettingsModal from './components/ProfileSettingsModal';
 import { useAuth } from '../auth/AuthContext';
 import * as mentorsApi from '../../shared/api/mentorsApi';
 import { fetchKnowledgeEntries } from '../library/api/knowledgeApi';
 
+// Profile page
 export default function ProfilePage({ userProfile, onLogout }) {
+  // Auth state
   const { currentUser, patchLocalProfile } = useAuth();
   const user = userProfile || currentUser;
 
-  const [activeTab, setActiveTab] = useState('contributions'); // 'contributions', 'mentorship', 'verification'
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  // Tab state
+  const [activeTab, setActiveTab] = useState('mentorship');
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
+  // Contributions state
   const [myContributions, setMyContributions] = useState([]);
   const [contribsLoading, setContribsLoading] = useState(true);
 
+  // Mentor state
   const [_mentorProfile, setMentorProfile] = useState(null);
   const [_mentorLoading, setMentorLoading] = useState(true);
   const [mentorSaving, setMentorSaving] = useState(false);
   const [mentorMsg, setMentorMsg] = useState('');
 
+  // Form fields
   const [mentorBio, setMentorBio] = useState('');
   const [yearsExp, setYearsExp] = useState(5);
   const [availability, setAvailability] = useState('Weekends, 2 hrs/week');
   const [categoriesInput, setCategoriesInput] = useState('Agriculture, Traditional Skills');
 
+  // Settings tab
+  const [settingsInitialTab, setSettingsInitialTab] = useState('edit_profile');
+
+  // Profile data
   const profileData = {
     name: user?.name || 'Community Member',
     title: user?.role === 'contributor' ? 'Senior Heritage Contributor' : 'Youth Learner & Explorer',
@@ -35,6 +46,7 @@ export default function ProfilePage({ userProfile, onLogout }) {
     role: user?.role || 'user',
   };
 
+  // Load contributions
   useEffect(() => {
     let isMounted = true;
     setContribsLoading(true);
@@ -53,6 +65,7 @@ export default function ProfilePage({ userProfile, onLogout }) {
     return () => { isMounted = false; };
   }, []);
 
+  // Load mentor
   useEffect(() => {
     let isMounted = true;
     setMentorLoading(true);
@@ -68,7 +81,7 @@ export default function ProfilePage({ userProfile, onLogout }) {
         }
       })
       .catch(() => {
-        // Not a mentor yet
+        // No mentor
       })
       .finally(() => {
         if (isMounted) setMentorLoading(false);
@@ -76,10 +89,12 @@ export default function ProfilePage({ userProfile, onLogout }) {
     return () => { isMounted = false; };
   }, []);
 
+  // Save profile
   const handleSaveProfile = (updatedFields) => {
     patchLocalProfile(updatedFields);
   };
 
+  // Save mentor
   const handleSaveMentorProfile = async (e) => {
     e.preventDefault();
     setMentorSaving(true);
@@ -103,19 +118,22 @@ export default function ProfilePage({ userProfile, onLogout }) {
     }
   };
 
+  // Render view
   return (
     <div className="pt-24 pb-16 min-h-screen bg-slate-50 text-slate-800 transition-colors duration-300">
-      <div className="max-w-6xl mx-auto px-6 md:px-12 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 space-y-8">
         
-        {/* Header Profile Banner Card */}
+        {/* Banner card */}
         <div className="bg-white rounded-3xl border border-slate-100 p-8 shadow-xs text-left relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-100/30 to-amber-100/30 rounded-full blur-2xl -z-10 translate-x-1/3 -translate-y-1/3"></div>
           
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+            {/* User info */}
             <div className="flex items-center space-x-5">
               <img
                 src={profileData.avatar}
                 alt={profileData.name}
+                loading="lazy"
                 className="w-20 h-20 rounded-full object-cover border-2 border-white shadow-md"
               />
               <div className="space-y-1">
@@ -130,12 +148,19 @@ export default function ProfilePage({ userProfile, onLogout }) {
               </div>
             </div>
 
+            {/* Action buttons */}
             <div className="flex items-center space-x-3 self-end sm:self-center">
               <button
-                onClick={() => setIsEditModalOpen(true)}
-                className="px-4 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer"
+                onClick={() => {
+                  setSettingsInitialTab('edit_profile');
+                  setIsSettingsModalOpen(true);
+                }}
+                title="Account & System Settings (Edit Profile, Text Size, Security, Privacy)"
+                className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center space-x-1.5 text-xs font-bold transition-all duration-200 cursor-pointer shadow-3xs hover:scale-105"
+                aria-label="Account and Settings"
               >
-                Edit Profile
+                <span>⚙️</span>
+                <span>Settings</span>
               </button>
               <button
                 onClick={onLogout}
@@ -146,23 +171,14 @@ export default function ProfilePage({ userProfile, onLogout }) {
             </div>
           </div>
 
+          {/* User bio */}
           <div className="mt-6 pt-6 border-t border-slate-100">
             <p className="text-xs text-slate-600 leading-relaxed font-normal">{profileData.bio}</p>
           </div>
         </div>
 
-        {/* Tab Navigation Controls */}
+        {/* Tab navigation */}
         <div className="flex border-b border-slate-200/60 space-x-6 text-left">
-          <button
-            onClick={() => setActiveTab('contributions')}
-            className={`pb-3 text-xs font-bold transition-all cursor-pointer ${
-              activeTab === 'contributions'
-                ? 'text-brand-primary border-b-2 border-brand-primary'
-                : 'text-slate-400 hover:text-slate-600'
-            }`}
-          >
-            My Contributions ({myContributions.length})
-          </button>
           <button
             onClick={() => setActiveTab('mentorship')}
             className={`pb-3 text-xs font-bold transition-all cursor-pointer ${
@@ -173,116 +189,135 @@ export default function ProfilePage({ userProfile, onLogout }) {
           >
             Mentor Profile &amp; Availability
           </button>
+          <button
+            onClick={() => setActiveTab('contributions')}
+            className={`pb-3 text-xs font-bold transition-all cursor-pointer ${
+              activeTab === 'contributions'
+                ? 'text-brand-primary border-b-2 border-brand-primary'
+                : 'text-slate-400 hover:text-slate-600'
+            }`}
+          >
+            My Contributions ({myContributions.length})
+          </button>
         </div>
 
-        {/* Tab Contents */}
-        {activeTab === 'contributions' && (
-          <div className="space-y-4 text-left">
-            <h3 className="text-sm font-bold text-slate-900">Submitted Knowledge Entries</h3>
-            {contribsLoading ? (
-              <div className="py-10 text-center text-xs font-bold text-slate-400">Loading your entries...</div>
-            ) : myContributions.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {myContributions.map((c) => (
-                  <div key={c.id} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-3xs space-y-2">
-                    <span className="text-[9px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md uppercase">
-                      {c.category}
-                    </span>
-                    <h4 className="text-xs font-bold text-slate-900 line-clamp-2">{c.title}</h4>
-                    <p className="text-[11px] text-slate-500 line-clamp-2">{c.description}</p>
-                    <span className="text-[9px] font-semibold text-emerald-600 block pt-2">✓ Verified on Setu</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="bg-white p-8 rounded-2xl border border-slate-100 text-center text-xs text-slate-400 italic">
-                You haven't shared any traditional knowledge entries yet.
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'mentorship' && (
-          <div className="bg-white rounded-3xl border border-slate-100 p-8 text-left space-y-6 shadow-xs">
-            <div className="space-y-1">
-              <h3 className="text-base font-bold text-slate-900">Become a Setu Mentor</h3>
-              <p className="text-xs text-slate-400 font-normal">
-                List your expertise so youth learners can discover you in the Community mentor directory.
-              </p>
-            </div>
-
-            {mentorMsg && (
-              <div className="bg-blue-50 border border-blue-100 text-blue-700 text-xs font-bold px-4 py-2.5 rounded-2xl">
-                {mentorMsg}
-              </div>
-            )}
-
-            <form onSubmit={handleSaveMentorProfile} className="space-y-4 text-xs font-semibold">
+        {/* Tab contents */}
+        <div className="max-h-[650px] overflow-y-auto custom-scrollbar p-1">
+          {/* Mentorship tab */}
+          {activeTab === 'mentorship' && (
+            <div className="bg-white rounded-3xl border border-slate-100 p-8 text-left space-y-6 shadow-xs">
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Expertise Categories (comma-separated)</label>
-                <input
-                  type="text"
-                  required
-                  value={categoriesInput}
-                  onChange={(e) => setCategoriesInput(e.target.value)}
-                  className="w-full border-b border-slate-200 py-2 focus:outline-none focus:border-brand-primary font-medium"
-                />
+                <h3 className="text-base font-bold text-slate-900">Become a Setu Mentor</h3>
+                <p className="text-xs text-slate-400 font-normal">
+                  List your expertise so youth learners can discover you in the Community mentor directory.
+                </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Years of Experience</label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="80"
-                    required
-                    value={yearsExp}
-                    onChange={(e) => setYearsExp(e.target.value)}
-                    className="w-full border-b border-slate-200 py-2 focus:outline-none focus:border-brand-primary font-medium"
-                  />
+              {/* Status message */}
+              {mentorMsg && (
+                <div className="bg-blue-50 border border-blue-100 text-blue-700 text-xs font-bold px-4 py-2.5 rounded-2xl">
+                  {mentorMsg}
                 </div>
+              )}
+
+              {/* Mentor form */}
+              <form onSubmit={handleSaveMentorProfile} className="space-y-4 text-xs font-semibold">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Availability</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Expertise Categories (comma-separated)</label>
                   <input
                     type="text"
                     required
-                    value={availability}
-                    onChange={(e) => setAvailability(e.target.value)}
+                    value={categoriesInput}
+                    onChange={(e) => setCategoriesInput(e.target.value)}
                     className="w-full border-b border-slate-200 py-2 focus:outline-none focus:border-brand-primary font-medium"
                   />
                 </div>
-              </div>
 
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mentor Bio &amp; Offerings</label>
-                <textarea
-                  rows={4}
-                  required
-                  value={mentorBio}
-                  onChange={(e) => setMentorBio(e.target.value)}
-                  className="w-full border border-slate-200 rounded-2xl p-3 focus:outline-none focus:border-brand-primary font-normal resize-none"
-                />
-              </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Years of Experience</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="80"
+                      required
+                      value={yearsExp}
+                      onChange={(e) => setYearsExp(e.target.value)}
+                      className="w-full border-b border-slate-200 py-2 focus:outline-none focus:border-brand-primary font-medium"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Availability</label>
+                    <input
+                      type="text"
+                      required
+                      value={availability}
+                      onChange={(e) => setAvailability(e.target.value)}
+                      className="w-full border-b border-slate-200 py-2 focus:outline-none focus:border-brand-primary font-medium"
+                    />
+                  </div>
+                </div>
 
-              <button
-                type="submit"
-                disabled={mentorSaving}
-                className="px-6 py-3 bg-brand-primary hover:bg-brand-hover text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-brand-primary/10 cursor-pointer disabled:opacity-60"
-              >
-                {mentorSaving ? 'Saving...' : 'Save Mentor Profile'}
-              </button>
-            </form>
-          </div>
-        )}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mentor Bio &amp; Offerings</label>
+                  <textarea
+                    rows={4}
+                    required
+                    value={mentorBio}
+                    onChange={(e) => setMentorBio(e.target.value)}
+                    className="w-full border border-slate-200 rounded-2xl p-3 focus:outline-none focus:border-brand-primary font-normal resize-none"
+                  />
+                </div>
+
+                {/* Submit button */}
+                <button
+                  type="submit"
+                  disabled={mentorSaving}
+                  className="px-6 py-3 bg-brand-primary hover:bg-brand-hover text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-brand-primary/10 cursor-pointer disabled:opacity-60"
+                >
+                  {mentorSaving ? 'Saving...' : 'Save Mentor Profile'}
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* Contributions tab */}
+          {activeTab === 'contributions' && (
+            <div className="space-y-4 text-left">
+              <h3 className="text-sm font-bold text-slate-900">Submitted Knowledge Entries</h3>
+              {contribsLoading ? (
+                <div className="py-10 text-center text-xs font-bold text-slate-400">Loading your entries...</div>
+              ) : myContributions.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {myContributions.map((c) => (
+                    <div key={c.id} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-3xs space-y-2 hover:shadow-md transition-all">
+                      <span className="text-[9px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md uppercase">
+                        {c.category}
+                      </span>
+                      <h4 className="text-xs font-bold text-slate-900 line-clamp-2">{c.title}</h4>
+                      <p className="text-[11px] text-slate-500 line-clamp-2">{c.description}</p>
+                      <span className="text-[9px] font-semibold text-emerald-600 block pt-2">✓ Verified on Setu</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-white p-8 rounded-2xl border border-slate-100 text-center text-xs text-slate-400 italic">
+                  You haven't shared any traditional knowledge entries yet.
+                </div>
+              )}
+            </div>
+          )}
+        </div>
 
       </div>
 
-      <EditProfileModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
+      {/* Settings modal */}
+      <ProfileSettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
         currentProfile={profileData}
-        onSave={handleSaveProfile}
+        onSaveSettings={handleSaveProfile}
+        initialTab={settingsInitialTab}
       />
     </div>
   );

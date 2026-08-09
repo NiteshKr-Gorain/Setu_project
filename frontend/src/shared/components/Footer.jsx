@@ -32,7 +32,7 @@ export default function Footer({ currentView, onViewChange }) {
             aria-label="Setu AI Knowledge Bridge Home"
           >
             <div className="w-11 h-11 rounded-2xl overflow-hidden group-hover:scale-105 transition-transform duration-300 flex items-center justify-center bg-transparent border-0 p-0">
-              <img src="/Setu_logo.png" alt="Setu Logo" className="w-full h-full object-contain" />
+              <img src="/Setu_logo.png" alt="Setu Logo" loading="lazy" className="w-full h-full object-contain" />
             </div>
             <div className="text-left">
               <span className="text-2xl font-black text-white tracking-tight block leading-none">Setu</span>

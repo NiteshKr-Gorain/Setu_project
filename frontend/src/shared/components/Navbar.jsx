@@ -53,7 +53,7 @@ export default function Navbar({ currentView, onViewChange, currentUser, onLogou
             aria-label="Setu AI Knowledge Bridge Home"
           >
             <div className="w-11 h-11 rounded-2xl overflow-hidden group-hover:scale-105 transition-transform duration-300 flex items-center justify-center bg-transparent border-0 p-0">
-              <img src="/Setu_logo.png" alt="Setu Logo" className="w-full h-full object-contain" />
+              <img src="/Setu_logo.png" alt="Setu Logo" loading="lazy" className="w-full h-full object-contain" />
             </div>
             <div className="text-left">
               <span className="text-[22px] font-black text-slate-900 tracking-tight block leading-none">Setu</span>
@@ -110,6 +110,7 @@ export default function Navbar({ currentView, onViewChange, currentUser, onLogou
                     id="nav-user-avatar"
                     src={currentUser.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100"}
                     alt={currentUser.name || "User Avatar"}
+                    loading="lazy"
                     className="w-8 h-8 rounded-full object-cover border border-slate-200"
                     onError={(e) => {
                       e.target.src = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100";

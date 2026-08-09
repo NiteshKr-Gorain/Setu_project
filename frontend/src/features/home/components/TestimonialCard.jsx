@@ -11,6 +11,7 @@ export default function TestimonialCard({ quote, name, role, avatar }) {
         <img
           src={avatar}
           alt={name}
+          loading="lazy"
           className="w-10 h-10 rounded-full object-cover border border-slate-100"
         />
         <div>

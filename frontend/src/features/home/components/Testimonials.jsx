@@ -1,7 +1,10 @@
+// Testimonials imports
 import React from 'react';
 import TestimonialCard from './TestimonialCard';
 
+// Testimonials component
 export default function Testimonials() {
+  // Testimonials data
   const testimonials = [
     {
       quote: "Sharing my zero-budget organic farming techniques with young agriculture students through Setu gave me a renewed sense of purpose.",
@@ -24,10 +27,10 @@ export default function Testimonials() {
   ];
 
   return (
-    <section className="py-24 bg-slate-50/50 transition-colors duration-300">
+    <section className="py-20 md:py-24 bg-slate-50/60 rounded-3xl border border-slate-100/80 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16">
         
-        {/* Section Header */}
+        {/* Section header */}
         <div className="flex flex-col items-center text-center space-y-4 max-w-2xl mx-auto">
           <span className="text-xs font-extrabold uppercase tracking-wider text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
             Community Voices
@@ -40,7 +43,7 @@ export default function Testimonials() {
           </p>
         </div>
 
-        {/* Testimonials 3-Column Grid */}
+        {/* Testimonials cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {testimonials.map((t, idx) => (
             <TestimonialCard

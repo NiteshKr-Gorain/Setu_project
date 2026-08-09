@@ -15,33 +15,30 @@ export function AuthProvider({ children }) {
       const token = authApi.getStoredToken();
       const storedUser = authApi.getStoredUser();
 
-      if (!token && !storedUser) {
-        if (isMounted) setIsLoading(false);
-        return;
-      }
-
       if (storedUser && isMounted) {
         setCurrentUser(storedUser);
       }
 
-      try {
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Auth hydration timeout')), 600)
-        );
+      if (token && !token.startsWith('demo-')) {
+        try {
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Auth hydration timeout')), 1000)
+          );
 
-        const profile = await Promise.race([authApi.getMe(), timeoutPromise]);
-        if (isMounted && profile) {
-          setCurrentUser(profile);
-          authApi.setStoredUser(profile);
+          const profile = await Promise.race([authApi.getMe(), timeoutPromise]);
+          if (isMounted && profile) {
+            setCurrentUser(profile);
+            authApi.setStoredUser(profile);
+          }
+        } catch (_err) {
+          if (storedUser && isMounted) {
+            setCurrentUser(storedUser);
+          }
         }
-      } catch (_err) {
-        if (storedUser && isMounted) {
-          setCurrentUser(storedUser);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+      }
+
+      if (isMounted) {
+        setIsLoading(false);
       }
     }
 

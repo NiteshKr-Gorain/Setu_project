@@ -2,19 +2,17 @@ import React, { useState, useEffect } from 'react';
 
 export default function BridgeLoader({ onFinish }) {
   const [progress, setProgress] = useState(0);
-  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
 
   useEffect(() => {
     let current = 0;
     let isCancelled = false;
     const startTime = Date.now();
-    const TARGET_DURATION_MS = 4000; // Exactly 4 seconds (reduced by 1 second)
+    const TARGET_DURATION_MS = 4000; // Exactly 4 seconds
 
     const interval = setInterval(() => {
       if (isCancelled) return;
       const elapsed = Date.now() - startTime;
       
-      // Calculate progress mapped to 5 seconds
       let targetProgress = Math.min(100, Math.floor((elapsed / TARGET_DURATION_MS) * 100));
       
       if (targetProgress < 99) {
@@ -42,30 +40,26 @@ export default function BridgeLoader({ onFinish }) {
 
   return (
     <div className="fixed inset-0 z-50 w-screen h-screen bg-slate-950 backdrop-blur-md overflow-hidden select-none">
-      {/* Edge-to-Edge Full Screen Setu Video with Optimized Preloading */}
+      {/* Background Video with preload="none" for fast loading */}
       <video
         src="/Setu_Video.mp4"
         autoPlay
         muted
         loop
         playsInline
-        preload="auto"
-        fetchpriority="high"
+        preload="none"
         disablePictureInPicture
         disableRemotePlayback
-        onLoadedData={() => setIsVideoLoaded(true)}
-        className={`w-full h-full object-cover bg-transparent transition-opacity duration-700 ${
-          isVideoLoaded ? 'opacity-100' : 'opacity-0'
-        }`}
+        className="w-full h-full object-cover bg-transparent pointer-events-none opacity-80"
       />
 
       {/* Transparent Ambient Gradient Overlays */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none"></div>
 
       {/* Sleek Floating Top Badge with Setu_logo.png */}
       <div className="absolute top-6 left-6 md:top-8 md:left-10 flex items-center space-x-3 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-orange-500/20 shadow-2xl z-20">
         <div className="w-6 h-6 rounded-full overflow-hidden bg-transparent border-0 p-0 flex items-center justify-center">
-          <img src="/Setu_logo.png" alt="Setu Logo" className="w-full h-full object-contain" />
+          <img src="/Setu_logo.png" alt="Setu Logo" loading="lazy" className="w-full h-full object-contain" />
         </div>
         <span className="w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse shadow-[0_0_8px_#F97316]"></span>
         <span className="text-xs font-black text-white uppercase tracking-widest font-mono">

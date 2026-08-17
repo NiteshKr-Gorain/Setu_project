@@ -82,3 +82,64 @@ body {
   scrollbar-color: #cbd5e1 #f1f5f9;
 }
 
+/* Avatar Voice Engine Design System Tokens & Animations */
+.font-mono-code {
+  font-family: 'Space Grotesk', 'Courier New', monospace;
+}
+
+.btn-action-primary {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: #ffffff;
+  font-weight: 600;
+  border: none;
+  border-radius: 14px;
+  padding: 0.6rem 1.25rem;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.45);
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.btn-action-primary:hover {
+  background: linear-gradient(135deg, #ea580c, #c2410c);
+  transform: scale(1.02);
+}
+.btn-action-primary:active {
+  transform: scale(0.98);
+}
+
+.mic-pulse-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 16px;
+  border: 2px solid #f97316;
+  opacity: 0.7;
+  animation: pingRing 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes pingRing {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.03); }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 3.5s ease-in-out infinite;
+}
+
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spinSlow 6s linear infinite;
+}
+
+

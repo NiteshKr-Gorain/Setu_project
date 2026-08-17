@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
 
 @import "tailwindcss";
 
@@ -8,7 +8,28 @@
   --color-brand-light: #FFF0E0;
   --color-setu-blue: #EBF3FF;
   --color-setu-dark: #1E293B;
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  
+  --font-sans: 'Outfit', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
+
+  --animate-float-slow: float-slow 8s ease-in-out infinite;
+  --animate-float-medium: float-medium 6s ease-in-out infinite;
+  --animate-float-fast: float-fast 4s ease-in-out infinite;
+  
+  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+  @keyframes float-slow {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-15px) rotate(1deg); }
+  }
+  @keyframes float-medium {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(-1deg); }
+  }
+  @keyframes float-fast {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-6px); }
+  }
 }
 
 html {
@@ -17,43 +38,64 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background-color: #ffffff;
-  color: #1e293b;
+  background-color: #FCFAF7;
+  color: #0F172A;
   overflow-x: hidden;
 }
 
-/* Glassmorphism custom utility classes */
-.glass {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+/* Premium Typography Utilities */
+.heading-serif {
+  font-family: var(--font-serif);
 }
 
-.glass-dark {
-  background: rgba(15, 23, 42, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+/* Elegant Text Gradient */
+.text-gradient-saffron {
+  background: linear-gradient(135deg, #FF9F43 0%, #FF6B6B 50%, #FF4757 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-navy {
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Glassmorphism Redefined */
+.glass {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.glass-pill {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.04);
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 8px 32px 0 rgba(15, 23, 42, 0.02);
 }
 
-.glass-card-hover {
+/* Interactive Card Hover Effects */
+.premium-card-hover {
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.glass-card-hover:hover {
-  background: rgba(255, 255, 255, 0.75);
-  box-shadow: 0 20px 40px rgba(255, 159, 67, 0.05), 0 1px 3px rgba(0, 0, 0, 0.02);
-  border: 1px solid rgba(255, 159, 67, 0.2);
-  transform: translateY(-4px);
+.premium-card-hover:hover {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 
+    0 30px 60px -15px rgba(255, 159, 67, 0.08), 
+    0 0 0 1px rgba(255, 159, 67, 0.15);
+  transform: translateY(-6px);
 }
 
 /* Custom isolated scrollbar styling */
@@ -63,22 +105,69 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #F1F5F9;
   border-radius: 9999px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #CBD5E1;
   border-radius: 9999px;
   transition: background 0.2s ease;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #ea580c;
+  background: #FF9F43;
 }
+
 
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 #f1f5f9;
+  scrollbar-color: #CBD5E1 #F1F5F9;
+}
+
+/* Red Hand-Drawn Polygon Highlight style for Preserving Wisdom */
+.heading-highlight {
+  position: relative;
+  display: inline-block;
+  color: white;
+  padding: 6px 38px;
+  font-weight: 700;
+  font-style: normal;
+  letter-spacing: normal;
+  z-index: 1;
+}
+
+.heading-highlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #d9001b;
+  z-index: -1;
+
+  clip-path: polygon(
+    3% 18%,
+    15% 8%,
+    30% 12%,
+    45% 5%,
+    60% 10%,
+    78% 4%,
+    96% 12%,
+
+    93% 30%,
+    100% 50%,
+    94% 68%,
+
+    98% 88%,
+    80% 94%,
+    63% 88%,
+    48% 97%,
+    32% 91%,
+    15% 97%,
+    3% 86%,
+
+    7% 67%,
+    1% 50%,
+    7% 32%
+  );
 }
 

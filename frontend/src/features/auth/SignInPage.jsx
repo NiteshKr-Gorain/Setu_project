@@ -159,14 +159,14 @@ export default function SignInPage({ onViewChange }) {
                       type="checkbox"
                       checked={rememberMe}
                       onChange={(e) => setRememberMe(e.target.checked)}
-                      className="rounded border-slate-300 text-brand-primary focus:ring-brand-primary w-4 h-4 cursor-pointer"
+                      className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 w-4 h-4 cursor-pointer"
                     />
                     <span>Remember Me</span>
                   </label>
                   <a 
                     href="#forgot" 
                     onClick={(e) => { e.preventDefault(); setSuccessMsg('Password reset instructions sent to your email.'); }}
-                    className="text-brand-primary hover:text-brand-hover transition-colors"
+                    className="text-emerald-600 hover:text-emerald-700 transition-colors"
                   >
                     Forgot Password?
                   </a>
@@ -176,7 +176,7 @@ export default function SignInPage({ onViewChange }) {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-3.5 mt-2 bg-brand-primary hover:bg-brand-hover text-white text-sm font-bold rounded-full transition-all duration-200 cursor-pointer shadow-md shadow-brand-primary/10 flex items-center justify-center space-x-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full py-3.5 mt-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-full transition-all duration-200 cursor-pointer shadow-md shadow-emerald-600/10 flex items-center justify-center space-x-2 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
                     <>

@@ -130,7 +130,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialMode = 's
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 bg-brand-primary hover:bg-brand-hover text-white text-xs font-bold rounded-full transition-all shadow-md shadow-brand-primary/10 cursor-pointer disabled:opacity-60"
+            className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-full transition-all shadow-md shadow-emerald-600/10 cursor-pointer disabled:opacity-60"
           >
             {isLoading ? 'Processing...' : mode === 'signin' ? 'Sign In & Continue' : 'Complete Registration & Continue'}
           </button>

@@ -1,528 +1,1058 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Mic, MicOff, Sparkles, Send, VolumeX, Video, Globe } from 'lucide-react';
+import { Mic, MicOff, Send, RefreshCw, X, Globe, AlertCircle } from 'lucide-react';
+import AvatarCanvas from './AvatarCanvas';
+import KaraokeSubtitles from './KaraokeSubtitles';
+import { askAvatarChat, askAvatarChatStream, fetchPersonas, fetchNeuralSpeechAudio } from '../services/avatarApi';
 
-const LOCAL_LANGUAGES = [
-  { code: 'hi-IN', name: 'Hindi (हिंदी)', flag: '🇮🇳' },
-  { code: 'pa-IN', name: 'Punjabi (ਪੰਜਾਬੀ)', flag: '🇮🇳' },
-  { code: 'en-US', name: 'English (US)', flag: '🇺🇸' },
-  { code: 'en-IN', name: 'English (India)', flag: '🇮🇳' },
-  { code: 'es-ES', name: 'Spanish (Español)', flag: '🇪🇸' },
-  { code: 'fr-FR', name: 'French (Français)', flag: '🇫🇷' },
-  { code: 'de-DE', name: 'German (Deutsch)', flag: '🇩🇪' },
-  { code: 'bn-IN', name: 'Bengali (বাংলা)', flag: '🇮🇳' },
-  { code: 'ta-IN', name: 'Tamil (தமிழ்)', flag: '🇮🇳' },
-  { code: 'te-IN', name: 'Telugu (తెలుగు)', flag: '🇮🇳' },
-  { code: 'mr-IN', name: 'Marathi (मराठी)', flag: '🇮🇳' },
-  { code: 'gu-IN', name: 'Gujarati (ગુજરાતી)', flag: '🇮🇳' }
+// Supported 5 Multi-Language Catalog matching Setu_Avatar
+// Supported 5 Multi-Language Catalog (Clean names only)
+const SUPPORTED_LANGUAGES = [
+  { code: 'en-IN', name: 'English', native: 'English' },
+  { code: 'hi-IN', name: 'Hindi', native: 'हिन्दी' },
+  { code: 'pa-IN', name: 'Punjabi', native: 'ਪੰਜਾਬੀ' },
+  { code: 'bn-IN', name: 'Bengali', native: 'বাংলা' },
+  { code: 'ta-IN', name: 'Tamil', native: 'தமிழ்' }
 ];
 
-export default function VoiceAvatarModal({ isOpen, onClose, onAskBackend }) {
-  const [selectedLang, setSelectedLang] = useState('hi-IN');
-  const [isListening, setIsListening] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [transcript, setTranscript] = useState('');
-  const [response, setResponse] = useState('');
+export default function VoiceAvatarModal({ isOpen, onClose }) {
+  // Model & State
+  const [selectedPersona, setSelectedPersona] = useState(null);
+  const [avatarState, setAvatarState] = useState('idle'); // 'idle' | 'listening' | 'thinking' | 'speaking'
   const [isProcessing, setIsProcessing] = useState(false);
-  const [hasBrowserSupport, setHasBrowserSupport] = useState(true);
+  const [selectedLang, setSelectedLang] = useState('en-IN');
+  const [spokenText, setSpokenText] = useState(
+    'Greetings and warm blessings, my child. I am Sardar Genji. Share with me what is in your heart today, and we will find a peaceful, time-tested traditional remedy together.'
+  );
 
-  // Voice Customization States
-  const [availableVoices, setAvailableVoices] = useState([]);
-  const [selectedVoiceIndex, setSelectedVoiceIndex] = useState(0);
-  const [speechPitch, setSpeechPitch] = useState(1.0);
-  const [speechRate, setSpeechRate] = useState(1.0);
-  const [showVoiceSettings, setShowVoiceSettings] = useState(false);
-
-  // Word Karaoke Subtitle States
   const [wordsList, setWordsList] = useState([]);
   const [currentWordIndex, setCurrentWordIndex] = useState(-1);
+  const [currentViseme, setCurrentViseme] = useState(null);
+  const [speakerAudioLevel, setSpeakerAudioLevel] = useState(0);
+
+  // Voice Engine State
+  const [useNeuralVoice, setUseNeuralVoice] = useState(true);
+  const [speechRate, setSpeechRate] = useState(1.0);
+  const [speechPitch, setSpeechPitch] = useState(1.0);
+  const [availableVoices, setAvailableVoices] = useState([]);
+  const [selectedVoiceIndex, setSelectedVoiceIndex] = useState(0);
+
+  // Voice Recognition & Input
+  const [transcript, setTranscript] = useState('');
+  const [isListening, setIsListening] = useState(false);
+  const [micVolume, setMicVolume] = useState(0);
 
   const recognitionRef = useRef(null);
-  const canvasRef = useRef(null);
-  const animationFrameRef = useRef(null);
-  const avatarImageRef = useRef(null);
+  const audioContextRef = useRef(null);
+  const micStreamRef = useRef(null);
+  const animFrameRef = useRef(null);
+  const latestTranscriptRef = useRef('');
+  const micEnabledRef = useRef(false);
+  const isStartingSpeechRef = useRef(false);
+  const inputRef = useRef(null);
 
-  // Load available browser voices
+  // Audio Playback & FIFO Streaming Audio Queue
+  const speakerAudioCtxRef = useRef(null);
+  const currentAudioSourceRef = useRef(null);
+  const speakerSyncFrameRef = useRef(null);
+  const fallbackIntervalRef = useRef(null);
+  const audioQueueRef = useRef([]);
+  const isPlayingAudioRef = useRef(false);
+  const isStreamActiveRef = useRef(false);
+  const abortControllerRef = useRef(null);
+  const activeRequestStartTimeRef = useRef(0);
+  const hasSpokenFirstChunkRef = useRef(false);
+  const autoSubmitTimerRef = useRef(null);
+
+  // Auto-submit after 3 seconds of silence or stopped commanding (invisible, no timing on screen)
+  useEffect(() => {
+    if (autoSubmitTimerRef.current) {
+      clearTimeout(autoSubmitTimerRef.current);
+      autoSubmitTimerRef.current = null;
+    }
+
+    const trimmed = (transcript || '').trim();
+    if (trimmed && !isProcessing && avatarState !== 'speaking' && avatarState !== 'thinking') {
+      autoSubmitTimerRef.current = setTimeout(() => {
+        const textToSubmit = (latestTranscriptRef.current || transcript || '').trim();
+        if (textToSubmit && !isProcessing) {
+          handleExecuteQuery(textToSubmit);
+        }
+      }, 3000);
+    }
+
+    return () => {
+      if (autoSubmitTimerRef.current) {
+        clearTimeout(autoSubmitTimerRef.current);
+      }
+    };
+  }, [transcript, isProcessing, avatarState]);
+
+  // State for Mic Errors & Compatibility
+  const [speechSupported, setSpeechSupported] = useState(true);
+  const [micPermissionDenied, setMicPermissionDenied] = useState(false);
+  const [micErrorNotice, setMicErrorNotice] = useState('');
+
+  // Initialize Persona
+  useEffect(() => {
+    async function init() {
+      const pList = await fetchPersonas();
+      if (pList.length > 0) {
+        setSelectedPersona(pList[0]);
+      }
+    }
+    init();
+  }, []);
+
+  // Match Browser Installed Voices
   useEffect(() => {
     if (!('speechSynthesis' in window)) return;
 
-    const updateVoices = () => {
+    const loadVoices = () => {
       const voices = window.speechSynthesis.getVoices();
       if (voices && voices.length > 0) {
         setAvailableVoices(voices);
-        const langPrefix = selectedLang.split('-')[0];
-        const matchingIdx = voices.findIndex(v => v.lang.startsWith(langPrefix) || v.lang.startsWith(selectedLang));
-        if (matchingIdx !== -1) setSelectedVoiceIndex(matchingIdx);
-      }
-    };
+        const langLower = selectedLang.toLowerCase();
 
-    updateVoices();
-    if (window.speechSynthesis.onvoiceschanged !== undefined) {
-      window.speechSynthesis.onvoiceschanged = updateVoices;
-    }
-  }, [selectedLang]);
-
-  // Preload Avatar Image
-  useEffect(() => {
-    const img = new Image();
-    img.src = '/avatar.png';
-    img.onload = () => {
-      avatarImageRef.current = img;
-    };
-  }, []);
-
-  // 60FPS Video Canvas Renderer with Lip-Sync & Vibrant Orange Lighting
-  useEffect(() => {
-    if (!isOpen) return;
-
-    let startTime = Date.now();
-
-    const renderVideoCanvas = () => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      const width = canvas.width;
-      const height = canvas.height;
-
-      const elapsed = (Date.now() - startTime) / 1000;
-
-      ctx.clearRect(0, 0, width, height);
-
-      // 1. Draw Base Avatar Character with Nodding Motion
-      ctx.save();
-      
-      let headTilt = 0;
-      let bodySwayY = 0;
-
-      if (isSpeaking) {
-        headTilt = Math.sin(elapsed * 4) * 0.025;
-        bodySwayY = Math.sin(elapsed * 6) * 3;
-      } else if (isListening) {
-        headTilt = Math.sin(elapsed * 2) * 0.015;
-        bodySwayY = Math.sin(elapsed * 2) * 1.5;
-      } else {
-        bodySwayY = Math.sin(elapsed * 1.5) * 1;
-      }
-
-      ctx.translate(width / 2, height / 2 + bodySwayY);
-      ctx.rotate(headTilt);
-
-      if (avatarImageRef.current) {
-        ctx.drawImage(
-          avatarImageRef.current,
-          -width / 2,
-          -height / 2,
-          width,
-          height
-        );
-      } else {
-        ctx.fillStyle = '#1e1e24';
-        ctx.fillRect(-width / 2, -height / 2, width, height);
-      }
-
-      // 2. Lip-Sync & Face Morphing
-      if (isSpeaking) {
-        const mouthOpen = Math.abs(Math.sin(elapsed * 16)) * 12 + 2;
-        const mouthWidth = 24 + Math.cos(elapsed * 10) * 3;
-        const mouthX = 0;
-        const mouthY = -28;
-        const jawDrop = mouthOpen * 0.25;
-
-        // Inner Mouth Cavity
-        ctx.beginPath();
-        ctx.ellipse(mouthX, mouthY + jawDrop, mouthWidth / 2, mouthOpen / 2, 0, 0, Math.PI * 2);
-        ctx.fillStyle = '#12080a';
-        ctx.fill();
-
-        // Upper Teeth
-        if (mouthOpen > 5) {
-          ctx.beginPath();
-          ctx.rect(mouthX - mouthWidth / 3, mouthY - mouthOpen / 4, (mouthWidth * 2) / 3, 2);
-          ctx.fillStyle = 'rgba(245, 245, 245, 0.9)';
-          ctx.fill();
+        let matchIdx = -1;
+        if (langLower.startsWith('hi')) {
+          matchIdx = voices.findIndex(v => {
+            const vLang = v.lang.toLowerCase().replace('_', '-');
+            const vName = v.name.toLowerCase();
+            return (vLang.startsWith('hi') || vName.includes('hindi') || vName.includes('हिन्दी'));
+          });
+        } else if (langLower.startsWith('pa')) {
+          matchIdx = voices.findIndex(v => {
+            const vLang = v.lang.toLowerCase().replace('_', '-');
+            const vName = v.name.toLowerCase();
+            return (vLang.startsWith('pa') || vName.includes('punjabi') || vName.includes('panjabi'));
+          });
+        } else if (langLower.startsWith('bn')) {
+          matchIdx = voices.findIndex(v => {
+            const vLang = v.lang.toLowerCase().replace('_', '-');
+            const vName = v.name.toLowerCase();
+            return (vLang.startsWith('bn') || vName.includes('bengali') || vName.includes('বাংলা'));
+          });
+        } else if (langLower.startsWith('ta')) {
+          matchIdx = voices.findIndex(v => {
+            const vLang = v.lang.toLowerCase().replace('_', '-');
+            const vName = v.name.toLowerCase();
+            return (vLang.startsWith('ta') || vName.includes('tamil') || vName.includes('தமிழ்'));
+          });
+        } else {
+          matchIdx = voices.findIndex(v => {
+            const vLang = v.lang.toLowerCase().replace('_', '-');
+            return vLang.startsWith('en-in') || vLang.startsWith('en-gb') || vLang.startsWith('en');
+          });
         }
 
-        // Upper Lip Contour
-        ctx.beginPath();
-        ctx.ellipse(mouthX, mouthY - mouthOpen / 4, mouthWidth / 2 + 1, 2.5, 0, 0, Math.PI);
-        ctx.fillStyle = 'rgba(249, 115, 22, 0.85)';
-        ctx.fill();
-
-        // Lower Lip Contour
-        ctx.beginPath();
-        ctx.ellipse(mouthX, mouthY + mouthOpen / 2 + jawDrop, mouthWidth / 2, 3, 0, Math.PI, Math.PI * 2);
-        ctx.fillStyle = 'rgba(234, 88, 12, 0.85)';
-        ctx.fill();
+        if (matchIdx !== -1) {
+          setSelectedVoiceIndex(matchIdx);
+        }
       }
-
-      ctx.restore();
-
-      // 3. HD Video HUD Badge Overlay
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.65)';
-      ctx.fillRect(10, 10, 120, 26);
-      ctx.lineWidth = 1;
-      ctx.strokeStyle = 'rgba(249, 115, 22, 0.4)';
-      ctx.strokeRect(10, 10, 120, 26);
-
-      // Status Dot
-      ctx.beginPath();
-      ctx.arc(22, 23, 4, 0, Math.PI * 2);
-      ctx.fillStyle = isSpeaking ? '#f97316' : '#10b981';
-      ctx.fill();
-
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 10px sans-serif';
-      ctx.fillText(isSpeaking ? 'SPEAKING 60 FPS' : 'AVATAR READY', 32, 26);
-
-      animationFrameRef.current = requestAnimationFrame(renderVideoCanvas);
     };
 
-    renderVideoCanvas();
-
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.onvoiceschanged = null;
       }
     };
-  }, [isOpen, isSpeaking, isListening]);
-
-  // Speech Recognition Setup (Dynamic Local Language)
-  useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      setHasBrowserSupport(false);
-      return;
-    }
-
-    const recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = true;
-    recognition.lang = selectedLang;
-
-    recognition.onresult = (event) => {
-      let currentTranscript = '';
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        currentTranscript += event.results[i][0].transcript;
-      }
-      setTranscript(currentTranscript);
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-
-    recognition.onerror = (event) => {
-      console.warn('Speech recognition error:', event.error);
-      setIsListening(false);
-    };
-
-    recognitionRef.current = recognition;
   }, [selectedLang]);
 
-  // Handle modal open state
+  // Check Web Speech API Support
+  useEffect(() => {
+    const hasSTT = 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window;
+    setSpeechSupported(hasSTT);
+  }, []);
+
+  // Cleanup on Unmount / Close
   useEffect(() => {
     if (isOpen) {
-      setTranscript('');
-      const selectedObj = LOCAL_LANGUAGES.find(l => l.code === selectedLang);
-      const langName = selectedObj ? selectedObj.name : 'Local Language';
-      setResponse(`Namaste! AI Voice Mode active in ${langName}. Speak or type your query in your local language.`);
-      setCurrentWordIndex(-1);
-      startListening();
+      if (inputRef.current) {
+        setTimeout(() => inputRef.current?.focus(), 200);
+      }
     } else {
-      stopListening();
-      stopSpeech();
+      turnMicOff();
+      handleStopSpeech();
     }
   }, [isOpen]);
 
-  const startListening = () => {
-    if (recognitionRef.current && !isListening) {
-      try {
-        setTranscript('');
-        recognitionRef.current.start();
-        setIsListening(true);
-      } catch (err) {
-        console.warn('Recognition active:', err);
+  // Safe AudioContext Initializer & Resumer (Fixes Autoplay Suspension)
+  const getOrCreateAudioContext = async () => {
+    try {
+      if (!speakerAudioCtxRef.current || speakerAudioCtxRef.current.state === 'closed') {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) {
+          speakerAudioCtxRef.current = new AudioCtx();
+        }
+      }
+      if (speakerAudioCtxRef.current && speakerAudioCtxRef.current.state === 'suspended') {
+        await speakerAudioCtxRef.current.resume().catch(() => {});
+      }
+      return speakerAudioCtxRef.current;
+    } catch (e) {
+      console.warn('AudioContext initialization/resume warning:', e);
+      return null;
+    }
+  };
+
+  // Safe Mic Visualizer (Isolated so it never blocks SpeechRecognition)
+  const initMicVisualizer = async () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      micStreamRef.current = stream;
+      setMicPermissionDenied(false);
+
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+
+      if (!audioContextRef.current || audioContextRef.current.state === 'closed') {
+        audioContextRef.current = new AudioCtx();
+      }
+      const ctx = audioContextRef.current;
+      if (ctx.state === 'suspended') {
+        await ctx.resume().catch(() => {});
+      }
+
+      const source = ctx.createMediaStreamSource(stream);
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 64;
+      source.connect(analyser);
+
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+
+      const updateVolume = () => {
+        if (!analyser || !micStreamRef.current) return;
+        analyser.getByteFrequencyData(dataArray);
+        let sum = 0;
+        for (let i = 0; i < bufferLength; i++) {
+          sum += dataArray[i];
+        }
+        const avg = sum / bufferLength;
+        const normalized = Math.min(1, avg / 128);
+        setMicVolume(normalized);
+        animFrameRef.current = requestAnimationFrame(updateVolume);
+      };
+      updateVolume();
+    } catch (err) {
+      console.warn('Mic visualizer notice:', err);
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        setMicPermissionDenied(true);
+        setMicErrorNotice('Microphone access was denied. Please allow microphone permissions in your browser.');
+        setTimeout(() => setMicErrorNotice(''), 6000);
       }
     }
   };
 
-  const stopListening = () => {
-    if (recognitionRef.current && isListening) {
+  const cleanupMicVisualizer = () => {
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
+    }
+    if (micStreamRef.current) {
+      try {
+        micStreamRef.current.getTracks().forEach(track => track.stop());
+      } catch (_e) {}
+      micStreamRef.current = null;
+    }
+    setMicVolume(0);
+  };
+
+  // Safe Speech Recognition Engine with Persistent User State
+  const startSpeechEngine = () => {
+    if (!micEnabledRef.current || micPermissionDenied) return;
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setSpeechSupported(false);
+      setMicErrorNotice('Speech recognition is not supported in this browser.');
+      setTimeout(() => setMicErrorNotice(''), 6000);
+      return;
+    }
+
+    if (isStartingSpeechRef.current) return;
+    isStartingSpeechRef.current = true;
+
+    try {
+      if (recognitionRef.current) {
+        try { recognitionRef.current.abort(); } catch (_e) {}
+        recognitionRef.current = null;
+      }
+
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = selectedLang;
+
+      recognition.onstart = () => {
+        isStartingSpeechRef.current = false;
+        setIsListening(true);
+        if (avatarState !== 'speaking' && avatarState !== 'thinking') {
+          setAvatarState('listening');
+        }
+        initMicVisualizer();
+      };
+
+      recognition.onresult = (event) => {
+        let currentTranscript = '';
+        for (let i = 0; i < event.results.length; i++) {
+          currentTranscript += event.results[i][0].transcript;
+        }
+        setTranscript(currentTranscript);
+        latestTranscriptRef.current = currentTranscript;
+      };
+
+      recognition.onerror = (event) => {
+        console.warn('Speech recognition event:', event.error);
+        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+          setMicPermissionDenied(true);
+          micEnabledRef.current = false;
+          setIsListening(false);
+          setMicErrorNotice('Microphone permission was denied in your browser.');
+          setTimeout(() => setMicErrorNotice(''), 6000);
+        }
+      };
+
+      recognition.onend = () => {
+        isStartingSpeechRef.current = false;
+        if (micEnabledRef.current && !micPermissionDenied) {
+          try {
+            recognition.start();
+          } catch (_e) {
+            setTimeout(() => {
+              if (micEnabledRef.current) startSpeechEngine();
+            }, 250);
+          }
+        } else {
+          setIsListening(false);
+          cleanupMicVisualizer();
+          if (avatarState === 'listening') {
+            setAvatarState('idle');
+          }
+        }
+      };
+
+      recognition.start();
+      recognitionRef.current = recognition;
+    } catch (err) {
+      console.warn('Speech recognition start error:', err);
+      isStartingSpeechRef.current = false;
+      if (!micEnabledRef.current) {
+        setIsListening(false);
+        if (avatarState === 'listening') setAvatarState('idle');
+      }
+    }
+  };
+
+  // Explicit User Control: Turn Mic ON (Stays ON until user turns it OFF)
+  const turnMicOn = () => {
+    if (micPermissionDenied) return;
+    micEnabledRef.current = true;
+    setIsListening(true);
+    getOrCreateAudioContext();
+    startSpeechEngine();
+  };
+
+  // Explicit User Control: Turn Mic OFF (Stays OFF until user turns it ON)
+  const turnMicOff = () => {
+    micEnabledRef.current = false;
+    isStartingSpeechRef.current = false;
+    if (recognitionRef.current) {
       try {
         recognitionRef.current.stop();
-      } catch (err) {
-        console.warn('Stop error:', err);
-      }
-      setIsListening(false);
+      } catch (_e) {}
+      recognitionRef.current = null;
+    }
+    cleanupMicVisualizer();
+    setIsListening(false);
+    setMicVolume(0);
+    if (avatarState === 'listening') {
+      setAvatarState('idle');
     }
   };
 
+  // Toggle Mic ON / OFF
   const toggleMic = () => {
-    if (isListening) {
-      stopListening();
+    if (micEnabledRef.current || isListening) {
+      turnMicOff();
     } else {
-      startListening();
+      turnMicOn();
+    }
+  };
+  const toggleListening = toggleMic;
+
+  // Spacebar Keyboard Shortcut to Toggle Mic ON / OFF
+  useEffect(() => {
+    const handleGlobalKey = (e) => {
+      if (!isOpen) return;
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+      const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+      if (activeTag === 'input' || activeTag === 'textarea' || activeTag === 'select') return;
+      if (e.code === 'Space' || e.key === ' ') {
+        e.preventDefault();
+        toggleMic();
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKey);
+    return () => window.removeEventListener('keydown', handleGlobalKey);
+  }, [isOpen, isListening, onClose]);
+
+  // Immediate Cancellation & Audio Stop
+  const handleStopSpeech = () => {
+    if (abortControllerRef.current) {
+      try {
+        abortControllerRef.current.abort();
+      } catch (e) {}
+      abortControllerRef.current = null;
+    }
+
+    audioQueueRef.current = [];
+    isPlayingAudioRef.current = false;
+    isStreamActiveRef.current = false;
+
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+
+    if (currentAudioSourceRef.current) {
+      try {
+        currentAudioSourceRef.current.stop();
+      } catch (e) {}
+      currentAudioSourceRef.current = null;
+    }
+
+    if (speakerSyncFrameRef.current) {
+      cancelAnimationFrame(speakerSyncFrameRef.current);
+      speakerSyncFrameRef.current = null;
+    }
+    if (fallbackIntervalRef.current) {
+      clearInterval(fallbackIntervalRef.current);
+      fallbackIntervalRef.current = null;
+    }
+
+    setAvatarState('idle');
+    setSpeakerAudioLevel(0);
+    setCurrentWordIndex(-1);
+    setCurrentViseme(null);
+  };
+
+  // Enqueue Incoming Neural Audio Chunk into FIFO Queue
+  const enqueueAudioChunk = (chunkData) => {
+    if (!chunkData) return;
+    audioQueueRef.current.push(chunkData);
+    processAudioQueue();
+  };
+
+  // Process FIFO Audio Queue Sequentially without Gaps
+  const processAudioQueue = async () => {
+    if (isPlayingAudioRef.current) {
+      return;
+    }
+
+    if (audioQueueRef.current.length === 0) {
+      if (!isStreamActiveRef.current) {
+        setAvatarState('idle');
+        setSpeakerAudioLevel(0);
+        setCurrentWordIndex(-1);
+        setCurrentViseme(null);
+      }
+      return;
+    }
+
+    const nextChunk = audioQueueRef.current.shift();
+    if (!nextChunk) return;
+
+    isPlayingAudioRef.current = true;
+    setAvatarState('speaking');
+
+    if (!hasSpokenFirstChunkRef.current) {
+      hasSpokenFirstChunkRef.current = true;
+      const elapsed = Date.now() - activeRequestStartTimeRef.current;
+      console.log(`🚀 [AVATAR STARTED SPEAKING FIRST CHUNK] at ${elapsed}ms`);
+    }
+
+    await playSingleAudioChunk(nextChunk);
+  };
+
+  // Play Single Audio Chunk with 60FPS Lip-Sync & Multi-Tier Fallbacks
+  const playSingleAudioChunk = async (chunk) => {
+    const { text, audio_base64 } = chunk;
+
+    if (!audio_base64) {
+      speakBrowserChunk(text, () => {
+        isPlayingAudioRef.current = false;
+        processAudioQueue();
+      });
+      return;
+    }
+
+    try {
+      const audioCtx = await getOrCreateAudioContext();
+
+      if (!audioCtx) {
+        throw new Error('AudioContext unavailable');
+      }
+
+      const binaryString = window.atob(audio_base64);
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+
+      const audioBuffer = await audioCtx.decodeAudioData(bytes.buffer);
+      const words = (text || '').trim().split(/\s+/);
+      setWordsList(words);
+      setCurrentWordIndex(0);
+
+      const source = audioCtx.createBufferSource();
+      source.buffer = audioBuffer;
+      source.playbackRate.value = speechRate;
+
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.85;
+
+      source.connect(analyser);
+      analyser.connect(audioCtx.destination);
+      currentAudioSourceRef.current = source;
+
+      const freqData = new Uint8Array(analyser.frequencyBinCount);
+      const audioStartTime = audioCtx.currentTime;
+      const audioDuration = audioBuffer.duration / speechRate;
+
+      let endedHandled = false;
+      const onEndedHandler = () => {
+        if (endedHandled) return;
+        endedHandled = true;
+        if (speakerSyncFrameRef.current) {
+          cancelAnimationFrame(speakerSyncFrameRef.current);
+          speakerSyncFrameRef.current = null;
+        }
+        isPlayingAudioRef.current = false;
+        processAudioQueue();
+      };
+
+      const updateLipSync = () => {
+        if (endedHandled || !speakerAudioCtxRef.current) return;
+
+        const currentElapsed = audioCtx.currentTime - audioStartTime;
+        if (currentElapsed >= audioDuration) {
+          onEndedHandler();
+          return;
+        }
+
+        if (words.length > 0 && audioDuration > 0) {
+          const progress = Math.min(1.0, Math.max(0, currentElapsed / audioDuration));
+          const wIdx = Math.min(words.length - 1, Math.floor(progress * words.length));
+          setCurrentWordIndex(wIdx);
+        }
+
+        analyser.getByteFrequencyData(freqData);
+        let lowEnergy = 0;
+        let midEnergy = 0;
+        let highEnergy = 0;
+
+        for (let i = 0; i < 8; i++) lowEnergy += freqData[i];
+        for (let i = 8; i < 32; i++) midEnergy += freqData[i];
+        for (let i = 32; i < 64; i++) highEnergy += freqData[i];
+
+        lowEnergy /= (8 * 255);
+        midEnergy /= (24 * 255);
+        highEnergy /= (32 * 255);
+
+        const liveLevel = Math.min(1.0, (lowEnergy * 0.45 + midEnergy * 0.45 + highEnergy * 0.10) * 1.6);
+        setSpeakerAudioLevel(liveLevel);
+
+        if (liveLevel > 0.08) {
+          if (highEnergy > lowEnergy * 1.15) {
+            setCurrentViseme({ shape: 'spread_smile' });
+          } else if (lowEnergy > highEnergy * 1.25) {
+            setCurrentViseme({ shape: 'rounded_o' });
+          } else {
+            setCurrentViseme({ shape: 'open_wide' });
+          }
+        } else {
+          setCurrentViseme({ shape: 'closed_mbp' });
+        }
+
+        speakerSyncFrameRef.current = requestAnimationFrame(updateLipSync);
+      };
+
+      source.onended = onEndedHandler;
+      source.start(0);
+      updateLipSync();
+
+      setTimeout(() => {
+        if (!endedHandled) {
+          onEndedHandler();
+        }
+      }, (audioDuration * 1000) + 350);
+
+    } catch (err) {
+      console.warn('Web Audio decode failed, falling back to HTML5 Audio Element:', err);
+      try {
+        const audio = new Audio(`data:audio/mp3;base64,${audio_base64}`);
+        audio.playbackRate = speechRate;
+        audio.onplay = () => {
+          setAvatarState('speaking');
+          setSpeakerAudioLevel(0.7);
+        };
+        audio.onended = () => {
+          isPlayingAudioRef.current = false;
+          processAudioQueue();
+        };
+        audio.onerror = () => {
+          speakBrowserChunk(text, () => {
+            isPlayingAudioRef.current = false;
+            processAudioQueue();
+          });
+        };
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((e) => {
+            console.warn('HTML5 Audio play rejected, falling back to Browser Speech:', e);
+            speakBrowserChunk(text, () => {
+              isPlayingAudioRef.current = false;
+              processAudioQueue();
+            });
+          });
+        }
+      } catch (audioElErr) {
+        speakBrowserChunk(text, () => {
+          isPlayingAudioRef.current = false;
+          processAudioQueue();
+        });
+      }
     }
   };
 
-  // Speak AI response out loud with local language support & pitch/rate controls
-  const speakScriptText = (textToSpeak) => {
-    if (!('speechSynthesis' in window) || !textToSpeak) return;
+  // Browser Speech Synthesis for a Single Chunk
+  const speakBrowserChunk = (textToSpeak, onComplete) => {
+    if (!('speechSynthesis' in window) || !textToSpeak) {
+      if (onComplete) onComplete();
+      return;
+    }
 
-    window.speechSynthesis.cancel();
     const words = textToSpeak.trim().split(/\s+/);
     setWordsList(words);
     setCurrentWordIndex(-1);
 
-    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    const cleanSpeech = textToSpeak.replace(/[\*\#\_`~]/g, '').replace(/\s+/g, ' ').trim();
+    const utterance = new SpeechSynthesisUtterance(cleanSpeech);
     utterance.rate = speechRate;
     utterance.pitch = speechPitch;
     utterance.lang = selectedLang;
 
-    // Find voice matching selected local language
-    const langPrefix = selectedLang.split('-')[0];
-    const matchingIdx = availableVoices.findIndex(v => v.lang.startsWith(selectedLang) || v.lang.startsWith(langPrefix));
-    if (matchingIdx !== -1) {
-      utterance.voice = availableVoices[matchingIdx];
-    } else if (availableVoices.length > 0 && availableVoices[selectedVoiceIndex]) {
-      utterance.voice = availableVoices[selectedVoiceIndex];
+    if (availableVoices.length > 0) {
+      const targetPrefix = selectedLang.toLowerCase().split('-')[0];
+      const matchingVoice = availableVoices.find(v => v.lang.toLowerCase().replace('_', '-').startsWith(targetPrefix)) || availableVoices[selectedVoiceIndex];
+      if (matchingVoice) {
+        utterance.voice = matchingVoice;
+      }
     }
-
+    
     let wordIdx = 0;
-
     utterance.onstart = () => {
-      setIsSpeaking(true);
+      setAvatarState('speaking');
       setCurrentWordIndex(0);
+      setSpeakerAudioLevel(0.7);
     };
 
     utterance.onboundary = (event) => {
       if (event.name === 'word') {
         setCurrentWordIndex(wordIdx);
+        setSpeakerAudioLevel(0.5 + Math.random() * 0.4);
+        setCurrentViseme({ shape: wordIdx % 2 === 0 ? 'open_wide' : 'spread_smile' });
         wordIdx++;
       }
     };
 
     utterance.onend = () => {
-      setIsSpeaking(false);
-      setCurrentWordIndex(-1);
+      setSpeakerAudioLevel(0);
+      setCurrentViseme(null);
+      if (onComplete) onComplete();
     };
 
     utterance.onerror = () => {
-      setIsSpeaking(false);
-      setCurrentWordIndex(-1);
+      if (onComplete) onComplete();
     };
 
     window.speechSynthesis.speak(utterance);
   };
 
-  // Handle Input Submit
-  const handleSubmitSpeech = async () => {
-    if (!transcript.trim() || isProcessing) return;
-    const queryText = transcript.trim();
-    stopListening();
-    setIsProcessing(true);
-    setTranscript('');
-    setResponse('Searching web and knowledge base...');
+  // Re-play Current Spoken Answer
+  const handlePlaySpokenAnswer = async (textToPlay) => {
+    const rawText = (typeof textToPlay === 'string' ? textToPlay : spokenText || '').trim();
+    if (!rawText) return;
 
-    try {
-      if (onAskBackend) {
-        const res = await onAskBackend(queryText);
-        const ans = res.response || 'I have processed your query.';
-        setResponse(ans);
-        speakScriptText(ans);
-      } else {
-        const ans = `Here is the explanation for "${queryText}". Ready to help you.`;
-        setResponse(ans);
-        speakScriptText(ans);
+    await getOrCreateAudioContext();
+    handleStopSpeech();
+
+    const sentenceMatches = rawText.match(/([^.?!।॥\n]+[.?!।॥\n]+|[^.?!।॥\n]+$)/g);
+    const sentences = (sentenceMatches || [rawText])
+      .map(s => s.trim())
+      .filter(s => s.length > 0);
+
+    if (sentences.length === 0) return;
+
+    isStreamActiveRef.current = true;
+    activeRequestStartTimeRef.current = Date.now();
+    hasSpokenFirstChunkRef.current = false;
+    audioQueueRef.current = [];
+
+    if (useNeuralVoice) {
+      try {
+        setIsProcessing(true);
+        for (let i = 0; i < sentences.length; i++) {
+          const sent = sentences[i];
+          const audioB64 = await fetchNeuralSpeechAudio({
+            text: sent,
+            language: selectedLang
+          });
+          enqueueAudioChunk({
+            text: sent,
+            audio_base64: audioB64,
+            chunk_index: i
+          });
+        }
+      } catch (err) {
+        console.warn('Neural TTS synthesis for play failed, using browser speech fallback:', err);
+        for (let i = 0; i < sentences.length; i++) {
+          enqueueAudioChunk({
+            text: sentences[i],
+            audio_base64: null,
+            chunk_index: i
+          });
+        }
+      } finally {
+        setIsProcessing(false);
+        isStreamActiveRef.current = false;
       }
-    } catch (_err) {
-      const fallbackAns = `I have received your request and generated the output for you.`;
-      setResponse(fallbackAns);
-      speakScriptText(fallbackAns);
-    } finally {
-      setIsProcessing(false);
+    } else {
+      for (let i = 0; i < sentences.length; i++) {
+        enqueueAudioChunk({
+          text: sentences[i],
+          audio_base64: null,
+          chunk_index: i
+        });
+      }
+      isStreamActiveRef.current = false;
     }
   };
 
-  const stopSpeech = () => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
+  // Submit Query with Incremental Sentence Streaming & Immediate First-Chunk Speech
+  const handleExecuteQuery = async (queryToSend) => {
+    if (autoSubmitTimerRef.current) {
+      clearTimeout(autoSubmitTimerRef.current);
+      autoSubmitTimerRef.current = null;
     }
-    setIsSpeaking(false);
-    setCurrentWordIndex(-1);
+
+    const cleanQ = (queryToSend || transcript).trim();
+    if (!cleanQ) return;
+
+    // Immediately turn OFF microphone on Enter / Auto-Enter / Query Execution
+    turnMicOff();
+
+    getOrCreateAudioContext();
+    handleStopSpeech();
+
+    setTranscript('');
+    setIsProcessing(true);
+    setAvatarState('thinking');
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    activeRequestStartTimeRef.current = Date.now();
+    hasSpokenFirstChunkRef.current = false;
+    isStreamActiveRef.current = true;
+    audioQueueRef.current = [];
+    isPlayingAudioRef.current = false;
+
+    console.log(`⏱️ [AI REQUEST STARTED] Query: "${cleanQ}" (Lang: ${selectedLang})`);
+
+    const instantAcks = {
+      'hi-IN': 'हाँ मेरे बच्चे, मैं आपकी बात समझ रहा हूँ...',
+      'pa-IN': 'ਹਾਂ ਮੇਰੇ ਬੱਚੇ, ਮੈਂ ਤੁਹਾਡੀ ਗੱਲ ਧਿਆਨ ਨਾਲ ਸੁਣ ਰਿਹਾ ਹਾਂ...',
+      'bn-IN': 'হ্যাঁ আমার সন্তান, আমি তোমার কথা শুনছি...',
+      'ta-IN': 'ஆம் என் குழந்தையே, நான் உங்கள் கவலையை கவனிக்கிறேன்...',
+      'en-IN': 'Yes, my child, let me share our traditional guidance with you...'
+    };
+    setSpokenText(instantAcks[selectedLang] || instantAcks['en-IN']);
+
+    try {
+      await askAvatarChatStream({
+        query: cleanQ,
+        persona: 'genji',
+        language: selectedLang,
+        search_enabled: true,
+        signal: controller.signal,
+        onStart: (data) => {
+          const elapsed = Date.now() - activeRequestStartTimeRef.current;
+          console.log(`⏱️ [START EVENT] at ${elapsed}ms: ${data.acknowledgement}`);
+          if (data.acknowledgement) {
+            setSpokenText(data.acknowledgement);
+          }
+        },
+        onTextChunk: (data) => {
+          const elapsed = Date.now() - activeRequestStartTimeRef.current;
+          console.log(`⏱️ [FIRST SENTENCE / TEXT CHUNK #${data.chunk_index}] at ${elapsed}ms: "${data.text}"`);
+          if (data.accumulated) {
+            setSpokenText(data.accumulated);
+          }
+        },
+        onAudioChunk: (data) => {
+          const elapsed = Date.now() - activeRequestStartTimeRef.current;
+          console.log(`🔊 [AUDIO CHUNK #${data.chunk_index} RECEIVED] at ${elapsed}ms -> enqueuing to FIFO player`);
+          enqueueAudioChunk(data);
+        },
+        onStreamDone: (data) => {
+          const elapsed = Date.now() - activeRequestStartTimeRef.current;
+          console.log(`✅ [STREAM COMPLETED] at ${elapsed}ms | Total chunks: ${data.total_chunks}`);
+          isStreamActiveRef.current = false;
+          setIsProcessing(false);
+          if (data.full_text) {
+            setSpokenText(data.full_text);
+          }
+          if (audioQueueRef.current.length === 0 && !isPlayingAudioRef.current) {
+            setAvatarState('idle');
+          }
+        },
+        onError: async (err) => {
+          console.warn('Streaming fallback triggered:', err);
+          isStreamActiveRef.current = false;
+          setIsProcessing(false);
+          if (!hasSpokenFirstChunkRef.current) {
+            try {
+              const res = await askAvatarChat({
+                query: cleanQ,
+                persona: 'genji',
+                language: selectedLang,
+                search_enabled: true
+              });
+              const displayAns = res.spoken_text || res.response || 'I have analyzed your inquiry, my child.';
+              setSpokenText(displayAns);
+              enqueueAudioChunk({ text: displayAns, audio_base64: res.audio_base64, visemes: res.visemes });
+            } catch (e) {
+              const fallbackMsg = 'Our traditional wisdom holds timeless guidance for this path, my child.';
+              setSpokenText(fallbackMsg);
+              enqueueAudioChunk({ text: fallbackMsg, audio_base64: null });
+            }
+          }
+        }
+      });
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        console.error('Avatar query error:', err);
+        const fallbackMsg = 'Our traditional wisdom holds timeless guidance for this path, my child.';
+        setSpokenText(fallbackMsg);
+        enqueueAudioChunk({ text: fallbackMsg, audio_base64: null });
+      }
+      setIsProcessing(false);
+      isStreamActiveRef.current = false;
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleExecuteQuery();
+    }
+  };
+
+  const handleLanguageChange = async (newLang) => {
+    setSelectedLang(newLang);
+    handleStopSpeech();
+
+    const greetings = {
+      'hi-IN': 'सादर प्रणाम और बहुत सारा आशीर्वाद, मेरे बच्चे। मैं सरदार गेंजी हूँ। बताइए आज आप किस समस्या का सामना कर रहे हैं, हम मिलकर पारंपरिक और वैज्ञानिक समाधान निकालेंगे।',
+      'pa-IN': 'ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ ਅਤੇ ਬਹੁਤ ਸਾਰਾ ਪਿਆਰ, ਮੇਰੇ ਬੱਚੇ। ਮੈਂ ਸਰਦਾਰ ਗੇਂਜੀ ਹਾਂ। ਦੱਸੋ ਅੱਜ ਤੁਸੀਂ ਕਿਹੜੀ ਮੁਸ਼ਕਲ ਦਾ ਸਾਹਮਣਾ ਕਰ ਰਹੇ ਹੋ, ਆਪਾਂ ਰਲ ਕੇ ਹੱਲ ਲੱਭਾਂਗੇ।',
+      'en-IN': 'Greetings and warm blessings, my child. I am Sardar Genji. Share with me what is in your heart today, and we will find a peaceful, time-tested traditional remedy together.',
+      'bn-IN': 'নমস্কার এবং অনেক আশীর্বাদ, আমার সন্তান। আমি সরদার গেঞ্জি। বলো আজ তুমি কী ধরনের সমস্যা অনুভব করছ, আমরা ঐতিহ্যবাহী প্রতিকার খুঁজে নেব।',
+      'ta-IN': 'வணக்கம் மற்றும் என் ஆசிகள், என் குழந்தையே. நான் சர்தார் கெஞ்சி. இன்று உங்கள் மனதில் உள்ளதை என்னிடம் பகிர்ந்து கொள்ளுங்கள், பாரம்பரிய தீர்வை காண்போம்.'
+    };
+
+    const greet = greetings[newLang] || greetings['en-IN'];
+    setSpokenText(greet);
   };
 
   if (!isOpen) return null;
 
+  const currentLangObj = SUPPORTED_LANGUAGES.find(l => l.code === selectedLang) || SUPPORTED_LANGUAGES[0];
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4 animate-fadeIn">
-      <div className="relative w-full max-w-xl bg-white border border-[#e2e8f0] rounded-3xl p-6 md:p-8 text-slate-800 flex flex-col items-center shadow-2xl overflow-hidden">
-        {/* Header with Local Language Selector */}
-        <div className="w-full flex items-center justify-between mb-3 gap-2">
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="px-3 py-1.5 rounded-full text-xs font-semibold bg-orange-500 text-white shadow-md shadow-orange-500/30 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-white" />
-              <span>AI Voice Mode</span>
-            </div>
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#080605]/85 backdrop-blur-md p-3 sm:p-5 selection:bg-orange-600 selection:text-white animate-fadeIn"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="voice-avatar-title"
+    >
+      {/* Background Ambient Radial Glow matching Setu_Avatar */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-amber-600/10 rounded-full blur-3xl animate-pulse-glow" />
+        <div className="absolute top-10 right-1/4 w-[300px] h-[300px] bg-orange-600/5 rounded-full blur-2xl" />
+      </div>
 
-            {/* Local Language Selector Pill */}
-            <div className="flex items-center bg-orange-50 border border-orange-200 rounded-full px-2.5 py-1 text-xs font-medium text-orange-800 shadow-xs">
-              <Globe className="w-3.5 h-3.5 mr-1 text-orange-600 shrink-0" />
-              <select
-                value={selectedLang}
-                onChange={(e) => {
-                  setSelectedLang(e.target.value);
-                  if (isListening) stopListening();
-                }}
-                className="bg-transparent outline-none cursor-pointer font-semibold text-orange-900 pr-1 text-xs"
-              >
-                {LOCAL_LANGUAGES.map((lang) => (
-                  <option key={lang.code} value={lang.code}>
-                    {lang.flag} {lang.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1 shrink-0">
-            <button
-              onClick={onClose}
-              className="p-2 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-full transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+      {/* Main Centered Responsive Container with Zero Page Scroll */}
+      <div className="relative z-10 w-full max-w-2xl sm:max-w-3xl h-full max-h-[96vh] flex flex-col justify-between items-center gap-1.5 sm:gap-2 py-1 select-none">
+        
+        {/* Header Strip: Close Button */}
+        <div className="w-full flex items-center justify-end px-1 shrink-0 h-7 sm:h-8">
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1.5 sm:p-2 rounded-full bg-stone-900/85 border border-amber-500/20 text-stone-400 hover:text-white hover:bg-red-950/80 shadow-md transition-all flex items-center justify-center shrink-0 cursor-pointer"
+            title="Close Voice Avatar (Esc)"
+            aria-label="Close Voice Avatar"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
-        {/* 60FPS Video Canvas Avatar Player */}
-        <div className="relative flex flex-col items-center justify-center my-2 group">
-          <div className={`relative rounded-3xl overflow-hidden border-2 transition-all duration-300 shadow-xl ${
-            isSpeaking
-              ? 'border-orange-500 shadow-[0_0_40px_rgba(249,115,22,0.5)]'
-              : isListening
-              ? 'border-orange-400 shadow-[0_0_30px_rgba(251,146,60,0.4)]'
-              : 'border-slate-200'
-          }`}>
-            <canvas
-              ref={canvasRef}
-              width={260}
-              height={320}
-              className="w-[260px] h-[320px] object-cover bg-[#1e1e24]"
-            />
-
-            {/* Orange Video Player Equalizer Soundwave Overlay */}
-            {isSpeaking && (
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-end gap-1 bg-slate-900/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-orange-500/50">
-                <span className="w-1 h-3.5 bg-orange-400 rounded-full animate-bounce" />
-                <span className="w-1 h-5.5 bg-orange-500 rounded-full animate-bounce delay-75" />
-                <span className="w-1 h-2.5 bg-amber-400 rounded-full animate-bounce delay-150" />
-                <span className="w-1 h-4.5 bg-orange-400 rounded-full animate-bounce delay-100" />
-              </div>
-            )}
-          </div>
-
-          {/* Video Status Badge */}
-          <div className="mt-2.5 inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-orange-50 border border-orange-200 text-xs font-semibold text-orange-700">
-            {isSpeaking ? (
-              <>
-                <Video className="w-3.5 h-3.5 text-orange-600 animate-pulse" />
-                <span>Video Lip-Syncing & Explaining...</span>
-              </>
-            ) : isListening ? (
-              <>
-                <span className="w-2 h-2 rounded-full bg-orange-500 animate-ping" />
-                <span>Listening in {LOCAL_LANGUAGES.find(l => l.code === selectedLang)?.name || selectedLang}...</span>
-              </>
-            ) : (
-              <>
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span>AI Voice Avatar Ready ({LOCAL_LANGUAGES.find(l => l.code === selectedLang)?.flag})</span>
-              </>
-            )}
-          </div>
+        {/* 1. Responsive 60 FPS HTML5 Video Canvas Avatar */}
+        <div className="flex-1 min-h-0 w-full flex items-center justify-center py-0.5">
+          <AvatarCanvas
+            persona={selectedPersona}
+            state={avatarState}
+            audioLevel={speakerAudioLevel}
+            isSpeaking={avatarState === 'speaking'}
+            isListening={avatarState === 'listening'}
+            isThinking={avatarState === 'thinking'}
+            currentViseme={currentViseme}
+            themeColor="#ea580c"
+          />
         </div>
 
-        {!hasBrowserSupport && (
-          <p className="text-xs text-amber-600 mb-2 font-medium">
-            Speech Recognition is not supported by your browser. Please type your query below.
-          </p>
+        {/* 2. Real-Time Dynamic Karaoke Subtitles (Fixed height & Internal text scroll) */}
+        <KaraokeSubtitles
+          words={wordsList}
+          currentWordIndex={currentWordIndex}
+          spokenText={spokenText}
+          isSpeaking={avatarState === 'speaking'}
+          isProcessing={isProcessing}
+          onStopSpeech={handleStopSpeech}
+          onPlaySpeech={() => handlePlaySpokenAnswer(spokenText)}
+          onReplaySpeech={() => handlePlaySpokenAnswer(spokenText)}
+          themeColor="#ea580c"
+        />
+
+        {/* Mic Notice / Permission Alert */}
+        {micErrorNotice && (
+          <div className="w-full px-3 py-1 rounded-xl bg-red-950/80 border border-red-500/40 text-xs text-red-200 flex items-center gap-2 animate-fadeIn shadow-lg shrink-0">
+            <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+            <span>{micErrorNotice}</span>
+          </div>
         )}
 
-        {/* Word-by-Word Karaoke Subtitles Box */}
-        <div className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3.5 my-2 min-h-16 max-h-28 overflow-y-auto text-center flex items-center justify-center custom-scrollbar">
-          {wordsList.length > 0 && isSpeaking ? (
-            <p className="text-xs md:text-sm font-medium leading-relaxed max-w-md">
-              {wordsList.map((word, idx) => (
-                <span
-                  key={idx}
-                  className={`inline-block mx-0.5 transition-all duration-150 ${
-                    idx === currentWordIndex
-                      ? 'text-orange-600 font-extrabold scale-110 border-b-2 border-orange-500'
-                      : idx < currentWordIndex
-                      ? 'text-slate-400'
-                      : 'text-slate-800'
-                  }`}
-                >
-                  {word}{' '}
-                </span>
-              ))}
-            </p>
-          ) : (
-            <p className="text-xs md:text-sm font-medium text-slate-700 leading-relaxed max-w-md">
-              {response}
-            </p>
-          )}
-        </div>
+        {/* 3. Bottom Unified Voice + Text Dock */}
+        <div className="w-full h-[52px] sm:h-[56px] shrink-0 flex items-center gap-1.5 sm:gap-2 bg-stone-900/90 backdrop-blur-2xl border border-amber-500/30 rounded-2xl sm:rounded-3xl p-1.5 sm:p-2 shadow-2xl transition-all focus-within:border-orange-500/70 focus-within:ring-2 focus-within:ring-orange-500/20">
+          {/* Mic Trigger */}
+          <button
+            type="button"
+            onClick={toggleListening}
+            disabled={isProcessing || micPermissionDenied || !speechSupported}
+            className={`relative p-2.5 sm:p-3 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all duration-300 shrink-0 ${
+              isListening
+                ? 'bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-lg shadow-emerald-600/40 animate-pulse'
+                : micPermissionDenied || !speechSupported
+                ? 'bg-stone-800 text-stone-500 cursor-not-allowed opacity-50'
+                : 'bg-stone-800/80 hover:bg-stone-700 text-amber-200 border border-amber-500/20 hover:border-amber-500/40 cursor-pointer'
+            }`}
+            title={
+              !speechSupported
+                ? 'Speech recognition not supported in this browser'
+                : micPermissionDenied
+                ? 'Microphone permission denied'
+                : isListening
+                ? 'Stop listening'
+                : 'Start speaking (Hands-Free with Space)'
+            }
+          >
+            {isListening ? (
+              <MicOff className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+            ) : (
+              <Mic className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400" />
+            )}
 
-        {/* AI VOICE MODE INPUT BOX */}
-        <div className="w-full flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2 mb-2">
+            {/* Mic Audio volume pulse ring */}
+            {isListening && (
+              <span
+                className="mic-pulse-ring"
+                style={{ transform: `scale(${1 + micVolume * 0.45})` }}
+              />
+            )}
+          </button>
+
+          {/* Compact Multi-Language Selector Pill near Mic */}
+          <div className="flex items-center gap-1 bg-stone-800/90 hover:bg-stone-800 px-2 py-1.5 sm:py-2 rounded-xl border border-amber-500/25 shadow-sm transition-all shrink-0">
+            <Globe className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-orange-400 shrink-0" />
+            <select
+              id="language-select-bar"
+              value={selectedLang}
+              onChange={(e) => handleLanguageChange(e.target.value)}
+              className="bg-transparent text-[11px] sm:text-xs font-semibold text-amber-200 focus:outline-none cursor-pointer pr-0.5"
+              aria-label="Select Language"
+            >
+              {SUPPORTED_LANGUAGES.map((lang) => (
+                <option
+                  key={lang.code}
+                  value={lang.code}
+                  className="bg-stone-950 text-stone-100 py-1"
+                >
+                  {lang.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Text Input */}
           <input
+            ref={inputRef}
             type="text"
             value={transcript}
             onChange={(e) => setTranscript(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSubmitSpeech()}
-            placeholder={isListening ? `Listening in ${LOCAL_LANGUAGES.find(l => l.code === selectedLang)?.name || 'local language'}...` : 'Type or speak in local language...'}
-            className="flex-1 bg-transparent border-none outline-none text-slate-800 text-sm placeholder-slate-400"
-          />
-          <button
-            type="button"
-            onClick={handleSubmitSpeech}
-            disabled={!transcript.trim() || isProcessing}
-            className="p-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl disabled:opacity-40 transition-colors shrink-0 shadow-md shadow-orange-500/20"
-          >
-            <Send className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Action Controls Bar */}
-        <div className="flex items-center gap-4 mt-2">
-          <button
-            onClick={toggleMic}
-            className={`w-11 h-11 rounded-full flex items-center justify-center transition-all ${
+            onKeyDown={handleKeyDown}
+            placeholder={
               isListening
-                ? 'bg-orange-500 text-white hover:bg-orange-600 shadow-lg shadow-orange-500/40 scale-105'
-                : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200'
-            }`}
-            title={isListening ? 'Mute Microphone' : 'Start Microphone'}
-          >
-            {isListening ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4 text-orange-500" />}
-          </button>
+                ? `Listening in ${currentLangObj.native}... Speak now.`
+                : !speechSupported || micPermissionDenied
+                ? `Type question in ${currentLangObj.native}...`
+                : `Ask in ${currentLangObj.native} or type question...`
+            }
+            className="flex-1 min-w-0 bg-transparent border-none outline-none text-stone-100 text-xs sm:text-sm md:text-base px-2 placeholder:text-stone-500 font-medium"
+          />
 
-          {isSpeaking && (
+          {/* Clear text button */}
+          {transcript && (
             <button
-              onClick={stopSpeech}
-              className="px-4 py-2 bg-red-50 border border-red-200 text-red-600 text-xs font-semibold rounded-full hover:bg-red-100 transition-colors flex items-center gap-1.5"
+              type="button"
+              onClick={() => setTranscript('')}
+              className="p-1.5 text-stone-400 hover:text-stone-200 rounded-full transition-colors shrink-0 cursor-pointer"
+              title="Clear text"
             >
-              <VolumeX className="w-3.5 h-3.5" />
-              <span>Stop Voice</span>
+              <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
           )}
 
+          {/* Send / Execute Button */}
           <button
-            onClick={onClose}
-            className="px-6 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-full border border-slate-200 transition-colors"
+            type="button"
+            onClick={() => handleExecuteQuery()}
+            disabled={!transcript.trim() || isProcessing}
+            className="btn-action-primary !p-2.5 sm:!p-3 !rounded-xl sm:!rounded-2xl disabled:opacity-30 disabled:pointer-events-none shrink-0 cursor-pointer"
+            title="Ask Avatar"
           >
-            Close
+            {isProcessing ? (
+              <RefreshCw className="w-4 h-4 animate-spin text-white" />
+            ) : (
+              <Send className="w-4 h-4 text-white" />
+            )}
           </button>
         </div>
       </div>

@@ -109,9 +109,34 @@ class TestBackendComprehensive(unittest.TestCase):
             self.assertIsInstance(res.json(), list)
         print(" [PASS] Text search query endpoint test passed.")
 
+    def test_09_avatar_endpoints(self):
+        """Test Avatar endpoints: personas, health, stats, and custom knowledge."""
+        with TestClient(app) as client:
+            res = client.get("/api/avatar/personas")
+            self.assertEqual(res.status_code, 200)
+            data = res.json()
+            self.assertIn("personas", data)
+            self.assertTrue(len(data["personas"]) >= 4)
+            print(f" [PASS] /api/avatar/personas verified ({len(data['personas'])} personas).")
+
+            res_stats = client.get("/api/avatar/stats")
+            self.assertEqual(res_stats.status_code, 200)
+            self.assertIn("avatarName", res_stats.json())
+            print(" [PASS] /api/avatar/stats verified.")
+
+            res_custom = client.get("/api/avatar/custom-knowledge")
+            self.assertEqual(res_custom.status_code, 200)
+            self.assertIn("knowledge", res_custom.json())
+            print(" [PASS] /api/avatar/custom-knowledge verified.")
+
+            res_health = client.get("/api/health")
+            self.assertEqual(res_health.status_code, 200)
+            print(" [PASS] /api/health verified.")
+
     @classmethod
     def tearDownClass(cls):
         database_module.close_mongo_connection()
 
 if __name__ == "__main__":
     unittest.main()
+

@@ -4,7 +4,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import connect_to_mongo, close_mongo_connection, get_database
-from app.routers import auth, users, knowledge, search, mentors, verification, learning_paths, communities, ai
+from app.routers import auth, users, knowledge, search, mentors, verification, learning_paths, communities, ai, avatar
+from app.services.rag_service import rag_service
 
 # Configure basic logging
 logging.basicConfig(
@@ -15,6 +16,13 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Initialize Avatar Knowledge Base & Vector Store
+    try:
+        await rag_service.initialize()
+        logger.info("Avatar Knowledge Base & Vector Store initialized successfully.")
+    except Exception as rag_err:
+        logger.warning(f"Avatar RAG initialization notice: {rag_err}")
+
     # Setup database connection
     connect_to_mongo()
     db = get_database()
@@ -157,6 +165,7 @@ app.include_router(verification.router)
 app.include_router(learning_paths.router)
 app.include_router(communities.router)
 app.include_router(ai.router)
+app.include_router(avatar.router)
 
 
 

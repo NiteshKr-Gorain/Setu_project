@@ -23,7 +23,7 @@ export default function KaraokeSubtitles({
   };
 
   return (
-    <div className="w-full h-[115px] sm:h-[128px] shrink-0 bg-stone-900/85 backdrop-blur-2xl border border-amber-500/25 rounded-2xl sm:rounded-3xl p-2.5 sm:p-3.5 shadow-2xl flex flex-col justify-between select-none">
+    <div className="w-full h-[145px] sm:h-[158px] shrink-0 bg-stone-900/85 backdrop-blur-2xl border border-amber-500/25 rounded-2xl sm:rounded-3xl p-3 sm:p-4 shadow-2xl flex flex-col justify-between select-none">
       {/* Subtitle Header Bar: Actions Group */}
       <div className="flex items-center justify-between gap-2 border-b border-amber-500/15 pb-1.5 shrink-0 h-7 sm:h-8">
         <div className="flex items-center gap-2 shrink-0 min-w-0">

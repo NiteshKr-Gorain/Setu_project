@@ -907,16 +907,16 @@ export default function VoiceAvatarModal({ isOpen, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 sm:p-2 rounded-full bg-stone-900/85 border border-amber-500/20 text-stone-400 hover:text-white hover:bg-red-950/80 shadow-md transition-all flex items-center justify-center shrink-0 cursor-pointer"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-stone-900/85 border border-amber-500/20 text-stone-400 hover:text-white hover:bg-red-950/80 shadow-md transition-all flex items-center justify-center shrink-0 cursor-pointer pointer-events-auto active:scale-95 touch-manipulation"
             title="Close Voice Avatar (Esc)"
             aria-label="Close Voice Avatar"
           >
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5 pointer-events-none" />
           </button>
         </div>
 
-        {/* 1. Responsive 60 FPS HTML5 Video Canvas Avatar */}
-        <div className="flex-1 min-h-0 w-full flex items-center justify-center py-0.5">
+        {/* 1. Responsive 60 FPS HTML5 Video Canvas Avatar - Shifted 30px Up */}
+        <div className="flex-1 min-h-0 w-full flex items-center justify-center py-0.5 -translate-y-[30px]">
           <AvatarCanvas
             persona={selectedPersona}
             state={avatarState}
@@ -951,13 +951,13 @@ export default function VoiceAvatarModal({ isOpen, onClose }) {
         )}
 
         {/* 3. Bottom Unified Voice + Text Dock */}
-        <div className="w-full h-[52px] sm:h-[56px] shrink-0 flex items-center gap-1.5 sm:gap-2 bg-stone-900/90 backdrop-blur-2xl border border-amber-500/30 rounded-2xl sm:rounded-3xl p-1.5 sm:p-2 shadow-2xl transition-all focus-within:border-orange-500/70 focus-within:ring-2 focus-within:ring-orange-500/20">
+        <div className="w-full h-[62px] sm:h-[68px] md:h-[74px] shrink-0 flex items-center gap-2 sm:gap-2.5 md:gap-3 bg-stone-900/90 backdrop-blur-2xl border border-amber-500/30 rounded-2xl sm:rounded-3xl p-2 sm:p-2.5 md:p-3 shadow-2xl transition-all focus-within:border-orange-500/70 focus-within:ring-2 focus-within:ring-orange-500/20">
           {/* Mic Trigger */}
           <button
             type="button"
             onClick={toggleListening}
             disabled={isProcessing || micPermissionDenied || !speechSupported}
-            className={`relative p-2.5 sm:p-3 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all duration-300 shrink-0 ${
+            className={`relative p-3 sm:p-3.5 md:p-3.5 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all duration-300 shrink-0 ${
               isListening
                 ? 'bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-lg shadow-emerald-600/40 animate-pulse'
                 : micPermissionDenied || !speechSupported
@@ -975,9 +975,9 @@ export default function VoiceAvatarModal({ isOpen, onClose }) {
             }
           >
             {isListening ? (
-              <MicOff className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              <MicOff className="w-4 h-4 sm:w-5 sm:h-5 md:w-5 md:h-5 text-white" />
             ) : (
-              <Mic className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400" />
+              <Mic className="w-4 h-4 sm:w-5 sm:h-5 md:w-5 md:h-5 text-orange-400" />
             )}
 
             {/* Mic Audio volume pulse ring */}
@@ -990,13 +990,13 @@ export default function VoiceAvatarModal({ isOpen, onClose }) {
           </button>
 
           {/* Compact Multi-Language Selector Pill near Mic */}
-          <div className="flex items-center gap-1 bg-stone-800/90 hover:bg-stone-800 px-2 py-1.5 sm:py-2 rounded-xl border border-amber-500/25 shadow-sm transition-all shrink-0">
-            <Globe className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-orange-400 shrink-0" />
+          <div className="flex items-center gap-1.5 bg-stone-800/90 hover:bg-stone-800 px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl border border-amber-500/25 shadow-sm transition-all shrink-0">
+            <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-400 shrink-0" />
             <select
               id="language-select-bar"
               value={selectedLang}
               onChange={(e) => handleLanguageChange(e.target.value)}
-              className="bg-transparent text-[11px] sm:text-xs font-semibold text-amber-200 focus:outline-none cursor-pointer pr-0.5"
+              className="bg-transparent text-xs sm:text-sm font-semibold text-amber-200 focus:outline-none cursor-pointer pr-0.5"
               aria-label="Select Language"
             >
               {SUPPORTED_LANGUAGES.map((lang) => (
@@ -1025,7 +1025,7 @@ export default function VoiceAvatarModal({ isOpen, onClose }) {
                 ? `Type question in ${currentLangObj.native}...`
                 : `Ask in ${currentLangObj.native} or type question...`
             }
-            className="flex-1 min-w-0 bg-transparent border-none outline-none text-stone-100 text-xs sm:text-sm md:text-base px-2 placeholder:text-stone-500 font-medium"
+            className="flex-1 min-w-0 bg-transparent border-none outline-none text-stone-100 text-sm sm:text-base md:text-lg px-2 sm:px-3 placeholder:text-stone-500 font-medium"
           />
 
           {/* Clear text button */}
@@ -1033,10 +1033,10 @@ export default function VoiceAvatarModal({ isOpen, onClose }) {
             <button
               type="button"
               onClick={() => setTranscript('')}
-              className="p-1.5 text-stone-400 hover:text-stone-200 rounded-full transition-colors shrink-0 cursor-pointer"
+              className="p-2 text-stone-400 hover:text-stone-200 rounded-full transition-colors shrink-0 cursor-pointer"
               title="Clear text"
             >
-              <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <X className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
             </button>
           )}
 
@@ -1045,13 +1045,13 @@ export default function VoiceAvatarModal({ isOpen, onClose }) {
             type="button"
             onClick={() => handleExecuteQuery()}
             disabled={!transcript.trim() || isProcessing}
-            className="btn-action-primary !p-2.5 sm:!p-3 !rounded-xl sm:!rounded-2xl disabled:opacity-30 disabled:pointer-events-none shrink-0 cursor-pointer"
+            className="btn-action-primary !p-3 sm:!p-3.5 md:!p-3.5 !rounded-xl sm:!rounded-2xl disabled:opacity-30 disabled:pointer-events-none shrink-0 cursor-pointer shadow-lg"
             title="Ask Avatar"
           >
             {isProcessing ? (
-              <RefreshCw className="w-4 h-4 animate-spin text-white" />
+              <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 animate-spin text-white" />
             ) : (
-              <Send className="w-4 h-4 text-white" />
+              <Send className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             )}
           </button>
         </div>

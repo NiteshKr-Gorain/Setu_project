@@ -3,11 +3,19 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-primary: #FF9F43;
-  --color-brand-hover: #E08A32;
-  --color-brand-light: #FFF0E0;
+  --color-brand-primary: #F97316;
+  --color-brand-hover: #EA580C;
+  --color-brand-light: #FFF7ED;
   --color-setu-blue: #EBF3FF;
   --color-setu-dark: #1E293B;
+  
+  --color-slate-900: #111827;
+  --color-slate-800: #1F2937;
+  --color-slate-600: #475569;
+  --color-slate-500: #64748B;
+  --color-slate-555: #475569;
+  --color-slate-550: #475569;
+  --color-slate-655: #475569;
   
   --font-sans: 'Outfit', system-ui, -apple-system, sans-serif;
   --font-serif: 'Playfair Display', Georgia, serif;
@@ -38,8 +46,8 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background-color: #FCFAF7;
-  color: #0F172A;
+  background-color: #FFF7ED;
+  color: #111827;
   overflow-x: hidden;
 }
 
@@ -50,13 +58,13 @@ body {
 
 /* Elegant Text Gradient */
 .text-gradient-saffron {
-  background: linear-gradient(135deg, #FF9F43 0%, #FF6B6B 50%, #FF4757 100%);
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 50%, #C2410C 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .text-gradient-navy {
-  background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+  background: linear-gradient(135deg, #111827 0%, #1F2937 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }

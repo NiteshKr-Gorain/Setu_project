@@ -8,7 +8,7 @@ export default function Testimonials() {
       quote: "Sharing my zero-budget organic farming techniques with young agriculture students through Setu gave me a renewed sense of purpose.",
       name: "Ramesh Kumar",
       role: "Farmer & Elder (Bihar)",
-      avatar: "https://images.unsplash.com/photo-1609010604666-615582c553fc?auto=format&fit=crop&w=150&h=150&q=80"
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80"
     },
     {
       quote: "I learned ancient pottery methods directly from Sita Devi. Her patience and guidance helped me preserve a craft that was almost extinct in our district.",
@@ -44,17 +44,17 @@ export default function Testimonials() {
   };
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 50 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: false, margin: '-100px' }}
-      transition={{ duration: 0.8, ease: 'easeOut' }}
-      className="py-24 bg-gradient-to-b from-[#FCFAF7] via-[#FFFBF7] to-[#FCFAF7] rounded-[48px] border border-orange-100/30 transition-colors duration-300 relative overflow-hidden"
+    <section
+      style={{ background: '#FFFFFF' }}
+      className="py-24 bg-[#FFFFFF] border-y border-slate-100 shadow-[0_4px_20px_rgba(15,23,42,0.015)] relative overflow-hidden w-full"
     >
-      {/* Background glow spark */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-brand-light/20 rounded-full blur-[100px] -z-10"></div>
-
-      <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16 relative z-10">
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: false, margin: '-100px' }}
+        transition={{ duration: 0.8, ease: 'easeOut' }}
+        className="max-w-7xl mx-auto px-6 md:px-12 space-y-16 relative z-10"
+      >
         
         {/* Section header */}
         <div className="flex flex-col items-center text-center space-y-4.5 max-w-2xl mx-auto">
@@ -89,7 +89,7 @@ export default function Testimonials() {
           ))}
         </motion.div>
 
-      </div>
-    </motion.section>
+      </motion.div>
+    </section>
   );
 }

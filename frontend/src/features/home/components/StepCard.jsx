@@ -1,28 +1,32 @@
 import React from 'react';
 
-export default function StepCard({ number, title, description }) {
-  return (
-    <div className="relative bg-white/70 p-8 rounded-[32px] border border-slate-200/50 shadow-3xs premium-card-hover flex flex-col justify-between text-left group transition-all duration-350 cursor-pointer">
-      <div className="space-y-5">
-        {/* Step Number Badge - Swaps theme on card hover */}
-        <div className="w-12 h-12 rounded-full bg-brand-light text-brand-primary font-black text-[13px] flex items-center justify-center border border-brand-primary/10 group-hover:scale-105 group-hover:bg-brand-primary group-hover:text-white transition-all duration-300 shadow-2xs">
-          {number}
-        </div>
+export default function StepCard({ step }) {
+  const { number, title, description, icon: Icon } = step;
 
+  return (
+    <div className="flex flex-col items-center text-center group cursor-pointer transition-all duration-300 w-full">
+      {/* 1. Circular Icon Badge (88px x 88px) */}
+      <div className="w-[88px] h-[88px] rounded-full bg-[#FFF7ED] border border-[#FFEDD5] flex items-center justify-center text-[#F97316] shadow-[0_4px_14px_rgba(249,115,22,0.06)] group-hover:bg-[#F97316] group-hover:text-white group-hover:scale-105 group-hover:shadow-[0_8px_20px_rgba(249,115,22,0.15)] transition-all duration-300 z-10 shrink-0">
+        {Icon && <Icon className="w-[30px] h-[30px]" strokeWidth={1.8} />}
+      </div>
+
+      {/* 2. Step Text Content (Offset below the icon) */}
+      <div className="mt-6 space-y-2">
+        {/* Step Number */}
+        <span className="text-[14px] font-bold text-[#F97316] tracking-wide block">
+          {number}
+        </span>
+        
         {/* Title */}
-        <h3 className="text-[17px] font-extrabold text-slate-800 group-hover:text-brand-primary transition-colors duration-250 tracking-tight">
+        <h3 className="text-[18px] sm:text-[19px] font-semibold text-[#172033] tracking-tight leading-snug group-hover:text-[#F97316] transition-colors duration-300">
           {title}
         </h3>
-
+        
         {/* Description */}
-        <p className="text-slate-550 text-[13.5px] font-semibold leading-relaxed">
+        <p className="text-[#64748B] text-[14px] sm:text-[14.5px] font-normal leading-[1.6] max-w-[240px] mx-auto">
           {description}
         </p>
       </div>
-
-      {/* Interactive progress bar indicator at bottom */}
-      <div className="w-8 h-1 bg-slate-200 group-hover:bg-brand-primary group-hover:w-14 transition-all duration-350 mt-6 rounded-full"></div>
     </div>
   );
 }
-

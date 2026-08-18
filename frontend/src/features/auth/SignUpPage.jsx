@@ -258,7 +258,7 @@ export default function SignUpPage({ onViewChange }) {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-3.5 mt-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-full transition-all duration-200 cursor-pointer shadow-md shadow-emerald-600/10 flex items-center justify-center space-x-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full py-3.5 mt-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-full transition-all duration-200 cursor-pointer flex items-center justify-center space-x-2 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
                     <>

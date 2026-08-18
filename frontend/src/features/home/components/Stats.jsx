@@ -30,17 +30,17 @@ export default function Stats() {
   };
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: false, margin: '-100px' }}
-      transition={{ duration: 0.8 }}
-      className="py-24 bg-gradient-to-b from-[#FCFAF7] via-[#FFFDFB] to-[#FCFAF7] rounded-[48px] border border-orange-100/30 relative overflow-hidden"
+    <section
+      style={{ background: '#FFFFFF' }}
+      className="py-24 bg-[#FFFFFF] border-y border-slate-100 shadow-[0_4px_20px_rgba(15,23,42,0.015)] relative overflow-hidden w-full"
     >
-      {/* Background glow accent */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[500px] bg-brand-light/20 rounded-full blur-[120px] -z-10"></div>
-
-      <div className="max-w-7xl mx-auto px-8 md:px-12 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: false, margin: '-100px' }}
+        transition={{ duration: 0.8 }}
+        className="max-w-7xl mx-auto px-8 md:px-12 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center"
+      >
         
         {/* Left Side: Stats introduction */}
         <div className="lg:col-span-5 text-left space-y-6">
@@ -70,7 +70,7 @@ export default function Stats() {
               <motion.div
                 key={idx}
                 variants={cardVariants}
-                className="bg-white p-8 rounded-[32px] border border-slate-200/50 shadow-[0_2px_8px_rgba(0,0,0,0.015)] hover:shadow-[0_20px_40px_rgba(255,159,67,0.05)] hover:border-brand-primary/20 transition-all duration-350 hover:-translate-y-1 flex flex-col justify-between h-[180px] group cursor-pointer"
+                className="bg-white p-8 rounded-[32px] border border-slate-200/50 shadow-[0_2px_8px_rgba(0,0,0,0.015)] hover:shadow-[0_20px_40px_rgba(99,102,241,0.05)] hover:border-brand-primary/20 transition-all duration-350 hover:-translate-y-1 flex flex-col justify-between h-[180px] group cursor-pointer"
               >
                 <div className="flex justify-between items-start">
                   <div className={`w-11 h-11 rounded-2xl ${stat.bg} border flex items-center justify-center ${stat.color} transition-transform duration-300 group-hover:scale-105`}>
@@ -87,7 +87,7 @@ export default function Stats() {
           })}
         </motion.div>
 
-      </div>
-    </motion.section>
+      </motion.div>
+    </section>
   );
 }

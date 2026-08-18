@@ -90,7 +90,7 @@ export default function Navbar({ currentView, onViewChange, currentUser, onLogou
                 >
                   {link.label}
                   <span className={`absolute bottom-1.5 left-4 right-4 h-[2px] bg-brand-primary rounded-full transition-transform duration-300 origin-center ${
-                    isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                    isActive ? 'scale-x-100' : 'scale-x-0'
                   }`}></span>
                 </button>
               );
@@ -144,7 +144,7 @@ export default function Navbar({ currentView, onViewChange, currentUser, onLogou
                 <button
                   id="nav-auth-signup"
                   onClick={() => handleNavClick('signup')}
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-[13px] font-bold rounded-full shadow-sm shadow-emerald-600/10 hover:shadow-md hover:shadow-emerald-600/15 transition-all duration-300 cursor-pointer hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                  className="px-5 py-2 bg-brand-primary hover:bg-brand-hover text-white text-[13px] font-bold rounded-full transition-all duration-300 cursor-pointer hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
                 >
                   Sign Up
                 </button>
@@ -232,7 +232,7 @@ export default function Navbar({ currentView, onViewChange, currentUser, onLogou
                   <button
                     id="mobile-auth-signup"
                     onClick={() => handleNavClick('signup')}
-                    className="w-full py-2.5 bg-brand-primary text-white text-xs font-bold rounded-xl text-center shadow-sm shadow-brand-primary/20 cursor-pointer hover:bg-brand-hover"
+                    className="w-full py-2.5 bg-brand-primary text-white text-xs font-bold rounded-xl text-center cursor-pointer hover:bg-brand-hover"
                   >
                     Sign Up
                   </button>

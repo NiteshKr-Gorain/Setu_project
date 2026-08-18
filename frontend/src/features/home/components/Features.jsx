@@ -1,29 +1,30 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Brain, Sprout, Cpu, Users } from 'lucide-react';
 import FeatureCard from './FeatureCard';
 
 export default function Features({ onViewChange }) {
   const featuresList = [
     {
-      icon: '🧠',
+      icon: Brain,
       title: 'Preserve Wisdom',
       description: 'Document and safeguard traditional practices, oral histories, and cultural heritage for future generations before they are lost.',
       targetView: 'legacy'
     },
     {
-      icon: '🌱',
+      icon: Sprout,
       title: 'Intergenerational Learning',
       description: 'Connect youth with experienced elders to learn traditional skills, local farming methods, and valuable life lessons.',
       targetView: 'community'
     },
     {
-      icon: '🤖',
+      icon: Cpu,
       title: 'AI Verification',
       description: 'Use AI algorithms to analyze, summarize, and cross-check traditional knowledge with modern scientific understanding.',
       targetView: 'library'
     },
     {
-      icon: '👥',
+      icon: Users,
       title: 'Community Building',
       description: 'Foster meaningful connections, mentorships, and active discussions between young learners and senior storytellers.',
       targetView: 'community'
@@ -50,17 +51,17 @@ export default function Features({ onViewChange }) {
   };
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: false, margin: '-80px' }}
-      transition={{ duration: 0.8, ease: 'easeOut' }}
-      className="py-24 bg-gradient-to-b from-[#FCFAF7] via-[#FFFDFB] to-[#FCFAF7] rounded-[36px] border border-orange-100/20 relative overflow-hidden"
+    <section
+      style={{ background: '#FFFFFF' }}
+      className="py-24 bg-[#FFFFFF] border-y border-slate-100 shadow-[0_4px_20px_rgba(15,23,42,0.015)] relative overflow-hidden w-full"
     >
-      {/* Background glow accent */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-brand-light/15 rounded-full blur-[110px] -z-10"></div>
-
-      <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16 relative z-10">
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: false, margin: '-80px' }}
+        transition={{ duration: 0.8, ease: 'easeOut' }}
+        className="max-w-7xl mx-auto px-6 md:px-12 space-y-16 relative z-10"
+      >
         
         {/* Section header */}
         <div className="flex flex-col items-center text-center space-y-4.5 max-w-2xl mx-auto">
@@ -84,8 +85,9 @@ export default function Features({ onViewChange }) {
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-7"
         >
           {featuresList.map((feat, index) => (
-            <motion.div key={index} variants={itemVariants}>
+            <motion.div key={index} variants={itemVariants} className="h-full">
               <FeatureCard
+                number={String(index + 1).padStart(2, '0')}
                 icon={feat.icon}
                 title={feat.title}
                 description={feat.description}
@@ -95,8 +97,8 @@ export default function Features({ onViewChange }) {
           ))}
         </motion.div>
 
-      </div>
-    </motion.section>
+      </motion.div>
+    </section>
   );
 }
 

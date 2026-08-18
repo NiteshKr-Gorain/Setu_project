@@ -60,9 +60,9 @@ export default function Hero({ onGetStarted, onLearnMore }) {
       {/* 1. Blended Full-Bleed Background Video */}
       <div className="absolute inset-0 w-full h-full pointer-events-none -z-10 select-none">
         {/* Desktop Gradient Mask (fades left to right) */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#FCFAF7]/95 via-[#FCFAF7]/75 to-[#FCFAF7]/20 z-10 lg:block hidden"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-[#FFF7ED]/95 via-[#FFF7ED]/75 to-[#FFF7ED]/20 z-10 lg:block hidden"></div>
         {/* Mobile Gradient Mask (fades bottom to top) */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#FCFAF7]/98 via-[#FCFAF7]/80 to-[#FCFAF7]/35 z-10 lg:hidden block"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-[#FFF7ED]/98 via-[#FFF7ED]/80 to-[#FFF7ED]/35 z-10 lg:hidden block"></div>
         <video
           autoPlay
           loop
@@ -76,8 +76,8 @@ export default function Hero({ onGetStarted, onLearnMore }) {
       </div>
 
       {/* 2. Soft background glowing gradients */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-[#FF9F43]/10 via-orange-300/5 to-transparent rounded-full blur-[120px] -z-25 animate-pulse-slow"></div>
-      <div className="absolute bottom-0 left-0 w-[700px] h-[700px] bg-gradient-to-tr from-blue-200/10 via-indigo-100/5 to-transparent rounded-full blur-[140px] -z-25"></div>
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-orange-500/10 via-amber-300/5 to-transparent rounded-full blur-[120px] -z-25 animate-pulse-slow"></div>
+      <div className="absolute bottom-0 left-0 w-[700px] h-[700px] bg-gradient-to-tr from-orange-500/5 via-amber-100/5 to-transparent rounded-full blur-[140px] -z-25"></div>
 
       {/* 3. Main Content Container */}
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 w-full relative z-20">
@@ -90,7 +90,7 @@ export default function Hero({ onGetStarted, onLearnMore }) {
           {/* Tagline Badge */}
           <motion.div
             variants={itemVariants}
-            className="inline-flex items-center space-x-2.5 bg-white/80 border border-orange-100/70 rounded-full px-4.5 py-1.5 shadow-[0_2px_8px_rgba(255,159,67,0.04)]"
+            className="inline-flex items-center space-x-2.5 bg-white/80 border border-orange-100/70 rounded-full px-4.5 py-1.5 shadow-[0_2px_8px_rgba(249,115,22,0.04)]"
           >
             <span className="w-2 h-2 rounded-full bg-brand-primary animate-pulse"></span>
             <span className="text-[10px] font-black text-slate-800 tracking-wider uppercase">
@@ -101,19 +101,19 @@ export default function Hero({ onGetStarted, onLearnMore }) {
           {/* Main Headline */}
           <motion.h1
             variants={itemVariants}
-            className="text-4.5xl sm:text-5xl lg:text-[56px] font-black tracking-tight leading-[1.08] text-slate-900"
+            className="text-4.5xl sm:text-5xl lg:text-[56px] font-bold tracking-[-0.03em] leading-[1.08] text-slate-900"
           >
             Bridging Generations,<br />
-            <span className="heading-highlight">
+            <span className="text-[#F97316] heading-serif italic font-normal">
               {typedText}
-              <span className="animate-pulse ml-0.5" style={{ display: 'inline-block', opacity: 0.8 }}>|</span>
             </span>
+            <span className="animate-pulse ml-0.5 text-slate-900 font-sans not-italic" style={{ display: 'inline-block', opacity: 0.8 }}>|</span>
           </motion.h1>
 
           {/* Supporting Description */}
           <motion.p
             variants={itemVariants}
-            className="text-slate-600 text-base sm:text-[16px] font-semibold leading-relaxed max-w-xl"
+            className="text-slate-600 text-[16px] font-normal leading-[1.7] tracking-normal max-w-xl"
           >
             Setu is a dedicated bridge connecting the vibrant youth of today with the rich experiences of older generations. Share life stories, pass on language dialects, collaborate on cultural traditions, and create lasting personal mentorships.
           </motion.p>
@@ -126,7 +126,7 @@ export default function Hero({ onGetStarted, onLearnMore }) {
             <button
               type="button"
               onClick={onGetStarted}
-              className="px-9 py-4.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[14px] font-black rounded-full shadow-lg shadow-emerald-600/20 hover:shadow-xl hover:shadow-emerald-600/30 transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer flex items-center justify-center space-x-2"
+              className="px-[18px] py-[10px] bg-brand-primary hover:bg-brand-hover text-white text-[14px] font-semibold rounded-[10px] transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 cursor-pointer flex items-center justify-center space-x-2 shadow-xs hover:shadow-sm"
             >
               <span>Sign Up</span>
               <span className="text-base">→</span>
@@ -134,7 +134,7 @@ export default function Hero({ onGetStarted, onLearnMore }) {
             <button
               type="button"
               onClick={onLearnMore}
-              className="px-9 py-4.5 bg-white hover:bg-slate-50 text-slate-850 hover:text-slate-900 border border-slate-200/80 text-[14px] font-black rounded-full transition-all duration-300 text-center cursor-pointer shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:-translate-y-0.5"
+              className="px-[18px] py-[10px] bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200 text-[14px] font-semibold rounded-[10px] transition-all duration-300 text-center cursor-pointer shadow-xs hover:-translate-y-[1px] hover:shadow-sm"
             >
               Explore Stories
             </button>

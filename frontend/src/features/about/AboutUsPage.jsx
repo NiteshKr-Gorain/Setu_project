@@ -173,7 +173,7 @@ export default function AboutUsPage({ onViewChange, onSignUpClick }) {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
               <button
                 onClick={onSignUpClick}
-                className="w-full sm:w-auto px-8 py-3.5 bg-white text-blue-700 hover:bg-blue-50 text-xs font-bold rounded-full shadow-md transition-all transform hover:-translate-y-0.5 cursor-pointer"
+                className="w-full sm:w-auto px-8 py-3.5 bg-white text-blue-700 hover:bg-blue-50 text-xs font-bold rounded-full transition-all transform hover:-translate-y-0.5 cursor-pointer"
               >
                 Join Setu Today
               </button>

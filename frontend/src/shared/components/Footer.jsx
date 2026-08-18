@@ -21,11 +21,11 @@ export default function Footer({ currentView, onViewChange }) {
   };
 
   return (
-    <footer id="app-footer-navigation" className="bg-[#FCFAF7] text-slate-600 py-20 relative overflow-visible transition-colors duration-300 mt-10">
+    <footer id="app-footer-navigation" style={{ background: '#E5E7EB' }} className="text-[#4B5563] pt-[30px] pb-[20px] px-[5%] relative overflow-visible transition-colors duration-300 border-t border-[#D1D5DB]">
       
       {/* 1. Bridge/Setu Arc Top Divider - Extends footer background upwards in a custom curve */}
       <div className="absolute top-0 inset-x-0 h-10 -translate-y-[99%] overflow-hidden pointer-events-none bg-transparent">
-        <svg className="w-full h-full text-[#FCFAF7] fill-current" viewBox="0 0 1440 40" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <svg className="w-full h-full text-[#E5E7EB] fill-current" viewBox="0 0 1440 40" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M0,40 Q720,0 1440,40 Z" />
         </svg>
       </div>
@@ -35,12 +35,12 @@ export default function Footer({ currentView, onViewChange }) {
 
       {/* 3. Soft Background Saffron Glow Accents */}
       <div className="absolute top-0 left-0 w-[350px] h-[350px] bg-brand-light/30 rounded-full blur-[90px] -z-10 pointer-events-none"></div>
-      <div className="absolute bottom-0 right-0 w-[350px] h-[350px] bg-orange-300/10 rounded-full blur-[90px] -z-10 pointer-events-none"></div>
+      <div className="absolute bottom-0 right-0 w-[350px] h-[350px] bg-orange-350/10 rounded-full blur-[90px] -z-10 pointer-events-none"></div>
 
-      <div className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-8 items-start text-left relative z-10">
+      <div className="max-w-[1280px] mx-auto px-6 md:px-8 grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-6 items-start text-left relative z-10">
 
         {/* Brand Info Column */}
-        <div className="space-y-5 md:col-span-4">
+        <div className="space-y-4 md:col-span-4">
           <button
             onClick={() => handleNavClick('home')}
             className="flex items-center space-x-3 group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary rounded-full p-1 text-left"
@@ -50,23 +50,23 @@ export default function Footer({ currentView, onViewChange }) {
               <img src="/Setu_logo.png" alt="Setu Logo" loading="lazy" className="w-full h-full object-contain" />
             </div>
             <div className="text-left">
-              <span className="text-lg font-extrabold text-slate-900 tracking-tight block leading-none">Setu</span>
+              <span className="text-lg font-extrabold text-[#1F2937] tracking-tight block leading-none">Setu</span>
               <span className="text-[8px] font-black text-brand-primary uppercase tracking-widest leading-none mt-1 block">AI Bridge</span>
             </div>
           </button>
-          <p className="text-[13px] text-slate-500 leading-relaxed font-semibold max-w-sm">
+          <p className="text-[13px] text-[#4B5563] leading-relaxed font-semibold max-w-sm">
             Preserving ancestral wisdom and connecting youth with senior storytellers across generations. Built on trust and scientific authentication.
           </p>
         </div>
 
         {/* Platform Navigation */}
-        <div className="space-y-4 md:col-span-2">
-          <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Navigation</h4>
-          <ul className="space-y-3 text-[13px] font-semibold">
+        <div className="space-y-3 md:col-span-2">
+          <h4 className="text-xs font-bold text-[#1F2937] uppercase tracking-wider">Navigation</h4>
+          <ul className="space-y-2 text-[13px] font-semibold">
             <li>
               <button
                 onClick={() => handleNavClick('library')}
-                className={`hover:text-brand-primary transition-colors cursor-pointer text-left ${currentView === 'library' ? 'text-brand-primary font-bold' : 'text-slate-500'}`}
+                className={`hover:text-[#F97316] transition-colors cursor-pointer text-left ${currentView === 'library' ? 'text-[#F97316] font-bold' : 'text-[#374151]'}`}
               >
                 Library
               </button>
@@ -74,7 +74,7 @@ export default function Footer({ currentView, onViewChange }) {
             <li>
               <button
                 onClick={() => handleNavClick('community')}
-                className={`hover:text-brand-primary transition-colors cursor-pointer text-left ${currentView === 'community' ? 'text-brand-primary font-bold' : 'text-slate-550'}`}
+                className={`hover:text-[#F97316] transition-colors cursor-pointer text-left ${currentView === 'community' ? 'text-[#F97316] font-bold' : 'text-[#374151]'}`}
               >
                 Community
               </button>
@@ -82,7 +82,7 @@ export default function Footer({ currentView, onViewChange }) {
             <li>
               <button
                 onClick={() => handleNavClick('govt schemes')}
-                className={`hover:text-brand-primary transition-colors cursor-pointer text-left ${currentView === 'govt schemes' ? 'text-brand-primary font-bold' : 'text-slate-500'}`}
+                className={`hover:text-[#F97316] transition-colors cursor-pointer text-left ${currentView === 'govt schemes' ? 'text-[#F97316] font-bold' : 'text-[#374151]'}`}
               >
                 Govt Schemes
               </button>
@@ -90,7 +90,7 @@ export default function Footer({ currentView, onViewChange }) {
             <li>
               <button
                 onClick={() => handleNavClick('legacy')}
-                className={`hover:text-brand-primary transition-colors cursor-pointer text-left ${currentView === 'legacy' ? 'text-brand-primary font-bold' : 'text-slate-500'}`}
+                className={`hover:text-[#F97316] transition-colors cursor-pointer text-left ${currentView === 'legacy' ? 'text-[#F97316] font-bold' : 'text-[#374151]'}`}
               >
                 Legacy Archives
               </button>
@@ -99,13 +99,13 @@ export default function Footer({ currentView, onViewChange }) {
         </div>
 
         {/* Community Resources */}
-        <div className="space-y-4 md:col-span-2">
-          <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Resources</h4>
-          <ul className="space-y-3 text-[13px] font-semibold text-slate-500">
+        <div className="space-y-3 md:col-span-2">
+          <h4 className="text-xs font-bold text-[#1F2937] uppercase tracking-wider">Resources</h4>
+          <ul className="space-y-2 text-[13px] font-semibold text-[#4B5563]">
             <li>
               <button
                 onClick={() => handleNavClick('community')}
-                className="hover:text-brand-primary transition-colors cursor-pointer text-left text-slate-500"
+                className="hover:text-[#F97316] transition-colors cursor-pointer text-left text-[#374151]"
               >
                 Find a Mentor
               </button>
@@ -113,7 +113,7 @@ export default function Footer({ currentView, onViewChange }) {
             <li>
               <button
                 onClick={() => handleNavClick('contribute')}
-                className={`hover:text-brand-primary transition-colors cursor-pointer text-left ${currentView === 'contribute' ? 'text-brand-primary font-bold' : 'text-slate-500'}`}
+                className={`hover:text-[#F97316] transition-colors cursor-pointer text-left ${currentView === 'contribute' ? 'text-[#F97316] font-bold' : 'text-[#374151]'}`}
               >
                 Share Knowledge
               </button>
@@ -121,7 +121,7 @@ export default function Footer({ currentView, onViewChange }) {
             <li>
               <button
                 onClick={() => handleNavClick('about us')}
-                className={`hover:text-brand-primary transition-colors cursor-pointer text-left ${currentView === 'about us' ? 'text-brand-primary font-bold' : 'text-slate-500'}`}
+                className={`hover:text-[#F97316] transition-colors cursor-pointer text-left ${currentView === 'about us' ? 'text-[#F97316] font-bold' : 'text-[#374151]'}`}
               >
                 About Us
               </button>
@@ -130,10 +130,10 @@ export default function Footer({ currentView, onViewChange }) {
         </div>
 
         {/* Stay Connected & Contact Details */}
-        <div className="space-y-6 md:col-span-4">
-          <div className="space-y-3.5">
-            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Stay Connected</h4>
-            <p className="text-[13px] text-slate-500 leading-relaxed font-semibold">
+        <div className="space-y-4 md:col-span-4">
+          <div className="space-y-2.5">
+            <h4 className="text-xs font-bold text-[#1F2937] uppercase tracking-wider">Stay Connected</h4>
+            <p className="text-[13px] text-[#4B5563] leading-relaxed font-semibold">
               Subscribe for monthly heritage stories and community updates.
             </p>
             {subscribed ? (
@@ -153,7 +153,7 @@ export default function Footer({ currentView, onViewChange }) {
                   />
                   <button
                     type="submit"
-                    className="px-4.5 py-2.5 bg-brand-primary hover:bg-brand-hover text-white text-[13px] font-bold rounded-xl transition-all duration-300 shadow-sm shadow-brand-primary/10 cursor-pointer flex items-center space-x-1.5 shrink-0"
+                    className="px-4.5 py-2.5 bg-[#F97316] hover:bg-[#EA580C] text-white text-[13px] font-bold rounded-xl transition-all duration-300 shadow-sm shadow-brand-primary/10 cursor-pointer flex items-center space-x-1.5 shrink-0"
                     aria-label="Subscribe"
                   >
                     <span>Join</span>
@@ -164,17 +164,17 @@ export default function Footer({ currentView, onViewChange }) {
             )}
           </div>
           
-          <div className="pt-5 border-t border-slate-200/60 space-y-2.5">
-            <h4 className="text-[10px] font-black text-slate-850 uppercase tracking-wider">Contact Channels</h4>
-            <div className="text-[13px] space-y-2.5 font-semibold">
-              <a href="mailto:support@setu.org" className="flex items-center space-x-3 text-slate-500 hover:text-brand-primary transition-colors group">
-                <div className="w-8 h-8 rounded-xl bg-slate-100 border border-slate-200/50 flex items-center justify-center text-slate-500 group-hover:bg-brand-light group-hover:text-brand-primary transition-all duration-300 shadow-3xs">
+          <div className="pt-4 border-t border-[#D1D5DB] space-y-2">
+            <h4 className="text-[10px] font-black text-[#1F2937] uppercase tracking-wider">Contact Channels</h4>
+            <div className="text-[13px] space-y-2 font-semibold">
+              <a href="mailto:support@setu.org" className="flex items-center space-x-3 text-[#374151] hover:text-[#F97316] transition-colors group">
+                <div className="w-8 h-8 rounded-xl bg-slate-100 border border-slate-200/50 flex items-center justify-center text-[#4B5563] group-hover:bg-brand-light group-hover:text-brand-primary transition-all duration-300 shadow-3xs">
                   <Mail className="w-4 h-4" strokeWidth={2.2} />
                 </div>
                 <span>support@setu.org</span>
               </a>
-              <a href="tel:+919876543210" className="flex items-center space-x-3 text-slate-500 hover:text-brand-primary transition-colors group">
-                <div className="w-8 h-8 rounded-xl bg-slate-100 border border-slate-200/50 flex items-center justify-center text-slate-500 group-hover:bg-brand-light group-hover:text-brand-primary transition-all duration-300 shadow-3xs">
+              <a href="tel:+919876543210" className="flex items-center space-x-3 text-[#374151] hover:text-[#F97316] transition-colors group">
+                <div className="w-8 h-8 rounded-xl bg-slate-100 border border-slate-200/50 flex items-center justify-center text-[#4B5563] group-hover:bg-brand-light group-hover:text-brand-primary transition-all duration-300 shadow-3xs">
                   <Phone className="w-4 h-4" strokeWidth={2.2} />
                 </div>
                 <span>+91 98765 43210</span>
@@ -185,7 +185,7 @@ export default function Footer({ currentView, onViewChange }) {
 
       </div>
 
-      <div className="max-w-[1280px] mx-auto px-6 md:px-8 mt-16 pt-8 border-t border-slate-200/60 text-center text-xs text-slate-400 font-bold tracking-wide relative z-10">
+      <div className="max-w-[1280px] mx-auto px-6 md:px-8 mt-10 pt-5 border-t border-[#D1D5DB] text-center text-xs text-[#4B5563] font-bold tracking-wide relative z-10">
         <p>© 2026 Setu Platform. All rights reserved. Preserving traditional knowledge for future generations.</p>
       </div>
     </footer>

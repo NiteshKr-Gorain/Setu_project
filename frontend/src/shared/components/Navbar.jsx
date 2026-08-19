@@ -1,22 +1,47 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 export default function Navbar({ currentView, onViewChange, currentUser, onLogout }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollYRef = useRef(0);
 
-  // Scroll listener for dynamic glassmorphic blur effect
+  // Scroll listener: on scroll down, navbar goes up; on scroll up, it comes down with rounded bottom corners
   useEffect(() => {
+    let ticking = false;
+
     const handleScroll = () => {
-      if (window.scrollY > 15) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          const prevScrollY = lastScrollYRef.current;
+
+          if (currentScrollY <= 15) {
+            setIsScrolled(false);
+            setIsVisible(true);
+          } else {
+            setIsScrolled(true);
+
+            // If scrolling down by more than 6px and past 60px, slide navbar up
+            if (currentScrollY > prevScrollY + 6 && currentScrollY > 60 && !isMobileMenuOpen) {
+              setIsVisible(false);
+            }
+            // If scrolling up by more than 6px or mobile menu is open, slide navbar down
+            else if (currentScrollY < prevScrollY - 6 || isMobileMenuOpen) {
+              setIsVisible(true);
+            }
+          }
+
+          lastScrollYRef.current = currentScrollY;
+          ticking = false;
+        });
+        ticking = true;
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isMobileMenuOpen]);
 
   const handleNavClick = (viewId) => {
     onViewChange(viewId);
@@ -36,13 +61,15 @@ export default function Navbar({ currentView, onViewChange, currentUser, onLogou
     <>
       <header
         id="app-header-navigation"
-        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ease-in-out ${
+          isVisible ? 'translate-y-0' : '-translate-y-full'
+        } ${
           isScrolled
-            ? 'bg-white/80 backdrop-blur-xl border-b border-slate-200/60 shadow-sm'
-            : 'bg-white/95 backdrop-blur-md border-b border-slate-100/90 shadow-3xs'
+            ? 'bg-white/90 backdrop-blur-xl border-b border-slate-200/80 shadow-md shadow-slate-900/5 rounded-b-2xl md:rounded-b-3xl'
+            : 'bg-white/95 backdrop-blur-md border-b border-slate-100/90 shadow-3xs rounded-b-none'
         }`}
       >
-        {/* Reduced side gap (px-4 md:px-8) and slightly increased height (h-22 / 88px) */}
+        {/* Navbar container */}
         <div className="max-w-[1440px] mx-auto px-4 md:px-8 h-22 flex items-center justify-between">
 
           {/* 1. Brand Logo & Title Button */}
@@ -161,7 +188,10 @@ export default function Navbar({ currentView, onViewChange, currentUser, onLogou
 
       {/* 5. Mobile Navigation Drawer */}
       {isMobileMenuOpen && (
-        <div id="mobile-navigation-drawer" className="fixed inset-x-0 top-22 z-30 bg-white/95 backdrop-blur-xl border-b border-slate-200 p-6 shadow-xl lg:hidden animate-in slide-in-from-top-4 duration-200">
+        <div
+          id="mobile-navigation-drawer"
+          className="fixed inset-x-0 top-22 z-30 bg-white/95 backdrop-blur-xl border-b border-slate-200 p-6 shadow-xl rounded-b-2xl md:rounded-b-3xl lg:hidden animate-in slide-in-from-top-4 duration-200"
+        >
           <nav aria-label="Mobile Navigation" className="flex flex-col space-y-3 text-left">
             {navLinks.map((link) => (
               <button

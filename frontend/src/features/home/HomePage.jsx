@@ -10,25 +10,24 @@ import Testimonials from './components/Testimonials';
 export default function HomePage({ onViewChange, currentUser }) {
   return (
     <div className="w-full flex flex-col items-center overflow-hidden">
-      {/* Top container for Hero and Features */}
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        {/* Hero section */}
-        <Hero
-          onGetStarted={() => onViewChange(currentUser ? 'contribute' : 'signup')}
-          onLearnMore={() => onViewChange('library')}
-        />
+      {/* Hero section */}
+      <Hero
+        onGetStarted={() => onViewChange(currentUser ? 'contribute' : 'signup')}
+        onLearnMore={() => onViewChange('library')}
+      />
 
-        {/* Features grid */}
+      {/* Features container */}
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 sm:space-y-16 mt-4 sm:mt-6">
         <Features onViewChange={onViewChange} />
       </div>
 
       {/* How it works - Full Width Section */}
-      <div className="w-full my-6">
+      <div className="w-full my-8 sm:my-14">
         <HowItWorks onViewChange={onViewChange} />
       </div>
 
       {/* Bottom container for Stats and Testimonials */}
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 sm:space-y-16 pb-16">
         {/* Statistics banner */}
         <Stats />
 

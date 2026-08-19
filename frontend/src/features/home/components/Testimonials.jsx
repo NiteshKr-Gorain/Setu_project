@@ -28,7 +28,7 @@ export default function Testimonials() {
 
   return (
     <section className="py-20 md:py-24 bg-slate-50/60 rounded-3xl border border-slate-100/80 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16">
+      <div className="w-full max-w-[1600px] 2xl:max-w-[1780px] mx-auto px-6 md:px-12 space-y-16">
         
         {/* Section header */}
         <div className="flex flex-col items-center text-center space-y-4 max-w-2xl mx-auto">

@@ -158,7 +158,9 @@ app.include_router(learning_paths.router)
 app.include_router(communities.router)
 app.include_router(ai.router)
 
-
+@app.get("/")
+def home():
+    return {"message": "Setu API is running"}
 
 
 @app.get("/health", tags=["health"])

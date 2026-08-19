@@ -124,8 +124,10 @@ export default function App() {
         />
       </main>
 
-      {/* Footer Section */}
-      <Footer currentView={currentView} onViewChange={handleViewChange} />
+      {/* Footer Section (Hidden on Profile Page) */}
+      {currentView !== 'profile' && (
+        <Footer currentView={currentView} onViewChange={handleViewChange} />
+      )}
 
       {/* Floating AI Assistant Button */}
       <AiButton onViewChange={handleViewChange} currentView={currentView} />

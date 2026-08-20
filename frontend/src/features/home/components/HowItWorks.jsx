@@ -6,18 +6,21 @@ import StepCard from './StepCard';
 export default function HowItWorks() {
   const stepsList = [
     {
+      id: '01',
       number: '01',
       title: 'Create Your Profile',
       description: 'Join Setu and create your profile. Tell us about your interests, skills, and what you love to share.',
       icon: User
     },
     {
+      id: '02',
       number: '02',
       title: 'Discover & Explore',
       description: 'Explore stories, knowledge, and experiences shared by people from different backgrounds.',
       icon: Search
     },
     {
+      id: '03',
       number: '03',
       title: 'Connect & Communicate',
       description: 'Connect with like-minded people, start conversations, and exchange ideas and experiences.',

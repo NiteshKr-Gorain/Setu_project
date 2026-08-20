@@ -587,7 +587,7 @@ export default function AvatarCanvas({
   }, [state, audioLevel, isSpeaking, isListening, isThinking, currentViseme, themeColor]);
 
   return (
-    <div className="relative w-auto h-full max-h-[38vh] sm:max-h-[44vh] md:max-h-[48vh] aspect-[350/500] shrink-1 rounded-3xl overflow-hidden shadow-2xl border border-amber-500/25 bg-stone-950 flex items-center justify-center group select-none">
+    <div className="relative w-auto h-full max-h-[44dvh] sm:max-h-[49dvh] md:max-h-[53dvh] lg:max-h-[57dvh] aspect-[350/500] shrink-1 rounded-3xl overflow-hidden shadow-2xl border border-amber-500/25 bg-stone-950 flex items-center justify-center group select-none transition-all duration-300">
       {/* 60 FPS HTML5 Canvas */}
       <canvas
         ref={canvasRef}

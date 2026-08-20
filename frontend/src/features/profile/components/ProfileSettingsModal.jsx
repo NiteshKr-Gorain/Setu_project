@@ -886,6 +886,7 @@ export default function ProfileSettingsModal({
                       <option value="en">English</option>
                       <option value="hi">Hindi (हिंदी)</option>
                       <option value="pa">Punjabi (ਪੰਜਾਬੀ)</option>
+                      <option value="hi">Hindi (हिंदी)</option>
                       <option value="ta">Tamil (தமிழ்)</option>
                       <option value="bn">Bengali (বাংলা)</option>
                     </select>

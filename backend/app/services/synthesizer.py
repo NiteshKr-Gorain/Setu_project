@@ -623,9 +623,11 @@ async def synthesize_spoken_response(
             if openai_raw:
                 raw_response_text = openai_raw
 
-    # 6. Compassionate Traditional Problem Solving & Medical Safeguard Engine
+    # 6. Compassionate Traditional Problem Solving & Medical Safeguard Engine (Offline Fallback)
     if not raw_response_text:
         raw_response_text = solve_real_life_problem(query_clean, search_results, language=language)
+        if language != "en-IN":
+            raw_response_text = await translate_to_target_language(raw_response_text, language)
 
     # Strict Clean Spoken Avatar Text
     cleaned = clean_for_spoken_avatar(raw_response_text, query_clean)

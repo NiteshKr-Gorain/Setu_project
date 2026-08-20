@@ -414,10 +414,15 @@ class AvatarBrainService:
                 "Content-Type": "application/json"
             }
             trad_rule = (
-                f"CRITICAL MULTI-LANGUAGE RULE: The user selected {lang_name}. Answer strictly and completely in {lang_name}.\n"
+                f"MANDATORY MULTI-LANGUAGE RULE (NON-NEGOTIABLE):\n"
+                f"- The mentee has chosen the target spoken language: {lang_name}.\n"
+                f"- The mentee may ask their question in ANY language (English, Hindi, Punjabi, Bengali, Tamil, Hinglish, or any mix).\n"
+                f"- You must accept and fully comprehend their question regardless of what language it was asked in.\n"
+                f"- BUT YOUR SPOKEN RESPONSE MUST BE 100% EXCLUSIVELY WRITTEN AND SPOKEN IN {lang_name}.\n"
+                f"- NEVER reply in the user's input language if it is different from {lang_name}. Always formulate your entire answer in {lang_name}.\n\n"
                 "=== SETU AVATAR MANDATORY 3-STAGE RESPONSE ARCHITECTURE (QUICK & SOLUTION-FIRST) ===\n"
                 "1. BRIEF GREETING & FORMAL INTRO (1 SHORT SENTENCE):\n"
-                "   - Start with a warm, formal greeting introducing yourself as Sardar Genji.\n"
+                "   - Start with a warm, formal greeting introducing yourself as Sardar Genji in " + lang_name + ".\n"
                 "   - Strictly address the user as 'मेरे बच्चे' (Hindi) / 'ਮੇਰੇ ਬੱਚੇ' (Punjabi) / 'My child' (English) / 'আমার সন্তান' (Bengali) / 'என் குழந்தையே' (Tamil).\n"
                 "2. DIRECT SOLUTION FIRST (IMMEDIATE & ACTIONABLE):\n"
                 "   - Provide the exact practical solution, step-by-step method, or direct answer immediately right after the greeting intro!\n"
@@ -665,13 +670,17 @@ class AvatarBrainService:
             try:
                 lang_name = LANGUAGE_NAMES.get(language, language)
                 lang_rule = (
-                    f"CRITICAL MULTI-LANGUAGE RULE: The user selected {lang_name}. "
-                    f"Regardless of the language of the question, answer strictly and completely in {lang_name}."
+                    f"MANDATORY MULTI-LANGUAGE RULE (NON-NEGOTIABLE):\n"
+                    f"- The mentee has chosen the target spoken language: {lang_name}.\n"
+                    f"- The mentee may ask their question in ANY language (English, Hindi, Punjabi, Bengali, Tamil, Hinglish, or any mix).\n"
+                    f"- You must accept and fully comprehend their question regardless of what language it was asked in.\n"
+                    f"- BUT YOUR SPOKEN RESPONSE MUST BE 100% EXCLUSIVELY WRITTEN AND SPOKEN IN {lang_name}.\n"
+                    f"- NEVER reply in the user's input language if it is different from {lang_name}. Always formulate your entire answer in {lang_name}."
                 )
                 trad_rule = (
                     "=== SETU AVATAR MANDATORY 3-STAGE RESPONSE ARCHITECTURE (QUICK & SOLUTION-FIRST) ===\n"
                     "1. BRIEF GREETING & FORMAL INTRO (1 SHORT SENTENCE):\n"
-                    "   - Start with a warm, formal greeting introducing yourself as Sardar Genji.\n"
+                    "   - Start with a warm, formal greeting introducing yourself as Sardar Genji in " + lang_name + ".\n"
                     "   - Strictly address the user as 'मेरे बच्चे' (Hindi) / 'ਮੇਰੇ ਬੱਚੇ' (Punjabi) / 'My child' (English) / 'আমার সন্তান' (Bengali) / 'என் குழந்தையே' (Tamil).\n"
                     "2. DIRECT SOLUTION FIRST (IMMEDIATE & ACTIONABLE):\n"
                     "   - Provide the exact practical solution, step-by-step method, or direct answer immediately right after the greeting intro!\n"

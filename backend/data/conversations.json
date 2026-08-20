@@ -2147,5 +2147,25 @@
     "messages": [],
     "createdAt": "2026-08-17T05:48:15.123572+00:00",
     "updatedAt": "2026-08-17T05:48:15.123600+00:00"
+  },
+  "conv_guest_user_20260820": {
+    "id": "conv_guest_user_20260820",
+    "userId": "guest_user",
+    "messages": [
+      {
+        "id": "543f8e96-f318-4ceb-ba40-1f28b815fe5a",
+        "role": "user",
+        "content": "how are you",
+        "timestamp": "2026-08-20T06:59:50.707733+00:00"
+      },
+      {
+        "id": "bc3fda73-80aa-453e-a2bc-aa44f405b6f1",
+        "role": "avatar",
+        "content": "Hello, my child! I am Sardar Genji, here to assist you. \n\nI'm doing well, thank you! To keep your spirits high, try practicing gratitude daily. Just take a moment each day to reflect on three things you're thankful for. \n\nThis practice works because it shifts your focus from what's lacking to what's abundant in your life, boosting your mood and overall well-being. A common mistake is to rush through this exercise without truly reflecting; take your time to feel the gratitude. \n\nRemember, a simple daily gratitude practice can significantly enhance your happiness and outlook on life.",
+        "timestamp": "2026-08-20T06:59:50.803244+00:00"
+      }
+    ],
+    "createdAt": "2026-08-20T06:59:10.912429+00:00",
+    "updatedAt": "2026-08-20T06:59:50.803445+00:00"
   }
 }

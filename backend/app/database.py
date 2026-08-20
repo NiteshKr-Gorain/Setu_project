@@ -25,3 +25,13 @@ def get_database():
     if db.client is None:
         raise RuntimeError("Database connection not established.")
     return db.client[settings.MONGO_DB_NAME]
+
+def get_optional_database():
+    """FastAPI Dependency for obtaining MongoDB database or None if offline."""
+    if db.client is None:
+        return None
+    try:
+        return db.client[settings.MONGO_DB_NAME]
+    except Exception:
+        return None
+

@@ -9,7 +9,7 @@ export default function HomeView({ onSendMessage, onOpenVoiceMode, isLoading, se
         {/* Brand Tag */}
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-orange-600 text-xs font-semibold shadow-sm">
           <Sparkles className="w-3.5 h-3.5" />
-          <span>AI Setu • Dual Search Intelligence</span>
+          <span>Sardar Genji • FAISS MiniLM RAG &amp; Dual Search</span>
         </div>
 
         {/* Hero Greeting Text */}

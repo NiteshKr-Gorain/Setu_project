@@ -111,15 +111,17 @@ export default function AiModalContainer({ userProfile, onClose }) {
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         category: data.category || category,
         source: data.source || 'Dual Search (Setu Database + Google Web)',
-        sources: data.sources || ['Setu Knowledge Database', 'Google Search'],
-        databaseMatches: data.database_matches || [],
+        sources: data.sources || ['Setu FAISS Knowledge Base', 'Google Search'],
+        databaseMatches: data.database_matches || data.faiss_matches || [],
+        faissMatches: data.faiss_matches || data.database_matches || [],
         googleMatches: data.google_matches || [],
         databaseMatch: data.database_match || null,
         googleMatch: data.google_match || null,
         localMatch: data.local_match || (localCheck.found ? localCheck : null),
         points: data.points || null,
         kerasMetadata: data.keras_metadata || null,
-        persona: data.persona || 'Setu Knowledge Assistant'
+        persona: data.persona || 'Sardar Genji (Senior Knowledge Master)',
+        faissEngine: data.faiss_engine || 'FAISS IndexFlatIP (384d MiniLM)'
       };
       saveToLocalStorageCache(promptText, aiMsg.text, aiMsg.category, data);
       setIsBackendConnected(true);

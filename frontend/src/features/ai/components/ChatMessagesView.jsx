@@ -235,11 +235,11 @@ function StreamingMessageText({ text, speed = 15, isLatestAI }) {
 // Source Badges and Match Inspector
 function SourcesPanel({ msg }) {
   const [showDetails, setShowDetails] = useState(false);
-  const dbMatches = msg.databaseMatches || (msg.localMatch?.found && msg.localMatch?.snippet ? [{
+  const dbMatches = msg.databaseMatches || msg.faissMatches || (msg.localMatch?.found && msg.localMatch?.snippet ? [{
     title: msg.localMatch.title || "Setu Knowledge Entry",
     category: msg.category || "General",
     snippet: msg.localMatch.snippet,
-    source: "Setu Knowledge Database"
+    source: "Setu FAISS Knowledge Base"
   }] : []);
 
   const webMatches = msg.googleMatches || (msg.googleMatch?.found && msg.googleMatch?.snippet ? [{
@@ -251,6 +251,7 @@ function SourcesPanel({ msg }) {
 
   const hasDbMatch = dbMatches.length > 0;
   const hasWebMatch = webMatches.length > 0;
+  const faissEngine = msg.faissEngine || "FAISS MiniLM (384d)";
 
   if (!hasDbMatch && !hasWebMatch) return null;
 
@@ -262,7 +263,7 @@ function SourcesPanel({ msg }) {
           {hasDbMatch && (
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
               <Database className="w-3 h-3 text-emerald-600" />
-              <span>Setu Database ({dbMatches.length})</span>
+              <span>FAISS MiniLM RAG ({dbMatches.length})</span>
             </span>
           )}
 
@@ -292,7 +293,7 @@ function SourcesPanel({ msg }) {
             <div className="space-y-2">
               <div className="flex items-center gap-1.5 font-bold text-slate-800">
                 <BookOpen className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Verified Internal Database Entries:</span>
+                <span>Verified Setu Knowledge Archives ({faissEngine}):</span>
               </div>
               <div className="space-y-2 pl-4 border-l-2 border-emerald-300">
                 {dbMatches.map((doc, i) => (
@@ -404,7 +405,7 @@ export default function ChatMessagesView({ messages, onBack, isLoading, title, u
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-orange-600 bg-orange-50 px-3 py-1 rounded-full border border-orange-200 shadow-xs">
             <Sparkles className="w-3.5 h-3.5 text-orange-500" />
-            <span>Dual Search AI Assistant</span>
+            <span>Sardar Genji • FAISS MiniLM RAG</span>
           </div>
         </div>
       </div>
@@ -500,10 +501,10 @@ export default function ChatMessagesView({ messages, onBack, isLoading, title, u
               <span className="w-2.5 h-2.5 rounded-full bg-orange-500 animate-ping" />
               <div className="flex flex-col">
                 <span className="text-xs font-bold text-slate-800">
-                  Dual Searching &amp; Synthesizing...
+                  Sardar Genji is consulting FAISS RAG &amp; Web...
                 </span>
                 <span className="text-[11px] text-slate-500">
-                  Checking Setu Database &amp; Live Google Web Search
+                  Retrieving 384d MiniLM vectors &amp; live Google Search
                 </span>
               </div>
             </div>

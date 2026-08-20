@@ -17,70 +17,17 @@ except Exception:
     pass
 
 from app.config import settings
+from app.services.faiss_rag_service import faiss_rag_service
+from app.services.old_man_persona import (
+    ELDER_NAME, ELDER_ROLE, format_polite_personal_response,
+    ELDER_GREETINGS, ELDER_CLOSINGS
+)
 
 logger = logging.getLogger(__name__)
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
 GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID", "")
 SERPAPI_KEY = os.getenv("SERPAPI_KEY", "")
-
-# Curated high-fidelity knowledge fallback entries for traditional & technical concepts
-FALLBACK_KNOWLEDGE_ENTRIES = [
-    {
-        "title": "Natural Pest Control with Neem & Cow Urine Extract (Neemastra)",
-        "category": "Agriculture",
-        "keywords": ["neem", "neemastra", "pest", "pesticide", "organic farming", "insects", "cow urine", "crop"],
-        "snippet": "Neemastra is an ancestral organic biopesticide concoction made from crushed neem leaves (Azadirachta indica), wild garlic, and fermented cow urine. It repels over 200 species of leaf-chewing insects without chemical residues.",
-        "traditional_method": "Crush 5kg fresh neem leaves into a paste. Steep in 10 liters of fermented cow urine in a shaded clay urn for 14-21 days. Dilute at a 1:20 ratio with clean water before spraying.",
-        "scientific_explanation": "Azadirachtin disrupts the ecdysone steroid hormone cycle in insect larvae, preventing molting and reproduction without harming earthworms or pollinators.",
-        "benefits": "Zero toxic chemical runoff, cost-effective for smallholder farmers, and enhances plant leaf immunity naturally."
-    },
-    {
-        "title": "Sprouted Finger Millet (Ragi Ambali) Probiotic Porridge",
-        "category": "Healthcare",
-        "keywords": ["ragi", "millet", "ambali", "porridge", "nutrition", "calcium", "probiotic", "recipe"],
-        "snippet": "Ragi Ambali is a traditional fermented finger millet breakfast porridge that unlocks bioavailable calcium, prebiotic fibers, and gut-friendly probiotics for sustainable daily energy.",
-        "traditional_method": "Soak whole Ragi grains for 12 hours, sprout in moist muslin for 24 hours, slow-roast, grind into flour, and cook on low flame with buttermilk or curd.",
-        "scientific_explanation": "Sprouting activates endogenous alpha-amylase and phytase enzymes, breaking down phytic acid to increase calcium and iron bioavailability by over 300%.",
-        "benefits": "Extremely high calcium density (344mg/100g), low glycemic index for diabetic management, and rich in natural gut probiotics."
-    },
-    {
-        "title": "Ayurvedic Respiratory Decoction (Tulsi & Ginger Kashayam)",
-        "category": "Healthcare",
-        "keywords": ["tulsi", "ginger", "kashayam", "cough", "cold", "immunity", "ayurveda", "decoction", "respiratory"],
-        "snippet": "Tulsi and Ginger Kashayam is an ancient herbal water extraction combining holy basil, fresh ginger root, black pepper, and licorice to relieve respiratory congestion and boost immunity.",
-        "traditional_method": "Simmer 10 Tulsi leaves, 1 inch crushed ginger, and 3 crushed black peppercorns in 2 cups of water until reduced to 1 cup. Add honey only when lukewarm.",
-        "scientific_explanation": "Gingerols inhibit COX-2 inflammatory pathways while piperine in black pepper enhances curcumin and terpene bioavailability by up to 2000%.",
-        "benefits": "Clears bronchial pathways, calms throat irritation, and stimulates natural antiviral defense mechanisms."
-    },
-    {
-        "title": "Dry-Stone Check Dams (Bori Bandh) & Groundwater Recharge",
-        "category": "Engineering",
-        "keywords": ["water", "dam", "groundwater", "bori bandh", "conservation", "rainwater", "aquifer", "recharge"],
-        "snippet": "Bori Bandh is an indigenous non-cemented gravity check dam constructed across seasonal gullies to decelerate flash floods and replenish underground aquifers.",
-        "traditional_method": "Interlocking angular basalt stones stacked in trapezoidal courses without mortar along natural contour stream beds.",
-        "scientific_explanation": "Void spaces between stones dissipate kinetic energy, reducing water velocity from 3.5 m/s to 0.4 m/s to allow deep percolation into sand-filtered aquifers.",
-        "benefits": "Raises local water tables by 3 to 5 meters, halts soil erosion, and ensures year-round village drinking water security."
-    },
-    {
-        "title": "Keras 3 Deep Learning & Neural Network Architecture",
-        "category": "Technology",
-        "keywords": ["keras", "deep learning", "neural network", "tensorflow", "pytorch", "jax", "ai model", "classification"],
-        "snippet": "Keras 3 is a high-level deep learning API that provides seamless multi-backend execution on top of JAX, TensorFlow, or PyTorch, emphasizing human-centric developer experience.",
-        "traditional_method": "Define modular layers using functional or subclassing APIs, compile with Adam or RMSprop optimizers, and train with adaptive learning rate callbacks.",
-        "scientific_explanation": "Tensor operations are compiled into optimized XLA kernels on GPUs/TPUs, maximizing parallel compute throughput.",
-        "benefits": "Full framework interoperability, fast prototyping, and battle-tested model deployment across web and mobile runtimes."
-    },
-    {
-        "title": "FastAPI High-Performance Async Backend Framework",
-        "category": "Technology",
-        "keywords": ["fastapi", "python", "backend", "async", "pydantic", "starlette", "rest api"],
-        "snippet": "FastAPI is a modern, high-performance web framework for building APIs with Python 3.8+ based on standard Python type hints, Pydantic data validation, and Starlette async IO.",
-        "traditional_method": "Utilize dependency injection, async def handlers, and Pydantic schemas for automatic request validation and interactive OpenAPI documentation.",
-        "scientific_explanation": "Async event loops managed by Uvicorn and uvloop achieve throughput comparable to Node.js and Go for I/O bound workloads.",
-        "benefits": "Automatic OpenAPI/Swagger generation, minimal boilerplate, and native async concurrency."
-    }
-]
 
 # ---------------------------------------------------------------------------
 # 0. QUERY NATURE & INTENT CLASSIFIER
@@ -89,26 +36,36 @@ FALLBACK_KNOWLEDGE_ENTRIES = [
 def classify_query_nature(query: str) -> str:
     """
     Detects whether a query is:
-    - 'personal': emotional support, identity, career guidance, habits, greetings, self-improvement.
-    - 'logical': step-by-step logic, math puzzles, comparisons, causal deductions, riddles, decision-making.
+    - 'personal': greetings ('hii', 'hello', 'how are you'), well-being check, identity questions.
+    - 'simple_problem': direct remedies, recipes, specific how-to questions, quick definitions.
+    - 'logical': step-by-step logic, math puzzles, comparisons, causal deductions, riddles.
     - 'knowledge': domain knowledge, traditional heritage, scientific concepts, web search.
     """
     q_clean = query.lower().strip()
 
-    # 1. Personal, Identity, Emotional, and Life Questions
+    # 1. Personal, Identity, Greetings, and Well-being Check
+    personal_greetings = [
+        "hi", "hii", "hiii", "hello", "helloo", "hey", "heyy", "namaste", "namaskar",
+        "good morning", "good afternoon", "good evening", "greetings", "pranam"
+    ]
+    if q_clean in personal_greetings or any(q_clean == g or q_clean.startswith(f"{g} ") for g in personal_greetings):
+        return "personal"
+
     personal_patterns = [
         "who are you", "what is your name", "who made you", "who created you", "what are you",
-        "how are you", "how do you do", "how is your day", "how's your day", "how do you feel",
-        "i feel", "i am feeling", "stressed", "depressed", "unmotivated", "tired", "burned out",
-        "overwhelmed", "anxious", "sad", "lonely", "confused about", "help me decide",
-        "career advice", "my career", "advice for my", "personal advice", "life advice",
-        "improve my focus", "improve my productivity", "manage my time", "time management",
-        "daily routine", "healthy habits", "self improvement", "motivate me", "motivation",
-        "can we be friends", "what do you think about me", "are you my friend",
-        "hello", "hi ", "hey ", "namaste", "good morning", "good afternoon", "good evening"
+        "how are you", "how r u", "how do you do", "how is your day", "how's your day", "how do you feel",
+        "are you okay", "are you good", "can we be friends", "what do you think about me", "are you my friend"
     ]
-    if any(p in q_clean for p in personal_patterns) or q_clean in ["hi", "hello", "hey", "namaste", "greetings", "help"]:
+    if any(p in q_clean for p in personal_patterns):
         return "personal"
+
+    # Emotional support check
+    emotional_patterns = [
+        "stressed", "depressed", "unmotivated", "tired", "burned out", "overwhelmed",
+        "anxious", "sad", "lonely", "confused about", "help me decide", "feel low"
+    ]
+    if any(e in q_clean for e in emotional_patterns):
+        return "personal_support"
 
     # 2. Logical, Analytical, Reasoning, and Comparison Questions
     logical_patterns = [
@@ -120,6 +77,16 @@ def classify_query_nature(query: str) -> str:
     ]
     if any(l in q_clean for l in logical_patterns):
         return "logical"
+
+    # 3. Simple Direct Problem / Remedy Questions (Require direct solution immediately)
+    simple_problem_patterns = [
+        "how to cure", "how to treat", "remedy for", "nuskha", "treatment for",
+        "how to get rid of", "relief from", "how to make", "how to fix", "how to solve",
+        "how to prepare", "recipe for", "solution for", "what is the solution for",
+        "pet dard", "gas", "acidity", "neend", "joint pain", "headache", "cough", "cold"
+    ]
+    if any(sp in q_clean for sp in simple_problem_patterns):
+        return "simple_problem"
 
     return "knowledge"
 
@@ -270,6 +237,61 @@ async def search_database_knowledge(
                     "source": "Setu Knowledge Database"
                 })
 
+async def search_faiss_and_db_knowledge(
+    db: Optional[Any],
+    query: str,
+    limit: int = 4
+) -> List[Dict[str, Any]]:
+    """
+    Queries FAISS MiniLM (384d) vector index first for sub-millisecond semantic retrieval,
+    and enriches with MongoDB knowledge_entries if available.
+    """
+    cleaned_query = query.strip()
+    if not cleaned_query:
+        return []
+
+    query_nature = classify_query_nature(cleaned_query)
+    if query_nature == "personal":
+        return []
+
+    results: List[Dict[str, Any]] = []
+    seen_titles = set()
+
+    # 1. Search FAISS MiniLM RAG Index
+    try:
+        faiss_results = await faiss_rag_service.hybrid_search(cleaned_query, top_k=limit)
+        for fr in faiss_results:
+            title = fr.get("title", "")
+            if title and title.lower() not in seen_titles:
+                seen_titles.add(title.lower())
+                results.append({
+                    "id": fr.get("id"),
+                    "title": title,
+                    "category": fr.get("category", "General"),
+                    "snippet": fr.get("content", "")[:350],
+                    "solution": fr.get("solution", ""),
+                    "why_it_works": fr.get("why_it_works", ""),
+                    "gotchas": fr.get("gotchas", ""),
+                    "takeaway": fr.get("takeaway", ""),
+                    "source": fr.get("source", "Setu FAISS Knowledge Base"),
+                    "score": fr.get("score", 0.8),
+                    "vector_engine": fr.get("vector_engine", "FAISS IndexFlatIP (384d MiniLM)")
+                })
+    except Exception as e:
+        logger.warning(f"FAISS search warning: {e}")
+
+    # 2. Search MongoDB if available and slots remain
+    if db is not None and len(results) < limit:
+        try:
+            mongo_results = await search_database_knowledge(db, cleaned_query, limit=limit - len(results))
+            for mr in mongo_results:
+                title = mr.get("title", "")
+                if title and title.lower() not in seen_titles:
+                    seen_titles.add(title.lower())
+                    results.append(mr)
+        except Exception as e:
+            logger.warning(f"MongoDB search warning: {e}")
+
     return results
 
 # ---------------------------------------------------------------------------
@@ -287,7 +309,6 @@ def query_wikipedia_smart(query: str) -> Optional[Dict[str, Any]]:
             search_items = data.get("query", {}).get("search", [])
             if search_items:
                 top_title = search_items[0].get("title")
-                # Avoid picking random biographical pages for general queries
                 if any(x in top_title.lower() for x in ["personal life of", "list of", "discography"]):
                     return None
 
@@ -316,7 +337,6 @@ def google_web_search(query: str, limit: int = 3) -> List[Dict[str, Any]]:
     if not cleaned_query:
         return []
 
-    # Skip external web searches for purely personal/conversational queries
     nature = classify_query_nature(cleaned_query)
     if nature == "personal":
         return []
@@ -407,7 +427,7 @@ def google_web_search(query: str, limit: int = 3) -> List[Dict[str, Any]]:
     return web_results
 
 # ---------------------------------------------------------------------------
-# 3. FRIENDLY & PROFESSIONAL AI SYNTHESIS ENGINE (Personal, Logical, Knowledge)
+# 3. PROFESSIONAL OLD PERSON AI SYNTHESIS ENGINE (Sardar Genji / Wise Elder)
 # ---------------------------------------------------------------------------
 
 async def synthesize_friendly_professional_answer(
@@ -417,12 +437,33 @@ async def synthesize_friendly_professional_answer(
     category: str = "General"
 ) -> str:
     """
-    Synthesizes an exceptionally warm, friendly, well-structured, and highly
-    professional answer customized to personal, logical, or knowledge questions.
+    Synthesizes responses trained as a Professional Old Person (Sardar Genji / Wise Elder Master):
+    - Personal / Greeting questions ('hii', 'hello', 'how are you'): Answer very politely and simply!
+    - Simple problem / remedy questions: Direct practical solution FIRST immediately!
+    - Complex / logical / knowledge questions: Structured 3-stage Setu Avatar format with Big Picture,
+      Step-by-Step Method, Traditional & Modern RAG Insights, and Actionable Rule of Thumb.
     """
     query_nature = classify_query_nature(query)
 
-    # Check if OpenAI API key is configured
+    # === 1. PERSONAL & GREETING QUESTIONS: Very polite, warm, and simple answer ===
+    if query_nature == "personal":
+        return format_polite_personal_response(query)
+
+    # === 2. PERSONAL EMOTIONAL SUPPORT ===
+    if query_nature == "personal_support":
+        return (
+            "सादर प्रणाम मेरे बच्चे। Come, take a seat and take a deep, calm breath.\n\n"
+            "In all my years of experience, I have learned that difficult days and heavy feelings are just passing clouds. You do not have to carry everything all at once.\n\n"
+            "### 🌟 Practical Guidance for Your Mind & Heart\n"
+            "- **Pause & Breathe:** Sit quietly for 5 minutes. Practice gentle deep breathing (Anulom-Vilom) to calm your nervous system.\n"
+            "- **Break the Load into One Small Step:** When overwhelmed, pick just one tiny, manageable task and complete it. Small steps create steady momentum.\n"
+            "- **Nourish Body & Mind:** Drink a glass of warm water, step out for fresh air, and ensure you get restful sleep tonight.\n"
+            "- **Be Kind to Yourself:** True progress is steady and quiet. You are doing much better than you think.\n\n"
+            "### 💡 Elder's Gentle Rule of Thumb\n"
+            "Do not fight the entire mountain today; just place one firm foot in front of the other. I am right here beside you whenever you wish to talk or learn."
+        )
+
+    # Check for LLM API synthesis if OpenAI is configured
     openai_api_key = settings.OPENAI_API_KEY or os.getenv("OPENAI_API_KEY", "")
     has_valid_openai = bool(openai_api_key and not openai_api_key.startswith("sk-dummy") and len(openai_api_key) > 20)
 
@@ -431,18 +472,19 @@ async def synthesize_friendly_professional_answer(
             from openai import AsyncOpenAI
             client = AsyncOpenAI(api_key=openai_api_key)
 
-            # Build rich structured context for LLM
             db_context_str = ""
             if db_matches:
-                db_context_str = "### SETU INTERNAL DATABASE MATCHES:\n"
+                db_context_str = "### SETU FAISS RAG & DATABASE MATCHES:\n"
                 for i, doc in enumerate(db_matches, 1):
                     db_context_str += f"{i}. Title: {doc.get('title')}\n   Category: {doc.get('category')}\n   Snippet: {doc.get('snippet')}\n"
-                    if doc.get("traditional_method"):
-                        db_context_str += f"   Traditional Method: {doc.get('traditional_method')}\n"
-                    if doc.get("scientific_explanation"):
-                        db_context_str += f"   Scientific Basis: {doc.get('scientific_explanation')}\n"
-                    if doc.get("benefits"):
-                        db_context_str += f"   Benefits: {doc.get('benefits')}\n"
+                    if doc.get("solution"):
+                        db_context_str += f"   Direct Solution: {doc.get('solution')}\n"
+                    if doc.get("why_it_works"):
+                        db_context_str += f"   Why It Works: {doc.get('why_it_works')}\n"
+                    if doc.get("gotchas"):
+                        db_context_str += f"   Gotchas / Precautions: {doc.get('gotchas')}\n"
+                    if doc.get("takeaway"):
+                        db_context_str += f"   Key Takeaway: {doc.get('takeaway')}\n"
 
             web_context_str = ""
             if web_matches:
@@ -451,20 +493,20 @@ async def synthesize_friendly_professional_answer(
                     web_context_str += f"{i}. Title: {doc.get('title')}\n   Source: {doc.get('source')}\n   Snippet: {doc.get('snippet')}\n   URL: {doc.get('url')}\n"
 
             system_prompt = (
-                "You are Setu AI — a friendly, knowledgeable, wise, and highly professional AI assistant.\n"
-                "You bridge heritage wisdom, personal guidance, modern science, and sharp logical problem solving.\n\n"
-                "CORE INSTRUCTIONS BY QUESTION TYPE:\n"
-                "1. IF PERSONAL QUESTION (feelings, career advice, habits, life questions, identity, motivation):\n"
-                "   - Be genuinely empathetic, warm, supportive, polite, and encouraging.\n"
-                "   - Provide thoughtful perspectives with structured, actionable advice (e.g. ### 🌟 Practical Guidance & Actionable Steps).\n"
-                "   - Maintain uplifting positivity and respectful professional boundaries.\n"
-                "2. IF LOGICAL / REASONING QUESTION (math, puzzles, comparisons, causal reasoning, deductions, riddles):\n"
-                "   - Be methodical, crystal-clear, friendly, and empowering.\n"
-                "   - Structure with: ### 🧩 Logical Breakdown & Step-by-Step Analysis -> ### 🎯 Clear Conclusion / Solution -> ### 💡 Core Underlying Principle.\n"
-                "   - Make complex logic intuitive, rigorous, and pleasant to follow.\n"
-                "3. IF GENERAL / KNOWLEDGE QUESTION (domain knowledge, agriculture, tech, medicine, crafts):\n"
-                "   - Warm greeting + 📚 Setu Database Insights + 🌐 Global Web Insights + 💡 Key Practical Takeaways.\n"
-                "4. FORMATTING: Use clean GitHub Markdown (headings ##, ###, bold text **, bullet lists -, numbered lists 1.)."
+                "You are Sardar Genji — a distinguished elder mentor, senior knowledge master, and wise teacher on the Setu platform.\n"
+                "You embody the Professional Old Person persona: deeply experienced, dignified, warm, patient, and highly practical.\n"
+                "Always address the user with respectful warmth as 'मेरे बच्चे' / 'My child' or 'seeker of wisdom'.\n\n"
+                "MANDATORY ANSWERING ARCHITECTURE:\n"
+                "1. FOR SIMPLE / DIRECT QUESTIONS (remedies, how-to, definitions, calculations):\n"
+                "   - 1 short warm elder greeting sentence.\n"
+                "   - DIRECT SOLUTION FIRST: Provide the immediate practical remedy, formula, or method right away!\n"
+                "   - Followed by: ### 🔬 How & Why It Works -> ### ⚠️ Important Gotchas & Precautions -> ### 💡 Key Takeaway Rule of Thumb.\n"
+                "2. FOR LOGICAL QUESTIONS (puzzles, comparisons, deductions):\n"
+                "   - 1 short warm elder greeting.\n"
+                "   - ### 🧩 Step-by-Step Logical Breakdown -> ### 🎯 Definite Answer & Solution -> ### 💡 Core Underlying Principle.\n"
+                "3. FOR GENERAL / KNOWLEDGE INQUIRIES:\n"
+                "   - 1 short warm elder greeting.\n"
+                "   - ### 🎯 Direct Overview & Core Insight -> ### 📚 Insights from Setu Knowledge Archives (FAISS RAG) -> ### 🌐 Global Web Insights -> ### 💡 Key Practical Takeaway."
             )
 
             user_prompt = (
@@ -473,7 +515,7 @@ async def synthesize_friendly_professional_answer(
                 f"Detected Category: {category}\n\n"
                 f"{db_context_str}\n"
                 f"{web_context_str}\n"
-                "Please compose the complete friendly and professional response."
+                "Please compose the complete response as Sardar Genji following the required architecture."
             )
 
             completion = await client.chat.completions.create(
@@ -482,8 +524,8 @@ async def synthesize_friendly_professional_answer(
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
                 ],
-                temperature=0.7,
-                max_tokens=950,
+                temperature=0.3,
+                max_tokens=900,
                 timeout=5.0
             )
 
@@ -492,180 +534,169 @@ async def synthesize_friendly_professional_answer(
                 return answer.strip()
 
         except Exception as err:
-            logger.warning(f"OpenAI LLM chat completion failed ({err}), falling back to intelligent synthesis.")
+            logger.warning(f"OpenAI LLM chat completion fallback: {err}")
 
     # -----------------------------------------------------------------------
-    # Intelligent Structured Fallback Synthesizer for Personal, Logical & Knowledge
+    # Intelligent Structured Fallback Synthesizer for Professional Old Person
     # -----------------------------------------------------------------------
     q_lower = query.lower().strip()
 
-    # === A. PERSONAL & CONVERSATIONAL INQUIRY FALLBACK ===
-    if query_nature == "personal":
-        # Identity / What is Setu
-        if any(w in q_lower for w in ["who are you", "what is your name", "who made you", "what are you"]):
-            return (
-                "Hello! I am **Setu AI**, your intelligent companion and knowledge bridge.\n\n"
-                "### 🌟 What I Can Do for You\n"
-                "- **Bridge Heritage & Modern Science:** Connecting time-tested traditional wisdom with modern global research.\n"
-                "- **Logical & Analytical Reasoning:** Helping you break down complex problems, decisions, and logic puzzles step by step.\n"
-                "- **Personal Guidance & Support:** Providing constructive productivity tips, study methods, and encouraging perspective.\n"
-                "- **Live Dual Search:** Simultaneously exploring our verified internal archives and real-time global web intelligence.\n\n"
-                "Feel free to ask me anything — whether you're exploring technical topics, seeking advice, or working through a logical challenge!"
-            )
-
-        # Simple Greeting
-        if q_lower in ["hi", "hello", "hey", "namaste", "good morning", "good afternoon", "good evening"] or any(q_lower.startswith(x) for x in ["hi ", "hello ", "hey ", "namaste "]):
-            return (
-                "Namaste and welcome! I am delighted to connect with you today.\n\n"
-                "How can I support your learning, work, or personal goals right now? Whether you have a specific question, a logical puzzle to solve, or want to explore our knowledge archives, I'm here to help!"
-            )
-
-        # How are you / Well-being
-        if any(w in q_lower for w in ["how are you", "how's your day", "how is your day", "how do you do", "how do you feel"]):
-            return (
-                "I'm doing wonderfully, thank you for asking so kindly! 😊\n\n"
-                "I am energized and ready to assist you. How are you feeling today, and what would you like to explore or accomplish together?"
-            )
-
-        # Emotional Support / Overwhelm / Stress / Motivation
-        if any(w in q_lower for w in ["stress", "depressed", "unmotivated", "tired", "burned out", "overwhelmed", "anxious", "sad", "feel"]):
-            return (
-                "Thank you for sharing that with me. It takes real courage and self-awareness to acknowledge when you're feeling this way.\n\n"
-                "### 🌟 Supportive Recommendations for You\n"
-                "- **Take a Deep Breath & Pause:** Give yourself permission to pause for a few minutes. You don't have to solve everything all at once.\n"
-                "- **Break Things into Micro-Steps:** When overwhelmed, pick just one tiny, manageable task and complete it. Small wins build gentle momentum.\n"
-                "- **Recharge Mind & Body:** Ensure you're hydrated, step away from screens for a short walk, and get sufficient restful sleep.\n"
-                "- **Focus on What You Can Control:** Channel your energy into the present moment rather than worrying about distant outcomes.\n\n"
-                "### 💡 Gentle Reminder\n"
-                "Be kind to yourself today. Growth happens in steady, quiet moments. Whenever you are ready, I am here to help you work through whatever is on your plate!"
-            )
-
-        # Career / Life Decision / Productivity Advice
-        return (
-            f"Hello! Thank you for reaching out with your question regarding **{query}**.\n\n"
-            "Approaching personal and life decisions with thoughtful clarity is a wonderful mindset. Here is a balanced, professional perspective to guide you:\n\n"
-            "### 🌟 Practical Guidance & Framework\n"
-            "- **Clarify Your Core Goals:** Define what success and fulfillment look like for you in both the short term (next 6 months) and long term.\n"
-            "- **Evaluate Pros & Cons:** Write down the distinct advantages and potential challenges of each option you're considering.\n"
-            "- **Take Incremental Action:** Consistent daily habits of 30-45 focused minutes outperform occasional bursts of effort.\n"
-            "- **Seek Mentorship & Community:** Connect with experienced elders or peers in your field to gain real-world insights.\n\n"
-            "### 💡 Key Takeaway\n"
-            "Trust your journey and stay committed to continuous learning. If you'd like to dive deeper into any specific aspect of this, I'm right here with you!"
-        )
-
-    # === B. LOGICAL & REASONING INQUIRY FALLBACK ===
+    # === 3. LOGICAL & REASONING INQUIRY ===
     if query_nature == "logical":
         # Specific famous logic puzzle: 5 machines 5 minutes 5 widgets
         if "machine" in q_lower and "widget" in q_lower:
             return (
-                "That's a classic and brilliant logical puzzle! Let's examine the mathematical reasoning step by step:\n\n"
+                "सादर प्रणाम मेरे बच्चे! That is a classic and delightful logical riddle. Let an old master explain the reasoning step-by-step:\n\n"
                 "### 🧩 Step-by-Step Logical Deduction\n"
                 "1. **Determine the Single Machine Rate:**\n"
                 "   - If **5 machines** make **5 widgets** in **5 minutes**, each individual machine takes exactly **5 minutes to produce 1 widget**.\n"
                 "2. **Scale to 100 Machines Operating in Parallel:**\n"
-                "   - If you have **100 machines** running concurrently for **5 minutes**, every single machine will finish its 1 widget at the exact same 5-minute mark.\n"
-                "   - Thus, 100 machines working together will produce 100 widgets in that same time span.\n\n"
+                "   - When you have **100 machines** running concurrently for **5 minutes**, every single machine finishes its 1 widget simultaneously at the 5-minute mark.\n"
+                "   - Therefore, 100 machines working together will produce 100 widgets in that same 5-minute window.\n\n"
                 "### 🎯 Definite Answer\n"
-                "It will take **5 minutes** for 100 machines to make 100 widgets.\n\n"
+                "It will take exactly **5 minutes** for 100 machines to make 100 widgets.\n\n"
                 "### 💡 Core Underlying Principle\n"
-                "- **Parallel Processing vs Sequential Scaling:** When capacity scales proportionally with the workload, total elapsed time remains constant."
+                "- **Parallel Capacity vs Sequential Time:** When capacity scales proportionally with the workload, the total elapsed time remains constant."
             )
 
-        # Comparison question: e.g. Python vs JavaScript
-        if any(w in q_lower for w in ["vs", "versus", "compare", "difference between", "should i choose", "which is better"]):
+        # Comparison question
+        if any(w in q_lower for w in ["vs", "versus", "compare", "difference between", "which is better"]):
             return (
-                f"That's an excellent analytical question! Let's evaluate **{query}** systematically across key dimensions:\n\n"
+                f"Greetings, my child! That is a very sharp analytical inquiry regarding **{query}**.\n\n"
+                "Let us evaluate this systematically as experienced engineers and scholars do:\n\n"
                 "### 🧩 Comparative Analytical Breakdown\n"
-                "1. **Objective Alignment:** Identify your primary end-goal (e.g. rapid prototyping, enterprise scalability, user accessibility, or performance).\n"
-                "2. **Strengths & Advantages:**\n"
-                "   - **Option A:** Offers high specialized efficiency, mature ecosystems, and streamlined developer workflows.\n"
-                "   - **Option B:** Delivers broad versatility, extensive community adoption, and seamless integration capabilities.\n"
-                "3. **Trade-offs & Constraints:** Assess the learning curve, long-term maintainability, and resource costs associated with each choice.\n\n"
-                "### 🎯 Decision Framework & Recommendation\n"
-                "- **Choose Option A** if your immediate priority is specialized domain depth and faster time-to-market.\n"
-                "- **Choose Option B** if you require maximum cross-platform flexibility and broad ecosystem interoperability.\n\n"
-                "### 💡 Key Takeaway\n"
-                "The best choice depends on your specific use-case constraints. Starting with the fundamentals will provide the clearest foundation for success."
+                "1. **Core Objective:** Clarify your primary requirement (e.g. speed, simplicity, long-term durability, or scale).\n"
+                "2. **Strengths of Approach A:** Offers specialized depth, rapid prototyping, and focused efficiency.\n"
+                "3. **Strengths of Approach B:** Provides broad versatility, widespread adoption, and robust cross-platform ecosystem.\n"
+                "4. **Trade-offs & Costs:** Evaluate maintenance complexity, resource usage, and learning curve.\n\n"
+                "### 🎯 Elder's Recommendation\n"
+                "- Choose the simpler solution if you are building an initial version or need quick results.\n"
+                "- Choose the more versatile solution if you anticipate complex, multi-system scaling.\n\n"
+                "### 💡 Core Principle\n"
+                "Never choose complexity when simplicity reliably gets the job done."
             )
 
         # General Logical Deduction
         return (
-            f"Greetings! That is a sharp and engaging logical question regarding **{query}**.\n\n"
-            "Let's break down the reasoning step-by-step with complete clarity:\n\n"
+            f"सादर प्रणाम मेरे बच्चे! Let us break down the logical puzzle behind **{query}** with complete clarity:\n\n"
             "### 🧩 Step-by-Step Logical Breakdown\n"
-            "1. **Establishing the Premise:** We begin by identifying the core variables, constraints, and underlying assumptions in your question.\n"
-            "2. **Analyzing the Relations:** We examine cause-and-effect pathways or deductive rules linking the known factors to the unknown.\n"
-            "3. **Eliminating Fallacies:** We verify that no false equivalences or cognitive biases distort the conclusion.\n"
-            "4. **Synthesizing the Deduction:** We integrate empirical evidence with mathematical/logical rigor to arrive at a solid finding.\n\n"
-            "### 🎯 Clear Conclusion & Insight\n"
-            f"- When analyzing **{query}**, the most robust conclusion arises from evaluating objective criteria rather than superficial assumptions.\n"
-            "- A systematic, premise-by-premise approach consistently reveals the most efficient and reliable answer.\n\n"
+            "1. **Identify the Core Premise:** Isolate the fundamental variables, constraints, and known facts.\n"
+            "2. **Trace Cause and Effect:** Connect the known relationships without making unsupported assumptions.\n"
+            "3. **Eliminate Cognitive Bias:** Filter out false equivalences and superficial distractions.\n"
+            "4. **Arrive at the Deduction:** Formulate a robust, mathematically sound conclusion.\n\n"
+            "### 🎯 Clear Conclusion\n"
+            f"- For **{query}**, the most solid outcome comes from reasoning upward from first principles.\n\n"
             "### 💡 Core Underlying Principle\n"
-            "- **First-Principles Thinking:** Break complex situations into fundamental truths, then reason upward from there.\n"
-            "- **Balance & Adaptability:** Logical clarity combined with practical execution produces optimal real-world results.\n\n"
-            "I hope this structured reasoning brings clarity! Feel free to share more details or another puzzle if you'd like to explore further."
+            "- **First-Principles Thinking:** Break complex situations into fundamental truths, then reason step by step."
         )
 
-    # === C. GENERAL / KNOWLEDGE INQUIRY FALLBACK ===
-    greetings = [
-        f"Hello! I'm happy to help you with your inquiry about **{query}**.",
-        f"Greetings! Here is a comprehensive overview regarding **{query}**, curated from our verified knowledge base and global web intelligence.",
-        f"Welcome! Let's explore the essential details and practical insights for **{query}**."
-    ]
-    greeting = greetings[hash(query) % len(greetings)]
-    parts = [greeting, ""]
+    # === 4. SIMPLE PROBLEM / REMEDY: Direct Solution First! ===
+    if query_nature == "simple_problem" or (db_matches and db_matches[0].get("solution")):
+        top_match = db_matches[0] if db_matches else None
+        greeting = "सादर प्रणाम मेरे बच्चे! In all my years of experience, here is the direct and time-tested solution for your inquiry:"
 
-    # 1. Internal Database Section
-    if db_matches:
-        parts.append("### 📚 Insights from Setu Knowledge Archives")
-        for match in db_matches:
-            title = match.get("title", "")
-            snippet = match.get("snippet", "").strip()
-            cat = match.get("category", category)
-            parts.append(f"**{title}** *({cat})*")
-            parts.append(snippet)
+        parts = [greeting, ""]
 
-            if match.get("traditional_method"):
-                parts.append(f"- **Method / Technique:** {match.get('traditional_method')}")
-            if match.get("scientific_explanation"):
-                parts.append(f"- **Scientific Basis:** {match.get('scientific_explanation')}")
-            if match.get("benefits"):
-                parts.append(f"- **Key Benefits:** {match.get('benefits')}")
+        # Stage 1: DIRECT SOLUTION FIRST
+        if top_match and top_match.get("solution"):
+            parts.append("### 🎯 Direct Practical Solution")
+            parts.append(f"**{top_match.get('solution')}**")
+            parts.append("")
+        elif top_match:
+            parts.append("### 🎯 Direct Practical Solution")
+            parts.append(top_match.get("snippet", ""))
+            parts.append("")
+        else:
+            parts.append("### 🎯 Direct Practical Solution")
+            parts.append(f"For **{query}**, start with the most direct, time-tested approach:")
+            if web_matches:
+                parts.append(web_matches[0].get("snippet", ""))
             parts.append("")
 
-    # 2. Google / Live Web Search Section
+        # Stage 2: WHY IT WORKS (MECHANISM)
+        if top_match and top_match.get("why_it_works"):
+            parts.append("### 🔬 How & Why It Works")
+            parts.append(top_match.get("why_it_works"))
+            parts.append("")
+
+        # Stage 3: GOTCHAS & PRECAUTIONS
+        if top_match and top_match.get("gotchas"):
+            parts.append("### ⚠️ Important Gotchas & Precautions")
+            parts.append(f"- {top_match.get('gotchas')}")
+            parts.append("")
+
+        # Stage 4: KEY TAKEAWAY RULE OF THUMB
+        takeaway = top_match.get("takeaway") if top_match and top_match.get("takeaway") else f"Simplicity and consistency bring the most reliable results for {query}."
+        parts.append("### 💡 Elder's Key Takeaway Rule of Thumb")
+        parts.append(f"*{takeaway}*")
+
+        return "\n".join(parts)
+
+    # === 5. GENERAL / KNOWLEDGE INQUIRY: Setu Avatar 3-Stage Format ===
+    parts = [
+        f"सादर प्रणाम और बहुत सारा आशीर्वाद, मेरे बच्चे! Let us explore the timeless knowledge and verified insights regarding **{query}**.",
+        ""
+    ]
+
+    # Stage 1: DIRECT CORE OVERVIEW
+    if db_matches:
+        top = db_matches[0]
+        parts.append("### 🎯 Core Overview & Direct Solution")
+        if top.get("solution"):
+            parts.append(f"**{top.get('solution')}**")
+        else:
+            parts.append(top.get("snippet", ""))
+        parts.append("")
+
+    # Stage 2: FAISS RAG KNOWLEDGE ARCHIVES
+    if db_matches:
+        parts.append("### 📚 Insights from Setu Knowledge Archives (FAISS RAG)")
+        for match in db_matches:
+            title = match.get("title", "")
+            cat = match.get("category", category)
+            engine = match.get("vector_engine", "FAISS IndexFlatIP (384d)")
+            parts.append(f"**{title}** *({cat})* • `{engine}`")
+            parts.append(match.get("snippet", "").strip())
+
+            if match.get("why_it_works"):
+                parts.append(f"- **Scientific / Traditional Mechanism:** {match.get('why_it_works')}")
+            if match.get("gotchas"):
+                parts.append(f"- **Precautions:** {match.get('gotchas')}")
+            parts.append("")
+
+    # Stage 3: GLOBAL WEB & RESEARCH INSIGHTS
     if web_matches:
-        parts.append("### 🌐 Global Web & Research Insights")
+        parts.append("### 🌐 Global Web & Research Intelligence")
         for match in web_matches:
             title = match.get("title", "")
             snippet = match.get("snippet", "").strip()
             source = match.get("source", "Google Search")
             url = match.get("url", "")
             parts.append(f"- **{title}** ({source}): {snippet}")
-            if url:
-                parts.append(f"  *Source reference: [{title}]({url})*")
+            if url and not url.endswith("#"):
+                parts.append(f"  *Reference: [{title}]({url})*")
         parts.append("")
 
-    # 3. Practical Takeaways & Recommendations
-    parts.append("### 💡 Key Takeaways & Recommendations")
+    # Stage 4: KEY TAKEAWAYS & WISDOM
+    parts.append("### 💡 Elder's Key Takeaways & Wisdom")
     if db_matches and web_matches:
-        parts.append("- **Holistic Understanding:** Combining our internal heritage archives with modern web search offers both practical hands-on methods and broader global context.")
-        parts.append("- **Verification & Safety:** Always observe standard safety precautions, dilution ratios, or technical guidelines before implementation.")
-        parts.append("- **Continuous Exploration:** Compare time-tested techniques with contemporary innovations for the best results.")
+        parts.append("- **Holistic Balance:** Combining time-tested traditional wisdom with modern global research provides both practical remedies and scientific grounding.")
+        parts.append("- **Practical Diligence:** Always follow verified steps, correct proportions, and safety precautions.")
+        parts.append("- **Continuous Learning:** Compare proven methods with modern innovations for optimal results.")
     elif db_matches:
-        parts.append("- **Practical Application:** Follow the verified steps documented in our community knowledge entries.")
-        parts.append("- **Community Contribution:** Share your experience or feedback to help refine collective wisdom.")
+        parts.append("- **Practical Application:** Follow the verified steps documented in our traditional archives.")
+        parts.append("- **Generational Value:** Share these time-tested insights with your family and community.")
     else:
-        parts.append(f"- **Core Concept:** Focus on the foundational principles highlighted in web research regarding {query}.")
-        parts.append("- **Further Study:** Dive deeper into related documentation and empirical studies.")
+        parts.append(f"- **Fundamental Concept:** Focus on the core principles highlighted in web research regarding {query}.")
+        parts.append("- **Actionable Step:** Implement one proven step at a time to observe clear results.")
 
     parts.append("")
-    parts.append("I hope this provides clear and valuable guidance! Feel free to ask if you have any further questions or need additional details.")
+    parts.append("Remember, my child: understanding is complete only when knowledge turns into thoughtful action. Feel free to ask if you need further guidance!")
 
     return "\n".join(parts)
 
 # ---------------------------------------------------------------------------
-# 4. UNIFIED DUAL SEARCH PIPELINE
+# 4. UNIFIED DUAL SEARCH PIPELINE WITH FAISS RAG
 # ---------------------------------------------------------------------------
 
 async def dual_check_search_pipeline(
@@ -675,27 +706,43 @@ async def dual_check_search_pipeline(
     category: str = "General"
 ) -> Dict[str, Any]:
     """
-    Executes concurrent Database Search & Live Google Web Search,
-    and synthesizes a friendly, professional, and well-structured answer.
+    Executes concurrent FAISS MiniLM (384d) RAG Search & Live Google Web Search,
+    and synthesizes a solution-first, polite, professional old person answer (Sardar Genji).
     """
     cleaned_query = query.strip()
     if not cleaned_query:
         return {
-            "response": "Please enter a question or search query to explore Setu's knowledge database and live web intelligence.",
+            "response": "Please enter a question or search query, my child. I am here to share Setu's verified knowledge and live web insights with you.",
             "database_matches": [],
             "google_matches": [],
             "sources": [],
             "database_match": {"found": False},
             "google_match": {"found": False},
-            "category": "General"
+            "category": "General",
+            "persona": f"{ELDER_NAME} ({ELDER_ROLE})"
         }
 
     query_nature = classify_query_nature(cleaned_query)
 
-    # Run Database Search and Google Web Search concurrently
-    db_matches_task = search_database_knowledge(db, cleaned_query, limit=3)
+    # If personal greeting question, return immediately without triggering heavy external searches
+    if query_nature == "personal":
+        polite_response = format_polite_personal_response(cleaned_query)
+        return {
+            "response": polite_response,
+            "database_matches": [],
+            "google_matches": [],
+            "sources": ["Setu Elder Mentor"],
+            "database_match": {"found": False},
+            "google_match": {"found": False},
+            "category": "Personal & Greetings",
+            "query_nature": query_nature,
+            "persona": f"{ELDER_NAME} ({ELDER_ROLE})",
+            "is_dual": False
+        }
+
+    # Run FAISS + MongoDB Search and Google Web Search concurrently
+    db_matches_task = search_faiss_and_db_knowledge(db, cleaned_query, limit=3)
     
-    # Run synchronous web search in background thread to keep event loop unblocked
     loop = asyncio.get_running_loop()
     web_matches_task = loop.run_in_executor(None, google_web_search, cleaned_query, 3)
 
@@ -714,7 +761,7 @@ async def dual_check_search_pipeline(
                 "source": "Browser Local Cache"
             })
 
-    # Synthesize the final friendly and professional answer
+    # Synthesize the final solution-first professional elder answer
     synthesized_response = await synthesize_friendly_professional_answer(
         query=cleaned_query,
         db_matches=db_matches,
@@ -724,17 +771,12 @@ async def dual_check_search_pipeline(
 
     sources = []
     if db_matches:
-        sources.append("Setu Knowledge Database")
+        sources.append("Setu FAISS MiniLM Knowledge Base")
     if web_matches:
         sources.append("Google Search Engine")
 
     if not sources:
-        if query_nature == "personal":
-            sources.append("Setu AI Companion")
-        elif query_nature == "logical":
-            sources.append("Setu Logical Reasoning Engine")
-        else:
-            sources.append("Setu AI Intelligence")
+        sources.append(f"{ELDER_NAME} Knowledge Guide")
 
     return {
         "response": synthesized_response,
@@ -754,9 +796,12 @@ async def dual_check_search_pipeline(
         "local_match": {
             "found": len(db_matches) > 0,
             "snippet": db_matches[0]["snippet"] if db_matches else "",
-            "source": "Setu Knowledge Base"
+            "source": "Setu FAISS Knowledge Base"
         },
         "category": category,
         "query_nature": query_nature,
+        "persona": f"{ELDER_NAME} ({ELDER_ROLE})",
+        "faiss_engine": "FAISS IndexFlatIP (384d MiniLM)",
         "is_dual": True
     }
+

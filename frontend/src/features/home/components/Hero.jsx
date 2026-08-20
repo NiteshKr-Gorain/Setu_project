@@ -1,119 +1,148 @@
-// Hero imports
 import React from 'react';
-import heroGraphic from '../../../assets/hero.png';
+import { motion } from 'framer-motion';
 
-// Hero component
 export default function Hero({ onGetStarted, onLearnMore }) {
+  // Animation variants for staggered load
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { type: 'spring', stiffness: 100, damping: 15 },
+    },
+  };
+
+  const [typedText, setTypedText] = React.useState('');
+  const [isDeleting, setIsDeleting] = React.useState(false);
+  const [typingSpeed, setTypingSpeed] = React.useState(650);
+  const fullText = "Preserving Wisdom.";
+
+  React.useEffect(() => {
+    let timer;
+    const handleType = () => {
+      const isComplete = !isDeleting && typedText === fullText;
+      const isDeleted = isDeleting && typedText === '';
+
+      if (isComplete) {
+        setTypingSpeed(2500);
+        setIsDeleting(true);
+      } else if (isDeleted) {
+        setIsDeleting(false);
+        setTypingSpeed(800);
+      } else {
+        setTypedText(prev =>
+          isDeleting
+            ? fullText.slice(0, prev.length - 1)
+            : fullText.slice(0, prev.length + 1)
+        );
+        setTypingSpeed(isDeleting ? 60 : 100);
+      }
+    };
+
+    timer = setTimeout(handleType, typingSpeed);
+    return () => clearTimeout(timer);
+  }, [typedText, isDeleting, typingSpeed]);
+
   return (
-    <section className="relative pt-24 pb-16 md:pt-36 md:pb-28 bg-white text-slate-900 overflow-hidden transition-colors duration-300">
-      {/* Decorative gradient blobs */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-blue-100/40 to-orange-100/30 rounded-full blur-3xl -z-10 translate-x-1/3 -translate-y-1/4"></div>
-      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-amber-100/30 via-orange-100/20 to-blue-50/40 rounded-full blur-3xl -z-10 -translate-x-1/4 translate-y-1/4"></div>
+    <section className="relative pt-40 pb-28 md:pt-48 md:pb-36 text-slate-900 overflow-hidden min-h-screen flex items-center">
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-          
-          {/* Left column */}
-          <div className="lg:col-span-7 flex flex-col items-start text-left space-y-7 max-w-2xl">
-            
-            {/* Tagline badge */}
-            <div className="inline-flex items-center space-x-2 bg-slate-50 border border-slate-200/80 rounded-full px-4 py-1.5 shadow-2xs">
-              <span className="w-2 h-2 rounded-full bg-brand-primary animate-pulse"></span>
-              <span className="text-xs font-semibold text-slate-700 tracking-wide uppercase">
-                Intergenerational Knowledge Exchange
-              </span>
-            </div>
-
-            {/* Main headline */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] text-slate-950">
-              Preserving <span className="bg-gradient-to-r from-brand-primary via-orange-500 to-amber-500 bg-clip-text text-transparent">Traditional Wisdom</span> Across Generations.
-            </h1>
-
-            {/* Subtitle */}
-            <p className="text-slate-600 text-base sm:text-lg font-normal leading-relaxed max-w-xl">
-              Connecting elders and youth to share life experiences, preserve cultural heritage, and build meaningful mentorships backed by intelligent verification.
-            </p>
-
-            {/* CTA buttons */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 w-full sm:w-auto pt-2">
-              <button
-                type="button"
-                onClick={onGetStarted}
-                className="px-8 py-4 bg-brand-primary hover:bg-brand-hover text-white text-sm font-bold rounded-full shadow-lg shadow-brand-primary/25 transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer flex items-center justify-center space-x-2"
-              >
-                <span>Explore Wisdom</span>
-                <span>→</span>
-              </button>
-              <button
-                type="button"
-                onClick={onLearnMore}
-                className="px-8 py-4 bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 text-sm font-bold rounded-full transition-all duration-200 text-center cursor-pointer shadow-2xs"
-              >
-                Learn More
-              </button>
-            </div>
-
-            {/* Metrics indicator */}
-            <div className="pt-8 border-t border-slate-100/80 w-full grid grid-cols-3 gap-6 text-left">
-              <div>
-                <p className="text-2xl font-black text-slate-900">1,200+</p>
-                <p className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider">Stories Shared</p>
-              </div>
-              <div>
-                <p className="text-2xl font-black text-slate-900">850+</p>
-                <p className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider">Mentors Connected</p>
-              </div>
-              <div>
-                <p className="text-2xl font-black text-slate-900">98%</p>
-                <p className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider">Verified Trust</p>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Right column */}
-          <div className="lg:col-span-5 relative w-full flex items-center justify-center">
-            <div className="relative w-full aspect-square max-w-[460px]">
-              {/* Circle background */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-brand-light/60 via-orange-100/40 to-blue-100/50 rounded-full blur-2xl transform scale-95 -z-10"></div>
-              
-              {/* Illustration graphic */}
-              <div className="w-full h-full rounded-3xl overflow-hidden border border-slate-100 shadow-2xl bg-white p-4 flex items-center justify-center">
-                <img
-                  src={heroGraphic}
-                  alt="Intergenerational Knowledge Exchange Illustration"
-                  loading="lazy"
-                  className="w-full h-full object-cover rounded-2xl transform hover:scale-102 transition-transform duration-500"
-                />
-              </div>
-
-              {/* Storyteller badge */}
-              <div className="absolute -top-4 -left-4 bg-white/90 backdrop-blur-md p-3.5 rounded-2xl border border-slate-100 shadow-xl flex items-center space-x-3 text-left animate-in fade-in slide-in-from-top-4 duration-700">
-                <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 font-bold flex items-center justify-center text-sm border border-amber-200">
-                  👵
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-slate-900">Senior Storyteller</p>
-                  <p className="text-[10px] text-slate-400 font-medium">Shared 14 Heritage Tales</p>
-                </div>
-              </div>
-
-              {/* Verified badge */}
-              <div className="absolute -bottom-4 -right-4 bg-white/90 backdrop-blur-md p-3.5 rounded-2xl border border-slate-100 shadow-xl flex items-center space-x-3 text-left animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center text-sm border border-emerald-200">
-                  ✓
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-slate-900">Verified Knowledge</p>
-                  <p className="text-[10px] text-emerald-600 font-bold">100% Authenticated</p>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-        </div>
+      {/* 1. Blended Full-Bleed Background Video */}
+      <div className="absolute inset-0 w-full h-full pointer-events-none -z-10 select-none">
+        {/* Desktop Gradient Mask (fades left to right) */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#FFF7ED]/95 via-[#FFF7ED]/75 to-[#FFF7ED]/20 z-10 lg:block hidden"></div>
+        {/* Mobile Gradient Mask (fades bottom to top) */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#FFF7ED]/98 via-[#FFF7ED]/80 to-[#FFF7ED]/35 z-10 lg:hidden block"></div>
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-full object-cover object-[70%_center] sm:object-center opacity-85"
+        >
+          <source src="/Setu_Video.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
       </div>
+
+      {/* 2. Soft background glowing gradients */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-orange-500/10 via-amber-300/5 to-transparent rounded-full blur-[120px] -z-25 animate-pulse-slow"></div>
+      <div className="absolute bottom-0 left-0 w-[700px] h-[700px] bg-gradient-to-tr from-orange-500/5 via-amber-100/5 to-transparent rounded-full blur-[140px] -z-25"></div>
+
+      {/* 3. Main Content Container */}
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 w-full relative z-20">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="max-w-2xl md:max-w-3xl flex flex-col items-start text-left space-y-9"
+        >
+          {/* Tagline Badge */}
+          <motion.div
+            variants={itemVariants}
+            className="inline-flex items-center space-x-2.5 bg-white/80 border border-orange-100/70 rounded-full px-4.5 py-1.5 shadow-[0_2px_8px_rgba(249,115,22,0.04)]"
+          >
+            <span className="w-2 h-2 rounded-full bg-brand-primary animate-pulse"></span>
+            <span className="text-[10px] font-black text-slate-800 tracking-wider uppercase">
+              ✨ Introducing Setu
+            </span>
+          </motion.div>
+
+          {/* Main Headline */}
+          <motion.h1
+            variants={itemVariants}
+            className="text-4.5xl sm:text-5xl lg:text-[56px] font-bold tracking-[-0.03em] leading-[1.08] text-slate-900"
+          >
+            Bridging Generations,<br />
+            <span className="text-[#F97316] heading-serif italic font-normal">
+              {typedText}
+            </span>
+            <span className="animate-pulse ml-0.5 text-slate-900 font-sans not-italic" style={{ display: 'inline-block', opacity: 0.8 }}>|</span>
+          </motion.h1>
+
+          {/* Supporting Description */}
+          <motion.p
+            variants={itemVariants}
+            className="text-slate-600 text-[16px] font-normal leading-[1.7] tracking-normal max-w-xl"
+          >
+            Setu is a dedicated bridge connecting the vibrant youth of today with the rich experiences of older generations. Share life stories, pass on language dialects, collaborate on cultural traditions, and create lasting personal mentorships.
+          </motion.p>
+
+          {/* CTA Buttons */}
+          <motion.div
+            variants={itemVariants}
+            className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3.5 sm:space-y-0 sm:space-x-4.5 w-full sm:w-auto pt-2"
+          >
+            <button
+              type="button"
+              onClick={onGetStarted}
+              className="px-[18px] py-[10px] bg-brand-primary hover:bg-brand-hover text-white text-[14px] font-semibold rounded-[10px] transition-all duration-300 transform hover:-translate-y-[1px] active:translate-y-0 cursor-pointer flex items-center justify-center space-x-2 shadow-xs hover:shadow-sm"
+            >
+              <span>Sign Up</span>
+              <span className="text-base">→</span>
+            </button>
+            <button
+              type="button"
+              onClick={onLearnMore}
+              className="px-[18px] py-[10px] bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200 text-[14px] font-semibold rounded-[10px] transition-all duration-300 text-center cursor-pointer shadow-xs hover:-translate-y-[1px] hover:shadow-sm"
+            >
+              Explore Stories
+            </button>
+          </motion.div>
+
+        </motion.div>
+      </div>
+
     </section>
   );
 }

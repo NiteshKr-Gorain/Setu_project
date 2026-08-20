@@ -1,0 +1,197 @@
+:root {
+  --setu-card-radius: 30px;
+  --setu-card-padding: 30px;
+  --setu-card-bg: #FFFFFF;
+  --setu-card-border: rgba(226, 232, 240, 0.85);
+  --setu-card-text: #0F172A;
+  --setu-card-muted: #64748B;
+  --setu-card-accent: #F97316;
+}
+
+.card-swap-container {
+  position: relative;
+  perspective: 1200px;
+  transform-style: preserve-3d;
+  user-select: none;
+  touch-action: pan-y;
+}
+
+.card-swap-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: center bottom;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+  border-radius: var(--setu-card-radius);
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+/* Base Setu Editorial Card */
+.setu-card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--setu-card-radius);
+  padding: var(--setu-card-padding);
+  background-color: var(--setu-card-bg);
+  border: 1px solid var(--setu-card-border);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+/* Front Active Card */
+.setu-card--front {
+  border-color: rgba(249, 115, 22, 0.25);
+}
+
+/* Background Ambient Glow & Subtle Texture */
+.setu-card__ambient {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.setu-card__decoration {
+  display: none;
+}
+
+/* Minimal curved line watermark */
+.setu-card__watermark {
+  position: absolute;
+  right: -20px;
+  bottom: -20px;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  border: 1px dashed rgba(249, 115, 22, 0.12);
+  pointer-events: none;
+}
+
+/* Top Row */
+.setu-card__top {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.setu-card__category {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+  color: var(--setu-card-accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.setu-card__category-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--setu-card-accent);
+  display: inline-block;
+}
+
+.setu-card__icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--setu-card-text);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.card-swap-card:hover .setu-card__icon-btn {
+  transform: translate(2px, -2px);
+  background-color: #FFF7ED;
+  color: var(--setu-card-accent);
+  border-color: rgba(249, 115, 22, 0.3);
+}
+
+/* Main Editorial Content */
+.setu-card__content {
+  position: relative;
+  z-index: 10;
+  margin: auto 0;
+  text-align: left;
+}
+
+.setu-card__title {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.18;
+  letter-spacing: -0.025em;
+  color: var(--setu-card-text);
+  margin-bottom: 10px;
+  font-family: inherit;
+}
+
+@media (min-width: 640px) {
+  .setu-card__title {
+    font-size: 28px;
+  }
+}
+
+.setu-card__description {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--setu-card-muted);
+  font-weight: 500;
+  max-width: 95%;
+  margin: 0;
+}
+
+/* Bottom Footer */
+.setu-card__footer {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 14px;
+  border-top: 1px solid rgba(241, 245, 249, 0.9);
+  width: 100%;
+}
+
+.setu-card__number {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #94A3B8;
+  font-feature-settings: "tnum";
+}
+
+.setu-card__action {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--setu-card-accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: gap 0.2s ease;
+}
+
+.card-swap-card:hover .setu-card__action {
+  gap: 7px;
+}

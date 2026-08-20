@@ -42,7 +42,6 @@ export default function Navbar({ currentView, onViewChange, currentUser, onLogou
     { label: 'Legacy', viewId: 'legacy', id: 'nav-link-legacy' },
     { label: 'Govt Schemes', viewId: 'govt schemes', id: 'nav-link-schemes' },
     { label: 'About Us', viewId: 'about us', id: 'nav-link-about' },
-    { label: 'Contact', viewId: 'contact', id: 'nav-link-contact' },
   ];
 
   return (
@@ -104,7 +103,7 @@ export default function Navbar({ currentView, onViewChange, currentUser, onLogou
                 <button
                   id="nav-action-contribute"
                   onClick={() => handleNavClick('contribute')}
-                  className="px-4.5 py-2 bg-brand-light hover:bg-brand-primary/15 text-brand-hover text-[13px] font-bold rounded-full transition-all duration-300 cursor-pointer flex items-center space-x-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary border border-brand-primary/10"
+                  className="h-[40px] px-4 bg-brand-primary hover:bg-brand-hover text-white text-[13.5px] font-medium rounded-[11px] transition-all duration-200 cursor-pointer flex items-center space-x-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
                 >
                   <span>✍️</span>
                   <span>Share Knowledge</span>
@@ -113,23 +112,23 @@ export default function Navbar({ currentView, onViewChange, currentUser, onLogou
                   id="nav-action-profile"
                   onClick={() => handleNavClick('profile')}
                   aria-label="View Profile"
-                  className={`flex items-center space-x-2 p-1 pl-3 rounded-full border transition-all duration-300 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary ${
+                  className={`h-[40px] flex items-center space-x-2 px-3 rounded-[11px] border transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary ${
                     currentView === 'profile'
-                      ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
-                      : 'bg-white text-slate-700 border-slate-200 hover:border-slate-350 hover:bg-slate-50'
+                      ? 'bg-slate-900 text-white border-slate-900'
+                      : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
                   }`}
                 >
-                  <span className="text-[13px] font-bold">{currentUser.name || 'Profile'}</span>
                   <img
                     id="nav-user-avatar"
                     src={currentUser.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100"}
                     alt={currentUser.name || "User Avatar"}
                     loading="lazy"
-                    className="w-7 h-7 rounded-full object-cover border border-slate-100"
+                    className="w-6 h-6 rounded-full object-cover border border-slate-200/80 flex-shrink-0"
                     onError={(e) => {
                       e.target.src = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100";
                     }}
                   />
+                  <span className="text-[13.5px] font-medium">{currentUser.name || 'Profile'}</span>
                 </button>
               </div>
             ) : (
@@ -137,14 +136,14 @@ export default function Navbar({ currentView, onViewChange, currentUser, onLogou
                 <button
                   id="nav-auth-signin"
                   onClick={() => handleNavClick('signin')}
-                  className="px-4 py-2 text-slate-700 hover:text-brand-primary text-[13px] font-bold rounded-full transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
+                  className="h-[40px] px-4 text-slate-700 hover:text-slate-900 hover:bg-slate-100 text-[13.5px] font-medium rounded-[11px] border border-slate-200 hover:border-slate-300 transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
                 >
                   Sign In
                 </button>
                 <button
                   id="nav-auth-signup"
                   onClick={() => handleNavClick('signup')}
-                  className="px-5 py-2 bg-brand-primary hover:bg-brand-hover text-white text-[13px] font-bold rounded-full transition-all duration-300 cursor-pointer hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
+                  className="h-[40px] px-4 bg-brand-primary hover:bg-brand-hover text-white text-[13.5px] font-medium rounded-[11px] transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
                 >
                   Sign Up
                 </button>

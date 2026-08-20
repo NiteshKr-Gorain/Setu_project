@@ -7,6 +7,11 @@ import {
   applyTextSizePreference,
   FONT_SIZE_PRESETS
 } from '../../../shared/services/localStorageService';
+import {
+  getSavedThemePreference,
+  applyThemePreference,
+  THEME_PRESETS
+} from '../../../shared/services/themeService';
 
 // Avatar presets
 const AVATAR_PRESETS = [
@@ -18,7 +23,62 @@ const AVATAR_PRESETS = [
   'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&h=300&q=80'
 ];
 
-// Settings modal
+// Clean SVG Icons
+const UserIcon = () => (
+  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+  </svg>
+);
+
+const PaletteIcon = () => (
+  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M7 21a4 4 0 01-4-4c0-1.423.593-2.73 1.543-3.666C5.525 12.35 6 11.2 6 10a6 6 0 0112 0c0 1.2.475 2.35 1.457 3.334A5.19 5.19 0 0121 17a4 4 0 01-4 4h-2a2 2 0 01-2-2 1.002 1.002 0 00-1-1H9.828a1.002 1.002 0 00-.707.293L7.707 20.707A1 1 0 017 21z" />
+  </svg>
+);
+
+const TextIcon = () => (
+  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 6h16M4 12h10M4 18h7" />
+  </svg>
+);
+
+const LockIcon = () => (
+  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+  </svg>
+);
+
+const BellIcon = () => (
+  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+  </svg>
+);
+
+const ShieldIcon = () => (
+  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+  </svg>
+);
+
+const DataIcon = () => (
+  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+  </svg>
+);
+
+const CloseIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+  </svg>
+);
+
+const CheckIcon = () => (
+  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+  </svg>
+);
+
+// Settings modal component
 export default function ProfileSettingsModal({
   isOpen,
   onClose,
@@ -36,6 +96,9 @@ export default function ProfileSettingsModal({
   const [bio, setBio] = useState(currentProfile?.bio || '');
   const [avatar, setAvatar] = useState(currentProfile?.avatar || AVATAR_PRESETS[0]);
   const [profileSavedMsg, setProfileSavedMsg] = useState('');
+
+  // Theme state
+  const [currentTheme, setCurrentTheme] = useState(() => getSavedThemePreference());
   
   // Text size
   const [textSizeState, setTextSizeState] = useState(() => getSavedTextSizePreference());
@@ -76,6 +139,7 @@ export default function ProfileSettingsModal({
         setAvatar(currentProfile.avatar || AVATAR_PRESETS[0]);
       }
       setTextSizeState(getSavedTextSizePreference());
+      setCurrentTheme(getSavedThemePreference());
     }
   }, [isOpen, initialTab, currentProfile]);
 
@@ -113,17 +177,28 @@ export default function ProfileSettingsModal({
       onSaveSettings(updatedData);
     }
 
-    setProfileSavedMsg('Profile details updated successfully!');
+    setProfileSavedMsg('Profile changes saved successfully.');
+    setStatusMsg('Profile changes saved successfully.');
     setTimeout(() => {
       setProfileSavedMsg('');
+      setStatusMsg('');
     }, 3500);
+  };
+
+  // Select theme
+  const handleSelectTheme = (themeId) => {
+    const applied = applyThemePreference(themeId);
+    setCurrentTheme(applied);
+    const themeObj = THEME_PRESETS.find((t) => t.id === themeId);
+    setStatusMsg(`Applied ${themeObj?.name || 'theme'} successfully.`);
+    setTimeout(() => setStatusMsg(''), 3000);
   };
 
   // Select preset
   const handleSelectPreset = (presetId) => {
     const updated = applyTextSizePreference(presetId);
     setTextSizeState(updated);
-    setTextSizeSavedMsg(`Applied ${updated.scale}% (${updated.px}px) font scale globally!`);
+    setTextSizeSavedMsg(`Applied ${updated.scale}% font scale.`);
     setTimeout(() => setTextSizeSavedMsg(''), 3000);
   };
 
@@ -140,7 +215,7 @@ export default function ProfileSettingsModal({
     const newScale = Math.min(135, Math.max(80, currentScale + delta));
     const updated = applyTextSizePreference(newScale);
     setTextSizeState(updated);
-    setTextSizeSavedMsg(`Adjusted scale to ${updated.scale}% (${updated.px}px)`);
+    setTextSizeSavedMsg(`Scale set to ${updated.scale}%`);
     setTimeout(() => setTextSizeSavedMsg(''), 2500);
   };
 
@@ -148,7 +223,7 @@ export default function ProfileSettingsModal({
   const handleResetTextSize = () => {
     const updated = applyTextSizePreference('default');
     setTextSizeState(updated);
-    setTextSizeSavedMsg('Reset text size to standard 100% (16px)');
+    setTextSizeSavedMsg('Text size reset to default (100%)');
     setTimeout(() => setTextSizeSavedMsg(''), 3000);
   };
 
@@ -158,11 +233,11 @@ export default function ProfileSettingsModal({
     setPassMsg({ type: '', text: '' });
 
     if (newPassword.length < 6) {
-      setPassMsg({ type: 'error', text: 'New password must be at least 6 characters long.' });
+      setPassMsg({ type: 'error', text: 'New password must be at least 6 characters.' });
       return;
     }
     if (newPassword !== confirmPassword) {
-      setPassMsg({ type: 'error', text: 'New passwords do not match.' });
+      setPassMsg({ type: 'error', text: 'Passwords do not match.' });
       return;
     }
 
@@ -170,7 +245,7 @@ export default function ProfileSettingsModal({
       onSaveSettings({ passwordUpdated: true });
     }
 
-    setPassMsg({ type: 'success', text: 'Password updated successfully!' });
+    setPassMsg({ type: 'success', text: 'Password updated successfully.' });
     setCurrentPassword('');
     setNewPassword('');
     setConfirmPassword('');
@@ -194,17 +269,16 @@ export default function ProfileSettingsModal({
         language
       });
     }
-    setStatusMsg('Settings saved successfully!');
+    setStatusMsg('Preferences saved successfully.');
     setTimeout(() => {
       setStatusMsg('');
-      onClose();
-    }, 1200);
+    }, 2500);
   };
 
   // Clear cache
   const handleClearCache = () => {
     clearLocalStorageCache();
-    setStatusMsg('Local AI search cache cleared!');
+    setStatusMsg('Browser cached data cleared.');
     setTimeout(() => setStatusMsg(''), 3000);
   };
 
@@ -215,213 +289,118 @@ export default function ProfileSettingsModal({
     setTimeout(() => setStatusMsg(''), 3000);
   };
 
-  // Render modal
+  const navItems = [
+    { id: 'edit_profile', label: 'Profile', icon: UserIcon },
+    { id: 'theme', label: 'Theme & Appearance', icon: PaletteIcon },
+    { id: 'text_size', label: 'Display & Text', icon: TextIcon },
+    { id: 'security', label: 'Security', icon: LockIcon },
+    { id: 'notifications', label: 'Notifications', icon: BellIcon },
+    { id: 'privacy', label: 'Privacy', icon: ShieldIcon },
+    { id: 'preferences', label: 'Data & Storage', icon: DataIcon },
+  ];
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-sm animate-in fade-in duration-200 overscroll-contain overflow-hidden"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      {/* Modal box */}
+      {/* Modal Card Container */}
       <div
-        className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl border border-slate-100 overflow-hidden flex flex-col h-[90vh] min-h-[640px] max-h-[860px] text-left transition-all duration-300 relative"
+        className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col h-[85vh] min-h-[580px] max-h-[800px] text-left relative"
         onClick={(e) => e.stopPropagation()}
       >
-        
-        {/* Header bar */}
-        <div className="px-6 sm:px-8 py-5 bg-gradient-to-r from-orange-600 via-amber-600 to-slate-900 text-white flex items-center justify-between shadow-md shrink-0 select-none">
-          <div className="flex items-center space-x-3.5">
-            <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-xl shadow-inner">
-              ⚙️
-            </div>
-            <div>
-              <h3 className="text-lg font-black text-white leading-tight">Account &amp; Profile Settings</h3>
-              <p className="text-xs text-amber-100/90 font-medium">Edit profile, display text size, security, privacy &amp; preferences</p>
-            </div>
+        {/* Modal Header */}
+        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-white shrink-0">
+          <div>
+            <h3 className="text-base font-semibold text-slate-900">Settings</h3>
+            <p className="text-xs text-slate-500 mt-0.5">Manage your account settings and preferences.</p>
           </div>
-          {/* Close button */}
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-bold text-sm transition-colors cursor-pointer border border-white/20"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
             title="Close Settings"
             aria-label="Close Settings"
           >
-            ✕
+            <CloseIcon />
           </button>
         </div>
 
-        {/* Feedback alert */}
+        {/* Global Feedback Banner */}
         {statusMsg && (
-          <div className="bg-emerald-50 border-b border-emerald-200 text-emerald-800 px-6 py-2.5 text-xs font-bold flex items-center space-x-2 shrink-0">
-            <span>✨</span>
+          <div className="bg-emerald-50 border-b border-emerald-200 text-emerald-800 px-6 py-2.5 text-xs font-medium flex items-center space-x-2 shrink-0">
+            <CheckIcon />
             <span>{statusMsg}</span>
           </div>
         )}
 
-        {/* Main layout */}
-        <div className="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0 relative">
+        {/* Modal Body */}
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
           
-          {/* Sidebar tabs */}
-          <div className="w-full md:w-64 bg-slate-50/90 border-r border-slate-100 p-3 sm:p-4 flex md:flex-col space-x-1.5 md:space-x-0 md:space-y-1.5 overflow-x-auto md:overflow-y-auto shrink-0 overscroll-contain custom-scrollbar">
-            
-            {/* Profile tab */}
-            <button
-              onClick={() => setActiveTab('edit_profile')}
-              className={`w-full text-left px-3.5 py-3 rounded-lg text-xs font-bold transition-all flex items-center justify-between cursor-pointer ${
-                activeTab === 'edit_profile'
-                  ? 'bg-white text-orange-600 shadow-sm border border-slate-200/80 ring-1 ring-orange-500/20'
-                  : 'text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              <div className="flex items-center space-x-2.5">
-                <span className="text-base">👤</span>
-                <span>Edit Profile</span>
-              </div>
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-orange-50 text-orange-600 border border-orange-200/60 hidden sm:inline-block">
-                Details
-              </span>
-            </button>
-
-            {/* Text size tab */}
-            <button
-              onClick={() => setActiveTab('text_size')}
-              className={`w-full text-left px-3.5 py-3 rounded-lg text-xs font-bold transition-all flex items-center justify-between cursor-pointer ${
-                activeTab === 'text_size'
-                  ? 'bg-white text-orange-600 shadow-sm border border-slate-200/80 ring-1 ring-orange-500/20'
-                  : 'text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              <div className="flex items-center space-x-2.5">
-                <span className="text-base">🔤</span>
-                <span>Text Size &amp; Display</span>
-              </div>
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-orange-50 text-orange-600 border border-orange-200/60 hidden sm:inline-block">
-                {textSizeState.scale}%
-              </span>
-            </button>
-
-            {/* Security tab */}
-            <button
-              onClick={() => setActiveTab('security')}
-              className={`w-full text-left px-3.5 py-3 rounded-lg text-xs font-bold transition-all flex items-center space-x-2.5 cursor-pointer ${
-                activeTab === 'security'
-                  ? 'bg-white text-orange-600 shadow-sm border border-slate-200/80 ring-1 ring-orange-500/20'
-                  : 'text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              <span className="text-base">🔒</span>
-              <span>Security &amp; Password</span>
-            </button>
-
-            {/* Notifications tab */}
-            <button
-              onClick={() => setActiveTab('notifications')}
-              className={`w-full text-left px-3.5 py-3 rounded-lg text-xs font-bold transition-all flex items-center space-x-2.5 cursor-pointer ${
-                activeTab === 'notifications'
-                  ? 'bg-white text-orange-600 shadow-sm border border-slate-200/80 ring-1 ring-orange-500/20'
-                  : 'text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              <span className="text-base">🔔</span>
-              <span>Notifications</span>
-            </button>
-
-            {/* Privacy tab */}
-            <button
-              onClick={() => setActiveTab('privacy')}
-              className={`w-full text-left px-3.5 py-3 rounded-lg text-xs font-bold transition-all flex items-center space-x-2.5 cursor-pointer ${
-                activeTab === 'privacy'
-                  ? 'bg-white text-orange-600 shadow-sm border border-slate-200/80 ring-1 ring-orange-500/20'
-                  : 'text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              <span className="text-base">🛡️</span>
-              <span>Privacy &amp; Direct Msgs</span>
-            </button>
-
-            {/* Language tab */}
-            <button
-              onClick={() => setActiveTab('preferences')}
-              className={`w-full text-left px-3.5 py-3 rounded-lg text-xs font-bold transition-all flex items-center space-x-2.5 cursor-pointer ${
-                activeTab === 'preferences'
-                  ? 'bg-white text-orange-600 shadow-sm border border-slate-200/80 ring-1 ring-orange-500/20'
-                  : 'text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              <span className="text-base">🌐</span>
-              <span>Language &amp; Data</span>
-            </button>
+          {/* Sidebar Tabs */}
+          <div className="w-full md:w-56 bg-slate-50/70 border-r border-slate-200 p-3 space-y-1 shrink-0 overflow-x-auto md:overflow-y-auto">
+            {navItems.map((item) => {
+              const IconComp = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`w-full text-left px-3 py-2.5 rounded-lg text-xs font-medium transition-colors flex items-center space-x-2.5 cursor-pointer ${
+                    isActive
+                      ? 'bg-white text-slate-900 shadow-xs border border-slate-200/80 font-semibold'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
+                  }`}
+                >
+                  <IconComp />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
           </div>
 
-          {/* Form body */}
-          <div className="flex-1 p-6 md:p-8 overflow-y-auto overscroll-contain space-y-6 min-h-0 custom-scrollbar scroll-smooth">
+          {/* Main Content Area */}
+          <div className="flex-1 p-6 md:p-8 overflow-y-auto space-y-6 custom-scrollbar">
             
-            {/* Edit profile form */}
+            {/* 1. Edit Profile Tab */}
             {activeTab === 'edit_profile' && (
               <form onSubmit={handleSaveProfile} className="space-y-6">
-                {/* Form header */}
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <div>
-                    <h4 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                      <span>👤</span>
-                      <span>Edit Profile Information</span>
-                    </h4>
-                    <p className="text-xs text-slate-500 font-medium mt-1">
-                      Update your public name, headline, location, avatar, and personal bio.
-                    </p>
-                  </div>
-                  <span className="text-[11px] font-bold px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200/60 rounded-lg uppercase">
-                    {currentProfile?.role || 'Member'}
-                  </span>
+                <div>
+                  <h4 className="text-sm font-semibold text-slate-900">Profile Information</h4>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Update your public display name, title, location, and biography.
+                  </p>
                 </div>
 
-                {/* Profile alert */}
-                {profileSavedMsg && (
-                  <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-lg flex items-center gap-2 animate-in fade-in">
-                    <span>✨</span>
-                    <span>{profileSavedMsg}</span>
-                  </div>
-                )}
-
-                {/* Profile preview */}
-                <div className="p-4 bg-gradient-to-r from-amber-50/70 via-orange-50/50 to-slate-50 border border-amber-200/70 rounded-xl space-y-2">
-                  <div className="flex items-center justify-between border-b border-amber-200/40 pb-1.5">
-                    <span className="text-[10px] font-bold text-amber-800 uppercase tracking-wider flex items-center gap-1.5">
-                      <span>👁️</span>
-                      <span>Live Profile Card Preview</span>
-                    </span>
-                    <span className="text-[10px] font-medium text-slate-400">Updates live as you type</span>
-                  </div>
-
-                  <div className="flex items-start space-x-3.5 pt-1">
+                {/* Profile Card Preview */}
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                  <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
+                    Profile Preview
+                  </span>
+                  <div className="flex items-center space-x-3.5">
                     <img
                       src={avatar || AVATAR_PRESETS[0]}
                       alt="Avatar Preview"
-                      className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm shrink-0"
+                      className="w-12 h-12 rounded-full object-cover border border-slate-200 shrink-0"
                     />
-                    <div className="space-y-0.5 flex-1 min-w-0">
+                    <div className="space-y-0.5 min-w-0">
                       <div className="flex items-center space-x-2">
-                        <span className="text-sm font-extrabold text-slate-900 truncate">{name || 'Your Name'}</span>
-                        <span className="text-[9px] font-bold bg-blue-100/80 text-blue-800 px-1.5 py-0.2 rounded-sm uppercase">
-                          {currentProfile?.role || 'user'}
+                        <span className="text-sm font-semibold text-slate-900 truncate">{name || 'Your Name'}</span>
+                        <span className="text-[10px] font-medium bg-slate-200 text-slate-700 px-2 py-0.5 rounded-md uppercase">
+                          {currentProfile?.role || 'User'}
                         </span>
                       </div>
-                      <p className="text-xs text-orange-600 font-semibold truncate">{title || 'Your Headline or Title'}</p>
-                      <p className="text-[10px] text-slate-400 font-medium truncate">📍 {location || 'Location'} • 📅 Joined July 2026</p>
-                      <p className="text-[11px] text-slate-600 line-clamp-2 pt-1 font-normal leading-snug">
-                        {bio || 'Tell the community about your background, interests, and traditional wisdom knowledge...'}
-                      </p>
+                      <p className="text-xs text-slate-600 truncate">{title || 'Headline or Title'}</p>
+                      <p className="text-[11px] text-slate-400 truncate">📍 {location || 'Location'}</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Avatar selection */}
+                {/* Avatar Selection */}
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                    Profile Avatar
-                  </label>
-                  <div className="flex flex-wrap items-center gap-2.5">
+                  <label className="text-xs font-semibold text-slate-700">Avatar Image</label>
+                  <div className="flex items-center gap-3">
                     {AVATAR_PRESETS.map((presetImg, idx) => {
                       const isSelected = avatar === presetImg;
                       return (
@@ -430,12 +409,12 @@ export default function ProfileSettingsModal({
                           type="button"
                           onClick={() => setAvatar(presetImg)}
                           className={`w-10 h-10 rounded-full p-0.5 border-2 transition-all cursor-pointer ${
-                            isSelected ? 'border-orange-600 scale-110 shadow-sm' : 'border-transparent hover:border-slate-300'
+                            isSelected ? 'border-slate-900 ring-1 ring-slate-900' : 'border-transparent hover:border-slate-300'
                           }`}
                         >
                           <img
                             src={presetImg}
-                            alt={`Preset ${idx + 1}`}
+                            alt={`Avatar Option ${idx + 1}`}
                             className="w-full h-full rounded-full object-cover"
                           />
                         </button>
@@ -444,11 +423,10 @@ export default function ProfileSettingsModal({
                   </div>
                 </div>
 
-                {/* Input fields */}
-                <div className="space-y-4 text-xs font-semibold">
-                  {/* Name field */}
+                {/* Form Fields */}
+                <div className="space-y-4">
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                    <label className="text-xs font-semibold text-slate-700">
                       Full Name <span className="text-rose-500">*</span>
                     </label>
                     <input
@@ -456,117 +434,146 @@ export default function ProfileSettingsModal({
                       required
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="Enter your full name"
-                      className="w-full bg-slate-50/70 border border-slate-200 rounded-lg px-3.5 py-2.5 text-xs text-slate-900 font-medium focus:outline-none focus:border-orange-500 focus:bg-white transition-all"
+                      placeholder="Enter full name"
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3.5 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-800 focus:ring-1 focus:ring-slate-800 transition-all font-normal"
                     />
                   </div>
 
-                  {/* Title field */}
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                      Professional Headline / Role Title
-                    </label>
+                    <label className="text-xs font-semibold text-slate-700">Headline / Title</label>
                     <input
                       type="text"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
-                      placeholder="E.g. Traditional Organic Farmer &amp; Heritage Contributor"
-                      className="w-full bg-slate-50/70 border border-slate-200 rounded-lg px-3.5 py-2.5 text-xs text-slate-900 font-medium focus:outline-none focus:border-orange-500 focus:bg-white transition-all"
+                      placeholder="E.g. Traditional Artisan & Educator"
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3.5 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-800 focus:ring-1 focus:ring-slate-800 transition-all font-normal"
                     />
                   </div>
 
-                  {/* Location field */}
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                      Location / Region
-                    </label>
+                    <label className="text-xs font-semibold text-slate-700">Location</label>
                     <input
                       type="text"
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
                       placeholder="E.g. Punjab, India"
-                      className="w-full bg-slate-50/70 border border-slate-200 rounded-lg px-3.5 py-2.5 text-xs text-slate-900 font-medium focus:outline-none focus:border-orange-500 focus:bg-white transition-all"
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3.5 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-800 focus:ring-1 focus:ring-slate-800 transition-all font-normal"
                     />
-                    {/* Location chips */}
-                    <div className="flex flex-wrap gap-1.5 pt-1">
-                      {['Punjab, India', 'Kerala, India', 'Rajasthan, India', 'Karnataka, India', 'Maharashtra, India'].map((loc) => (
-                        <button
-                          key={loc}
-                          type="button"
-                          onClick={() => setLocation(loc)}
-                          className="text-[10px] font-medium bg-slate-100 hover:bg-orange-50 hover:text-orange-700 text-slate-600 px-2 py-0.5 rounded-md transition-colors cursor-pointer"
-                        >
-                          + {loc}
-                        </button>
-                      ))}
-                    </div>
                   </div>
 
-                  {/* Bio field */}
                   <div className="space-y-1">
-                    <div className="flex justify-between items-center">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                        Bio &amp; Personal Background
-                      </label>
-                      <span className="text-[10px] text-slate-400 font-normal">{bio.length} characters</span>
-                    </div>
+                    <label className="text-xs font-semibold text-slate-700">Bio</label>
                     <textarea
                       rows={3}
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
-                      placeholder="Share your interests, traditional practices, cultural crafts, or learning aspirations with the Setu community..."
-                      className="w-full bg-slate-50/70 border border-slate-200 rounded-lg p-3 text-xs text-slate-900 font-normal focus:outline-none focus:border-orange-500 focus:bg-white transition-all resize-none"
+                      placeholder="Write a brief bio about your interests and skills..."
+                      className="w-full bg-white border border-slate-200 rounded-lg p-3 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-800 focus:ring-1 focus:ring-slate-800 transition-all resize-none font-normal"
                     />
                   </div>
                 </div>
 
-                {/* Save button */}
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                  <p className="text-[11px] text-slate-400 font-medium">
-                    Changes will be updated across your profile immediately.
-                  </p>
-                  <button
-                    type="submit"
-                    className="px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-lg transition-all shadow-md shadow-orange-500/10 cursor-pointer"
-                  >
-                    Save Profile Changes
-                  </button>
+                {/* Submit Action */}
+                <div className="pt-4 border-t border-slate-200 flex items-center justify-between">
+                  <span className="text-xs text-slate-500">
+                    Changes apply immediately to your profile.
+                  </span>
+                  <div className="flex items-center space-x-3">
+                    {profileSavedMsg && (
+                      <span className="text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg flex items-center space-x-1.5">
+                        <CheckIcon />
+                        <span>Saved</span>
+                      </span>
+                    )}
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg transition-colors shadow-xs cursor-pointer"
+                    >
+                      Save Profile Changes
+                    </button>
+                  </div>
                 </div>
               </form>
             )}
 
-            {/* Text size panel */}
-            {activeTab === 'text_size' && (
+            {/* 2. Theme & Appearance Tab */}
+            {activeTab === 'theme' && (
               <div className="space-y-6">
-                {/* Panel header */}
                 <div>
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                      <span>🔤</span>
-                      <span>Text Size &amp; Reading Scale</span>
-                    </h4>
-                    <span className="text-xs font-bold px-3 py-1 bg-orange-50 text-orange-700 border border-orange-200 rounded-lg">
-                      Scale: {textSizeState.scale}% ({textSizeState.px}px)
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-500 font-medium mt-1">
-                    Increase or adjust font sizing according to your reading comfort across the entire Setu website.
+                  <h4 className="text-sm font-semibold text-slate-900">Theme &amp; Appearance</h4>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Choose your preferred website color theme and visual style.
                   </p>
                 </div>
 
-                {/* Scale message */}
-                {textSizeSavedMsg && (
-                  <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-lg flex items-center gap-2">
-                    <span>✨</span>
-                    <span>{textSizeSavedMsg}</span>
-                  </div>
-                )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {THEME_PRESETS.map((preset) => {
+                    const isSelected = currentTheme === preset.id;
+                    return (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        onClick={() => handleSelectTheme(preset.id)}
+                        className={`p-4 rounded-xl border text-left transition-all cursor-pointer relative ${
+                          isSelected
+                            ? 'bg-white border-slate-900 ring-2 ring-slate-900/10 shadow-xs'
+                            : 'bg-slate-50 border-slate-200 hover:bg-slate-100/70 hover:border-slate-300'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center space-x-2.5">
+                            <div
+                              className="w-6 h-6 rounded-full border border-slate-300 shadow-2xs flex items-center justify-center shrink-0"
+                              style={{ backgroundColor: preset.bgPreview }}
+                            >
+                              <div
+                                className="w-2.5 h-2.5 rounded-full"
+                                style={{ backgroundColor: preset.accentPreview }}
+                              />
+                            </div>
+                            <span className="text-xs font-semibold text-slate-900">{preset.name}</span>
+                          </div>
+                          {isSelected && (
+                            <span className="text-[10px] font-semibold bg-slate-900 text-white px-2 py-0.5 rounded-md flex items-center space-x-1">
+                              <CheckIcon />
+                              <span>Active</span>
+                            </span>
+                          )}
+                        </div>
 
-                {/* Presets grid */}
-                <div className="space-y-2.5">
-                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                    Quick Size Presets
-                  </label>
+                        <p className="text-[11px] text-slate-500 font-normal leading-relaxed">
+                          {preset.description}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="pt-4 border-t border-slate-200 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+                  >
+                    Done
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* 3. Display & Text Tab */}
+            {activeTab === 'text_size' && (
+              <div className="space-y-6">
+                <div>
+                  <h4 className="text-sm font-semibold text-slate-900">Display &amp; Text Sizing</h4>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Adjust font scale for optimal reading comfort.
+                  </p>
+                </div>
+
+                {/* Quick Presets */}
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-700">Presets</label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {FONT_SIZE_PRESETS.map((preset) => {
                       const isActive = textSizeState.preset === preset.id || Math.abs(textSizeState.scale - preset.scale) < 2;
@@ -575,24 +582,21 @@ export default function ProfileSettingsModal({
                           key={preset.id}
                           type="button"
                           onClick={() => handleSelectPreset(preset.id)}
-                          className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer relative overflow-hidden ${
+                          className={`p-3.5 rounded-xl border text-left transition-colors cursor-pointer ${
                             isActive
-                              ? 'bg-orange-50/60 border-orange-500 ring-2 ring-orange-500/20 shadow-xs'
-                              : 'bg-slate-50/70 border-slate-200 hover:bg-slate-100 hover:border-slate-300'
+                              ? 'bg-white border-slate-900 ring-1 ring-slate-900 shadow-xs'
+                              : 'bg-slate-50 border-slate-200 hover:bg-slate-100/70'
                           }`}
                         >
-                          <div className="flex items-center justify-between mb-1.5">
-                            <div className="flex items-center space-x-2">
-                              <span className="text-lg">{preset.icon}</span>
-                              <span className="text-xs font-bold text-slate-900">{preset.label}</span>
-                            </div>
-                            <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md ${
-                              isActive ? 'bg-orange-600 text-white' : 'bg-slate-200 text-slate-700'
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs font-semibold text-slate-900">{preset.label}</span>
+                            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-md ${
+                              isActive ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-700'
                             }`}>
                               {preset.badge}
                             </span>
                           </div>
-                          <p className="text-[11px] text-slate-500 font-normal leading-relaxed">
+                          <p className="text-[11px] text-slate-500 font-normal">
                             {preset.description}
                           </p>
                         </button>
@@ -601,35 +605,29 @@ export default function ProfileSettingsModal({
                   </div>
                 </div>
 
-                {/* Slider control */}
-                <div className="p-4 bg-slate-50 border border-slate-200/90 rounded-xl space-y-4">
+                {/* Slider */}
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
                   <div className="flex items-center justify-between">
-                    <div>
-                      <h5 className="text-xs font-bold text-slate-900">Custom Font Scaling Slider</h5>
-                      <p className="text-[11px] text-slate-500">Fine-tune font size from 80% to 135%</p>
-                    </div>
+                    <span className="text-xs font-semibold text-slate-900">Custom Font Scale</span>
                     <button
                       type="button"
                       onClick={handleResetTextSize}
-                      className="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-[11px] font-bold rounded-lg transition-all cursor-pointer shadow-3xs"
+                      className="text-xs text-slate-600 hover:text-slate-900 underline font-medium cursor-pointer"
                     >
-                      ↺ Reset to Default (100%)
+                      Reset to Default (100%)
                     </button>
                   </div>
 
                   <div className="flex items-center space-x-4">
-                    {/* Stepper decrease */}
                     <button
                       type="button"
                       onClick={() => handleStepSize(-5)}
-                      className="w-9 h-9 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-800 font-black text-sm flex items-center justify-center transition-all cursor-pointer shadow-3xs hover:scale-105 active:scale-95 shrink-0"
-                      title="Decrease text size (A-)"
-                      aria-label="Decrease text size"
+                      className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-700 text-xs font-semibold flex items-center justify-center hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
+                      title="Decrease font size"
                     >
                       A-
                     </button>
 
-                    {/* Range slider */}
                     <div className="flex-1 space-y-1">
                       <input
                         type="range"
@@ -638,60 +636,32 @@ export default function ProfileSettingsModal({
                         step="2.5"
                         value={textSizeState.scale}
                         onChange={handleSliderChange}
-                        className="w-full accent-orange-600 cursor-pointer h-2 bg-slate-200 rounded-lg appearance-none"
+                        className="w-full accent-slate-900 cursor-pointer h-1.5 bg-slate-200 rounded-lg appearance-none"
                       />
-                      <div className="flex justify-between text-[10px] text-slate-400 font-bold px-1">
+                      <div className="flex justify-between text-[11px] text-slate-500 font-medium">
                         <span>Compact (80%)</span>
-                        <span className="text-orange-600 font-extrabold">{textSizeState.scale}% ({textSizeState.px}px)</span>
-                        <span>Extra Large (135%)</span>
+                        <span className="text-slate-900 font-semibold">{textSizeState.scale}%</span>
+                        <span>Large (135%)</span>
                       </div>
                     </div>
 
-                    {/* Stepper increase */}
                     <button
                       type="button"
                       onClick={() => handleStepSize(5)}
-                      className="w-9 h-9 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-800 font-black text-sm flex items-center justify-center transition-all cursor-pointer shadow-3xs hover:scale-105 active:scale-95 shrink-0"
-                      title="Increase text size (A+)"
-                      aria-label="Increase text size"
+                      className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-700 text-xs font-semibold flex items-center justify-center hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
+                      title="Increase font size"
                     >
                       A+
                     </button>
                   </div>
                 </div>
 
-                {/* Text preview */}
-                <div className="p-4 bg-gradient-to-br from-amber-50/50 via-orange-50/30 to-slate-50 border border-amber-200/80 rounded-xl space-y-2.5">
-                  <div className="flex items-center justify-between border-b border-amber-200/50 pb-2">
-                    <span className="text-[10px] font-bold text-amber-800 uppercase tracking-wider flex items-center gap-1.5">
-                      <span>👁️</span>
-                      <span>Live Reading Preview</span>
-                    </span>
-                    <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-md">
-                      ✓ Instant Global Effect
-                    </span>
-                  </div>
-
-                  <div className="space-y-1.5 text-left">
-                    <h5 className="text-sm font-black text-slate-900 leading-snug">
-                      Connecting Generations &amp; Traditional Wisdom
-                    </h5>
-                    <p className="text-xs text-slate-600 leading-relaxed font-normal">
-                      Setu enables youth and elders to bridge time-honored Indian practices with modern AI discovery.
-                      Adjusting this text size helps elders, researchers, and learners read with maximum ease.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Done button */}
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                  <p className="text-[11px] text-slate-400 font-medium">
-                    Preference is automatically saved to your browser session.
-                  </p>
+                {/* Done */}
+                <div className="pt-4 border-t border-slate-200 flex justify-end">
                   <button
                     type="button"
                     onClick={onClose}
-                    className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg transition-all shadow-md cursor-pointer"
+                    className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer"
                   >
                     Done
                   </button>
@@ -699,81 +669,77 @@ export default function ProfileSettingsModal({
               </div>
             )}
 
-            {/* Password panel */}
+            {/* 4. Security Tab */}
             {activeTab === 'security' && (
               <form onSubmit={handlePasswordSubmit} className="space-y-5">
                 <div>
-                  <h4 className="text-sm font-extrabold text-slate-900">Change Account Password</h4>
-                  <p className="text-xs text-slate-400 font-medium">Update your password regularly to keep your profile secure.</p>
+                  <h4 className="text-sm font-semibold text-slate-900">Security &amp; Password</h4>
+                  <p className="text-xs text-slate-500 mt-1">Update your password to ensure account security.</p>
                 </div>
 
-                {/* Password alert */}
                 {passMsg.text && (
-                  <div className={`p-3 rounded-lg text-xs font-bold border ${
+                  <div className={`p-3 rounded-lg text-xs font-medium border ${
                     passMsg.type === 'error' ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                   }`}>
                     {passMsg.text}
                   </div>
                 )}
 
-                {/* Password inputs */}
-                <div className="space-y-4 text-xs font-semibold">
+                <div className="space-y-4">
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Current Password</label>
+                    <label className="text-xs font-semibold text-slate-700">Current Password</label>
                     <input
                       type={showPass ? 'text' : 'password'}
                       required
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
                       placeholder="Enter current password"
-                      className="w-full border-b border-slate-200 py-2 text-xs font-medium focus:outline-none focus:border-orange-500"
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-800 focus:ring-1 focus:ring-slate-800"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">New Password</label>
+                    <label className="text-xs font-semibold text-slate-700">New Password</label>
                     <input
                       type={showPass ? 'text' : 'password'}
                       required
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="At least 6 characters"
-                      className="w-full border-b border-slate-200 py-2 text-xs font-medium focus:outline-none focus:border-orange-500"
+                      placeholder="Minimum 6 characters"
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-800 focus:ring-1 focus:ring-slate-800"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Confirm New Password</label>
+                    <label className="text-xs font-semibold text-slate-700">Confirm New Password</label>
                     <input
                       type={showPass ? 'text' : 'password'}
                       required
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Re-enter new password"
-                      className="w-full border-b border-slate-200 py-2 text-xs font-medium focus:outline-none focus:border-orange-500"
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-slate-800 focus:ring-1 focus:ring-slate-800"
                     />
                   </div>
 
-                  {/* Show password */}
                   <div className="flex items-center space-x-2 pt-1">
                     <input
                       type="checkbox"
-                      id="show-pass-checkbox"
+                      id="show-pass-check"
                       checked={showPass}
                       onChange={(e) => setShowPass(e.target.checked)}
-                      className="rounded border-slate-300 text-orange-600 focus:ring-orange-500 cursor-pointer"
+                      className="rounded border-slate-300 text-slate-900 focus:ring-slate-800 cursor-pointer"
                     />
-                    <label htmlFor="show-pass-checkbox" className="text-xs text-slate-600 font-medium cursor-pointer">
-                      Show Password characters
+                    <label htmlFor="show-pass-check" className="text-xs text-slate-600 font-medium cursor-pointer">
+                      Show password
                     </label>
                   </div>
                 </div>
 
-                {/* Password submit */}
-                <div className="pt-3 border-t border-slate-100 flex justify-end">
+                <div className="pt-4 border-t border-slate-200 flex justify-end">
                   <button
                     type="submit"
-                    className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg transition-all shadow-md cursor-pointer"
+                    className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer"
                   >
                     Update Password
                   </button>
@@ -781,129 +747,119 @@ export default function ProfileSettingsModal({
               </form>
             )}
 
-            {/* Notifications panel */}
+            {/* 5. Notifications Tab */}
             {activeTab === 'notifications' && (
               <form onSubmit={handleSaveGeneralSettings} className="space-y-6">
                 <div>
-                  <h4 className="text-sm font-extrabold text-slate-900">Email &amp; Notification Preferences</h4>
-                  <p className="text-xs text-slate-400 font-medium">Choose when Setu sends you updates and alerts.</p>
+                  <h4 className="text-sm font-semibold text-slate-900">Notification Preferences</h4>
+                  <p className="text-xs text-slate-500 mt-1">Configure your email and application alerts.</p>
                 </div>
 
-                {/* Notification list */}
-                <div className="space-y-4">
-                  {/* Digest option */}
-                  <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200">
                     <div>
-                      <p className="text-xs font-bold text-slate-900">Monthly Heritage Digest</p>
-                      <p className="text-[10px] text-slate-500">Receive monthly top storyteller summaries &amp; heritage articles.</p>
+                      <p className="text-xs font-semibold text-slate-900">Monthly Knowledge Digest</p>
+                      <p className="text-[11px] text-slate-500">Receive monthly summaries of top contributions.</p>
                     </div>
                     <input
                       type="checkbox"
                       checked={emailDigest}
                       onChange={(e) => setEmailDigest(e.target.checked)}
-                      className="w-4 h-4 rounded text-orange-600 accent-orange-600 cursor-pointer"
+                      className="w-4 h-4 rounded text-slate-900 accent-slate-900 cursor-pointer"
                     />
                   </div>
 
-                  {/* Alerts option */}
-                  <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+                  <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200">
                     <div>
-                      <p className="text-xs font-bold text-slate-900">Mentorship Request Alerts</p>
-                      <p className="text-[10px] text-slate-500">Get notified immediately when a youth learner requests guidance.</p>
+                      <p className="text-xs font-semibold text-slate-900">Mentorship Alerts</p>
+                      <p className="text-[11px] text-slate-500">Notifications when learners request mentorship.</p>
                     </div>
                     <input
                       type="checkbox"
                       checked={mentorAlerts}
                       onChange={(e) => setMentorAlerts(e.target.checked)}
-                      className="w-4 h-4 rounded text-orange-600 accent-orange-600 cursor-pointer"
+                      className="w-4 h-4 rounded text-slate-900 accent-slate-900 cursor-pointer"
                     />
                   </div>
 
-                  {/* Replies option */}
-                  <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+                  <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200">
                     <div>
-                      <p className="text-xs font-bold text-slate-900">Community Discussion Replies</p>
-                      <p className="text-[10px] text-slate-500">Alerts when someone comments on or appreciates your posts.</p>
+                      <p className="text-xs font-semibold text-slate-900">Discussion Replies</p>
+                      <p className="text-[11px] text-slate-500">Alerts for replies to your community posts.</p>
                     </div>
                     <input
                       type="checkbox"
                       checked={communityReplies}
                       onChange={(e) => setCommunityReplies(e.target.checked)}
-                      className="w-4 h-4 rounded text-orange-600 accent-orange-600 cursor-pointer"
+                      className="w-4 h-4 rounded text-slate-900 accent-slate-900 cursor-pointer"
                     />
                   </div>
                 </div>
 
-                {/* Notification submit */}
-                <div className="pt-3 border-t border-slate-100 flex justify-end">
+                <div className="pt-4 border-t border-slate-200 flex justify-end">
                   <button
                     type="submit"
-                    className="px-5 py-2.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-lg transition-all shadow-md shadow-orange-500/10 cursor-pointer"
+                    className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer"
                   >
-                    Save Notification Preferences
+                    Save Preferences
                   </button>
                 </div>
               </form>
             )}
 
-            {/* Privacy panel */}
+            {/* 6. Privacy Tab */}
             {activeTab === 'privacy' && (
               <form onSubmit={handleSaveGeneralSettings} className="space-y-6">
                 <div>
-                  <h4 className="text-sm font-extrabold text-slate-900">Privacy &amp; Visibility Controls</h4>
-                  <p className="text-xs text-slate-400 font-medium">Control who can discover your profile and message you.</p>
+                  <h4 className="text-sm font-semibold text-slate-900">Privacy &amp; Visibility</h4>
+                  <p className="text-xs text-slate-500 mt-1">Control your profile visibility and messaging settings.</p>
                 </div>
 
-                {/* Privacy controls */}
-                <div className="space-y-4 text-xs font-semibold">
-                  {/* Visibility dropdown */}
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Profile Directory Visibility</label>
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-700">Profile Directory Visibility</label>
                     <select
                       value={profileVisibility}
                       onChange={(e) => setProfileVisibility(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 font-medium focus:outline-none focus:border-orange-500"
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-slate-800"
                     >
-                      <option value="public">Public (Discoverable in Community Directory)</option>
-                      <option value="connections">Connections Only (Only approved connections)</option>
-                      <option value="private">Private (Hidden from directory listings)</option>
+                      <option value="public">Public (Visible in directory)</option>
+                      <option value="connections">Connections Only</option>
+                      <option value="private">Private (Hidden)</option>
                     </select>
                   </div>
 
-                  {/* DM permissions */}
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Direct Message Permissions</label>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-700">Direct Message Permissions</label>
                     <select
                       value={allowDirectMessages}
                       onChange={(e) => setAllowDirectMessages(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 font-medium focus:outline-none focus:border-orange-500"
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-slate-800"
                     >
-                      <option value="everyone">Everyone on Setu</option>
+                      <option value="everyone">Everyone</option>
                       <option value="connections">Approved Connections Only</option>
-                      <option value="none">Nobody (Disable Direct Messaging)</option>
+                      <option value="none">Nobody</option>
                     </select>
                   </div>
 
-                  {/* Email toggle */}
-                  <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-100 pt-2">
+                  <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200">
                     <div>
-                      <p className="text-xs font-bold text-slate-900">Display Email Address on Public Profile</p>
-                      <p className="text-[10px] text-slate-500">Allow users to see {currentProfile?.email || 'your email'}.</p>
+                      <p className="text-xs font-semibold text-slate-900">Show Email on Profile</p>
+                      <p className="text-[11px] text-slate-500">Allow users to view your email address.</p>
                     </div>
                     <input
                       type="checkbox"
                       checked={showEmailOnProfile}
                       onChange={(e) => setShowEmailOnProfile(e.target.checked)}
-                      className="w-4 h-4 rounded text-orange-600 accent-orange-600 cursor-pointer"
+                      className="w-4 h-4 rounded text-slate-900 accent-slate-900 cursor-pointer"
                     />
                   </div>
                 </div>
 
-                {/* Privacy submit */}
-                <div className="pt-3 border-t border-slate-100 flex justify-end">
+                <div className="pt-4 border-t border-slate-200 flex justify-end">
                   <button
                     type="submit"
-                    className="px-5 py-2.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-lg transition-all shadow-md shadow-orange-500/10 cursor-pointer"
+                    className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer"
                   >
                     Save Privacy Settings
                   </button>
@@ -911,24 +867,23 @@ export default function ProfileSettingsModal({
               </form>
             )}
 
-            {/* Language panel */}
+            {/* 7. Data & Storage Tab */}
             {activeTab === 'preferences' && (
               <div className="space-y-6">
                 <div>
-                  <h4 className="text-sm font-extrabold text-slate-900">Language &amp; Account Data</h4>
-                  <p className="text-xs text-slate-400 font-medium">Manage system language, text size shortcuts, and local browser data.</p>
+                  <h4 className="text-sm font-semibold text-slate-900">Language &amp; Data Storage</h4>
+                  <p className="text-xs text-slate-500 mt-1">Manage system language and local browser data.</p>
                 </div>
 
-                {/* Language inputs */}
-                <div className="space-y-4 text-xs font-semibold">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Preferred System Language</label>
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-700">Preferred Language</label>
                     <select
                       value={language}
                       onChange={(e) => setLanguage(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800 font-medium focus:outline-none focus:border-orange-500"
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-slate-800"
                     >
-                      <option value="en">English (US / Global)</option>
+                      <option value="en">English</option>
                       <option value="hi">Hindi (हिंदी)</option>
                       <option value="pa">Punjabi (ਪੰਜਾਬੀ)</option>
                       <option value="ta">Tamil (தமிழ்)</option>
@@ -936,60 +891,37 @@ export default function ProfileSettingsModal({
                     </select>
                   </div>
 
-                  {/* Size shortcut */}
-                  <div className="p-4 bg-orange-50/50 border border-orange-200/80 rounded-xl space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-base">🔤</span>
-                        <div>
-                          <h5 className="text-xs font-bold text-slate-900">Text Size &amp; Accessibility</h5>
-                          <p className="text-[10px] text-slate-500">Currently scaled to {textSizeState.scale}%</p>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setActiveTab('text_size')}
-                        className="px-3 py-1.5 bg-white border border-orange-200 hover:bg-orange-50 text-orange-700 text-xs font-bold rounded-lg transition-all cursor-pointer shadow-3xs"
-                      >
-                        Adjust Text Size →
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Data actions */}
-                  <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-xl space-y-3">
-                    <h5 className="text-xs font-bold text-slate-900">Account Data &amp; Local Storage Cache</h5>
+                  <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                    <h5 className="text-xs font-semibold text-slate-900">Account Data &amp; Cache</h5>
                     <p className="text-[11px] text-slate-500 leading-relaxed font-normal">
-                      Export your account saved history or reset local browser AI search cache.
+                      Export your account history or clear local browser cache.
                     </p>
 
-                    {/* Action buttons */}
-                    <div className="flex flex-wrap gap-2 pt-1">
+                    <div className="flex flex-wrap gap-2">
                       <button
                         type="button"
                         onClick={handleExportData}
-                        className="px-3.5 py-2 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-lg transition-all cursor-pointer shadow-3xs"
+                        className="px-3.5 py-2 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-medium rounded-lg transition-colors cursor-pointer"
                       >
-                        📥 Export Account Data (JSON)
+                        Export Account Data (JSON)
                       </button>
 
                       <button
                         type="button"
                         onClick={handleClearCache}
-                        className="px-3.5 py-2 bg-white border border-rose-200 hover:bg-rose-50 text-rose-600 text-xs font-bold rounded-lg transition-all cursor-pointer shadow-3xs"
+                        className="px-3.5 py-2 bg-white border border-slate-200 hover:bg-rose-50 hover:border-rose-200 text-rose-600 text-xs font-medium rounded-lg transition-colors cursor-pointer"
                       >
-                        🗑️ Clear AI Local Search Cache
+                        Clear Browser Cache
                       </button>
                     </div>
                   </div>
                 </div>
 
-                {/* Done button */}
-                <div className="pt-3 border-t border-slate-100 flex justify-end">
+                <div className="pt-4 border-t border-slate-200 flex justify-end">
                   <button
                     type="button"
                     onClick={onClose}
-                    className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg transition-all shadow-md cursor-pointer"
+                    className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer"
                   >
                     Done
                   </button>
@@ -1000,6 +932,14 @@ export default function ProfileSettingsModal({
           </div>
 
         </div>
+
+        {/* Toast Notification */}
+        {profileSavedMsg && (
+          <div className="fixed bottom-6 right-6 z-[100] bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg border border-slate-800 flex items-center space-x-2.5 text-xs font-medium animate-in slide-in-from-bottom-2 duration-150">
+            <CheckIcon />
+            <span>{profileSavedMsg}</span>
+          </div>
+        )}
 
       </div>
     </div>

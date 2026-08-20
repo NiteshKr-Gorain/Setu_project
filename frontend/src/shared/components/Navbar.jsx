@@ -19,18 +19,6 @@ export default function Navbar({ currentView, onViewChange, currentUser, onLogou
   }, []);
 
   const handleNavClick = (viewId) => {
-    if (viewId === 'contact') {
-      // Smooth scroll to the contact/newsletter section in the footer
-      onViewChange('home');
-      setTimeout(() => {
-        const footer = document.getElementById('app-footer-navigation');
-        if (footer) {
-          footer.scrollIntoView({ behavior: 'smooth' });
-        }
-      }, 150);
-      setIsMobileMenuOpen(false);
-      return;
-    }
     onViewChange(viewId);
     setIsMobileMenuOpen(false);
   };
@@ -48,13 +36,13 @@ export default function Navbar({ currentView, onViewChange, currentUser, onLogou
     <>
       <header
         id="app-header-navigation"
-        className={`fixed top-4 left-4 right-4 z-40 transition-all duration-500 rounded-full max-w-[1280px] mx-auto border ${
+        className={`fixed top-0 left-0 right-0 w-full z-40 transition-all duration-300 ${
           isScrolled
-            ? 'bg-white/85 backdrop-blur-xl border-slate-200/80 shadow-[0_12px_36px_-6px_rgba(15,23,42,0.08),0_0_0_1px_rgba(15,23,42,0.01)] py-2 md:py-2.5'
-            : 'bg-white/50 backdrop-blur-md border-white/60 shadow-[0_8px_24px_-6px_rgba(15,23,42,0.04),0_0_0_1px_rgba(15,23,42,0.01)] py-3 md:py-4'
+            ? 'bg-white/75 backdrop-blur-xl rounded-b-2xl md:rounded-b-3xl border-b border-slate-200/80 shadow-[0_12px_36px_-6px_rgba(15,23,42,0.08)] py-2 md:py-2.5'
+            : 'bg-white/30 backdrop-blur-md rounded-b-none border-b border-slate-200/20 py-3.5 md:py-4'
         }`}
       >
-        <div className="px-6 md:px-8 flex items-center justify-between h-12">
+        <div className="max-w-[1280px] mx-auto px-6 md:px-8 flex items-center justify-between h-12">
           {/* 1. Brand Logo */}
           <button
             id="nav-brand-button"

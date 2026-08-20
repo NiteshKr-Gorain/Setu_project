@@ -247,10 +247,10 @@ export default function SignUpPage({ onViewChange }) {
                     required
                     checked={agreedToTerms}
                     onChange={(e) => setAgreedToTerms(e.target.checked)}
-                    className="mt-0.5 rounded border-slate-300 text-brand-primary focus:ring-brand-primary w-4 h-4 cursor-pointer"
+                    className="mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 w-4 h-4 cursor-pointer"
                   />
                   <label htmlFor="terms" className="text-xs text-slate-500 leading-tight font-medium cursor-pointer">
-                    I agree to Setu's <a href="#terms" className="text-brand-primary underline font-bold">Terms of Service</a> &amp; <a href="#privacy" className="text-brand-primary underline font-bold">Community Guidelines</a>.
+                    I agree to Setu's <a href="#terms" className="text-emerald-600 underline font-bold">Terms of Service</a> &amp; <a href="#privacy" className="text-emerald-600 underline font-bold">Community Guidelines</a>.
                   </label>
                 </div>
 
@@ -258,7 +258,7 @@ export default function SignUpPage({ onViewChange }) {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-3.5 mt-2 bg-brand-primary hover:bg-brand-hover text-white text-sm font-bold rounded-full transition-all duration-200 cursor-pointer shadow-md shadow-brand-primary/10 flex items-center justify-center space-x-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full py-3.5 mt-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-full transition-all duration-200 cursor-pointer flex items-center justify-center space-x-2 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
                     <>

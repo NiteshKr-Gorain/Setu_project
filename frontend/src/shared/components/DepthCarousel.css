@@ -1,0 +1,13 @@
+.depth-carousel { position: relative; width: 100%; height: 100%; min-height: 340px; perspective: 1200px; perspective-origin: 50% 50%; user-select: none; }
+.depth-carousel__stage { position: absolute; inset: 0; transform-style: preserve-3d; }
+.depth-carousel__card { position: absolute; top: 50%; left: 50%; overflow: hidden; padding: 0; border: 1px solid rgba(255,255,255,.65); border-radius: 22px; background: #fff; box-shadow: 0 22px 45px -18px rgba(15,23,42,.45); cursor: pointer; transform-origin: center; transition: transform 700ms cubic-bezier(.16,1,.3,1), opacity 500ms ease, filter 700ms ease; will-change: transform, opacity, filter; }
+.depth-carousel__card:focus-visible { outline: 3px solid #ff9f43; outline-offset: 4px; }
+.depth-carousel__card img { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.depth-carousel__controls { position: absolute; right: 0; bottom: 2.7rem; left: 0; z-index: 120; display: flex; justify-content: space-between; pointer-events: none; }
+.depth-carousel__controls button { width: 2.25rem; height: 2.25rem; border: 1px solid rgba(148,163,184,.35); border-radius: 999px; background: rgba(255,255,255,.82); color: #334155; font-size: 1.7rem; line-height: 1; box-shadow: 0 4px 12px rgba(15,23,42,.12); cursor: pointer; pointer-events: auto; transition: transform .2s ease, background .2s ease; }
+.depth-carousel__controls button:hover { transform: scale(1.08); background: #fff; }
+.depth-carousel__dots { position: absolute; bottom: .55rem; left: 50%; z-index: 120; display: flex; gap: .38rem; transform: translateX(-50%); }
+.depth-carousel__dots button { width: .42rem; height: .42rem; padding: 0; border: 0; border-radius: 999px; background: #cbd5e1; cursor: pointer; transition: width .25s ease, background .25s ease; }
+.depth-carousel__dots button.is-active { width: 1.25rem; background: #ff9f43; }
+@media (max-width: 640px) { .depth-carousel { min-height: 300px; } .depth-carousel__controls { padding: 0 .25rem; } }
+@media (prefers-reduced-motion: reduce) { .depth-carousel__card, .depth-carousel__controls button, .depth-carousel__dots button { transition: none; } }

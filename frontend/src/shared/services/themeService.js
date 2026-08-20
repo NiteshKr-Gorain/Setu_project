@@ -1,56 +1,67 @@
-// Global Theme & Appearance Service for Setu
+// Website Theme Preference Service for Setu
 
-const THEME_KEY = 'setu_theme_preference';
+const THEME_KEY = 'setu_website_theme_preference';
 
 export const THEME_PRESETS = [
   {
-    id: 'light',
-    name: 'Setu Classic (Light)',
-    description: 'Clean bright layout with warm saffron amber accents, optimized for daylight.',
-    bgPreview: '#FFFFFF',
-    accentPreview: '#EA580C'
-  },
-  {
-    id: 'warm',
-    name: 'Warm Heritage (Sepia)',
-    description: 'Soft parchment warm tones that reduce eye strain for reading traditional wisdom and archives.',
-    bgPreview: '#FDFBF7',
-    accentPreview: '#D97706'
+    id: 'saffron',
+    name: 'Saffron Heritage',
+    description: 'Signature warm saffron and cream aesthetic',
+    bgPreview: '#FFF7ED',
+    accentPreview: '#F97316',
+    borderPreview: '#FED7AA',
+    badge: 'Default'
   },
   {
     id: 'dark',
     name: 'Midnight Dark',
-    description: 'Sleek dark slate aesthetic for comfortable night-time browsing and high contrast.',
+    description: 'Sleek dark mode for nighttime reading & high contrast',
     bgPreview: '#0F172A',
-    accentPreview: '#F97316'
+    accentPreview: '#F97316',
+    borderPreview: '#334155',
+    badge: 'Dark'
   },
   {
-    id: 'forest',
-    name: 'Vedic Forest (Green)',
-    description: 'Nature-inspired earthy emerald tones reflecting traditional agriculture and herbal wisdom.',
+    id: 'emerald',
+    name: 'Emerald Forest',
+    description: 'Calming botanical green inspired by nature & craft',
     bgPreview: '#F0FDF4',
-    accentPreview: '#16A34A'
+    accentPreview: '#059669',
+    borderPreview: '#A7F3D0',
+    badge: 'Green'
+  },
+  {
+    id: 'indigo',
+    name: 'Royal Indigo',
+    description: 'Rich deep indigo blue for a classic modern feel',
+    bgPreview: '#EEF2FF',
+    accentPreview: '#4F46E5',
+    borderPreview: '#C7D2FE',
+    badge: 'Indigo'
   }
 ];
 
 export function getSavedThemePreference() {
   try {
-    const saved = localStorage.getItem(THEME_KEY);
-    if (saved && THEME_PRESETS.some((t) => t.id === saved)) {
-      return saved;
+    const raw = localStorage.getItem(THEME_KEY);
+    if (raw) {
+      const found = THEME_PRESETS.find((t) => t.id === raw);
+      if (found) return found.id;
     }
   } catch (err) {
     console.error('Error reading theme preference:', err);
   }
-  return 'light';
+  return 'saffron';
 }
 
 export function applyThemePreference(themeId) {
-  const validId = THEME_PRESETS.some((t) => t.id === themeId) ? themeId : 'light';
+  const validTheme = THEME_PRESETS.some((t) => t.id === themeId) ? themeId : 'saffron';
 
   if (typeof document !== 'undefined' && document.documentElement) {
-    document.documentElement.setAttribute('data-theme', validId);
-    if (validId === 'dark') {
+    document.documentElement.setAttribute('data-theme', validTheme);
+    document.body.setAttribute('data-theme', validTheme);
+
+    if (validTheme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
@@ -58,26 +69,19 @@ export function applyThemePreference(themeId) {
   }
 
   try {
-    localStorage.setItem(THEME_KEY, validId);
+    localStorage.setItem(THEME_KEY, validTheme);
   } catch (err) {
     console.error('Error saving theme preference:', err);
   }
 
   if (typeof window !== 'undefined') {
-    window.dispatchEvent(new CustomEvent('setu-theme-changed', { detail: { theme: validId } }));
+    window.dispatchEvent(new CustomEvent('setu-theme-changed', { detail: validTheme }));
   }
 
-  return validId;
+  return validTheme;
 }
 
-// Automatically apply saved theme preference when module loads
+// Auto-initialize theme on module load
 if (typeof window !== 'undefined') {
-  try {
-    const saved = getSavedThemePreference();
-    if (saved) {
-      applyThemePreference(saved);
-    }
-  } catch (err) {
-    console.error('Error initializing theme preference:', err);
-  }
+  applyThemePreference(getSavedThemePreference());
 }

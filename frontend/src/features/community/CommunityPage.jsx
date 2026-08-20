@@ -13,7 +13,6 @@ import dripIrrigationImg from '../../assets/drip_irrigation.png';
 import cropRotationImg from '../../assets/crop_rotation.png';
 import herbalPlantsImg from '../../assets/herbal_plants.png';
 import pickleMakingImg from '../../assets/pickle_making.jpg';
-import healthyDietImg from '../../assets/healthy_diet.png';
 import traditionalSkillsImg from '../../assets/traditional_skills.png';
 import solarIrrigationImg from '../../assets/solar_irrigation.jpg';
 import { CATEGORIES as BACKEND_CATEGORIES } from '../library/api/knowledgeApi';
@@ -25,6 +24,7 @@ const initialStories = [
     id: 1,
     userName: "Ramesh Kumar",
     role: "Elder",
+    profilePic: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80",
     contributorTitle: "Master Farmer",
     location: "Bihar",
     category: "Agriculture",

@@ -10,12 +10,21 @@ import Testimonials from './components/Testimonials';
 // Home page component
 export default function HomePage({ onViewChange, currentUser }) {
   return (
+  testing
+    <div className="w-full flex flex-col items-center overflow-hidden bg-[#FFF7ED]">
+      <div className="w-full">
+        <Hero
+          onGetStarted={() => onViewChange(currentUser ? 'contribute' : 'signup')}
+          onLearnMore={() => onViewChange('library')}
+        />
+
     <div className="w-full flex flex-col items-center overflow-hidden">
       {/* Hero section */}
       <Hero
         onGetStarted={() => onViewChange(currentUser ? 'contribute' : 'signup')}
         onLearnMore={() => onViewChange('library')}
       />
+ main
 
       {/* Features container - Full Width */}
       <div className="w-full max-w-[1600px] 2xl:max-w-[1780px] mx-auto px-4 sm:px-6 md:px-10 lg:px-12 2xl:px-16 space-y-12 sm:space-y-16 mt-4 sm:mt-6">

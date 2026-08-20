@@ -884,6 +884,7 @@ export default function ProfileSettingsModal({
                       className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-slate-800"
                     >
                       <option value="en">English</option>
+                      <option value="hi">Hindi (हिंदी)</option>
                       <option value="pa">Punjabi (ਪੰਜਾਬੀ)</option>
                       <option value="hi">Hindi (हिंदी)</option>
                       <option value="ta">Tamil (தமிழ்)</option>

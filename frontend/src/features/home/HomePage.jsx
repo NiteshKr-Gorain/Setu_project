@@ -9,7 +9,7 @@ import Testimonials from './components/Testimonials';
 // Home page component
 export default function HomePage({ onViewChange, currentUser }) {
   return (
-    <div className="w-full flex flex-col items-center overflow-hidden bg-[#FFF7ED]">
+    <div className="w-full flex flex-col items-center overflow-hidden bg-[#FFF7ED]" >
       <div className="w-full">
         <Hero
           onGetStarted={() => onViewChange(currentUser ? 'contribute' : 'signup')}
